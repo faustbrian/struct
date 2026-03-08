@@ -1,0 +1,21 @@
+<?php declare(strict_types=1);
+
+/**
+ * Copyright (C) Brian Faust
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Cline\Struct\Enums;
+
+/**
+ * Configures whether missing input keys are allowed during hydration.
+ *
+ * @author Brian Faust <brian@cline.sh>
+ */
+enum UndefinedValues: string
+{
+    case Allow = 'allow';
+    case Forbid = 'forbid';
+}
