@@ -14,6 +14,73 @@ Struct auto-discovers its service provider.
 
 If you use Livewire support, install Livewire 4 in your application.
 
+## Quick Example
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsDataList;
+use Cline\Struct\Attributes\Computed;
+use Cline\Struct\Attributes\Lazy;
+use Cline\Struct\Attributes\LazyGroup;
+use Cline\Struct\Attributes\MapName;
+use Cline\Struct\Attributes\UseFactory;
+use Cline\Struct\Attributes\Validate;
+use Cline\Struct\Attributes\ValidateItems;
+use Cline\Struct\Enums\DataListType;
+use Cline\Struct\Enums\NameMapper;
+use Cline\Struct\Support\DataList;
+use Cline\Struct\Support\Optional;
+use Carbon\CarbonImmutable;
+
+#[UseFactory(UserDataFactory::class)]
+#[MapName(NameMapper::SnakeCase)]
+final readonly class UserData extends AbstractData
+{
+    public function __construct(
+        public int $id,
+        #[Validate('required|min:3')]
+        public string $name,
+        public Optional|int $age,
+        public Optional|string|null $email = null,
+        public CarbonImmutable $createdAt,
+        #[AsDataList(DataListType::String)]
+        #[ValidateItems('string|min:2')]
+        public DataList $tags = new DataList(),
+        #[Lazy()]
+        public array $analytics = [],
+        #[LazyGroup('details')]
+        public string $bio = '',
+        #[Computed]
+        public string $displayName = '',
+    ) {}
+}
+
+$dto = UserData::create([
+    'id' => '1',
+    'name' => 'Brian',
+    'created_at' => '2026-03-07T10:00:00+00:00',
+    'tags' => [1, 2, 3],
+]);
+
+$validated = UserData::createWithValidation([
+    'id' => 1,
+    'name' => 'Brian',
+    'created_at' => now()->toIso8601String(),
+]);
+
+$clone = $validated->with(name: 'Struct');
+
+$validated->toArray();
+(string) $validated;
+UserData::factory()->count(3)->make();
+UserData::collect(User::query()->paginate());
+UserData::collectInto($users, Collection::class);
+$validated->toArray(include: ['analytics'], groups: ['details']);
+$validated->serializer()->include('analytics')->groups('details')->toJson();
+```
+
 ## What Struct Is
 
 Struct is an attribute-driven, immutable data mapping package for Laravel.
@@ -697,6 +764,41 @@ public string $displayName = '';
 
 Computed properties can also be lazy, so they are only derived when included
 in serialization output.
+
+## Benchmarking
+
+Struct keeps the existing `phpbench` suite and also ships a `cline/bench`
+mirror of the same DTO comparison scenarios.
+
+Existing `phpbench` workflow:
+
+```bash
+composer bench
+composer bench:compare
+```
+
+Docker profiling workflow with Xdebug:
+
+```bash
+make profile-phpinfo
+XDEBUG_MODE=trace docker-compose run --rm profile php vendor/bin/phpbench run benchmarks/DataProfileBench.php
+XDEBUG_MODE=profile docker-compose run --rm profile php vendor/bin/phpbench run benchmarks/BagDataProfileBench.php
+```
+
+Trace and profiler output is written to `build/xdebug/` on the host so it can
+be inspected with tools such as QCacheGrind or KCachegrind.
+
+`cline/bench` workflow:
+
+```bash
+composer bench:cline
+composer bench:cline:save
+composer bench:cline:compare
+```
+
+The `cline/bench` suite lives in `benchmarks-cline/` and reuses the same
+support graph as the `phpbench` benchmarks. That keeps the benchmark subjects
+aligned while comparing the existing runner to the new one.
 
 ## Eloquent Integration
 
