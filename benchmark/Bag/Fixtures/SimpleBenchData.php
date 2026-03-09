@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Bag\Fixtures;
+namespace Benchmark\Bag\Fixtures;
 
 use Bag\Bag;
 

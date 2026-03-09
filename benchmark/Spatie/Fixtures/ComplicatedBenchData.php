@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Spatie\Fixtures;
+namespace Benchmark\Spatie\Fixtures;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;

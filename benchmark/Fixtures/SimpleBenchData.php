@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Fixtures;
+namespace Benchmark\Fixtures;
 
 use Cline\Struct\AbstractData;
 

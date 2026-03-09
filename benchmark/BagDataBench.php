@@ -1,17 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace BenchmarksCline;
+namespace Benchmark;
 
-use Benchmarks\Bag\Fixtures\ComplicatedBenchData;
-use Benchmarks\Support\AbstractBagBench;
+use Benchmark\Bag\Fixtures\ComplicatedBenchData;
+use Benchmark\Support\AbstractBagBench;
 use Cline\Bench\Attributes\Before;
 use Cline\Bench\Attributes\Bench;
 use Cline\Bench\Attributes\Competitor;
 use Cline\Bench\Attributes\Group;
 use Cline\Bench\Attributes\Iterations;
 use Cline\Bench\Attributes\Regression;
-use Cline\Bench\Attributes\Revs;
+use Cline\Bench\Attributes\Revolutions;
 use Cline\Bench\Attributes\Scenario;
+use Cline\Bench\Enums\Metric;
 
 #[Scenario('baloo-data')]
 #[Competitor('bag')]
@@ -21,9 +22,9 @@ final class BagDataBench extends AbstractBagBench
 {
     #[
         Bench('collection-transformation'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupCache', 'setupCollectionTransformation']),
-        Regression(metric: 'median', tolerance: '5%'),
+        Regression(metric: Metric::Median, tolerance: '5%'),
     ]
     public function benchCollectionTransformation(): void
     {
@@ -32,7 +33,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('object-transformation'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupCache', 'setupObjectTransformation']),
     ]
     public function benchObjectTransformation(): void
@@ -42,7 +43,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('collection-creation'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupCache', 'setupCollectionCreation']),
     ]
     public function benchCollectionCreation(): void
@@ -52,7 +53,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('object-creation'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupCache', 'setupObjectCreation']),
     ]
     public function benchObjectCreation(): void
@@ -62,7 +63,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('collection-transformation-without-cache'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupCollectionTransformation']),
     ]
     public function benchCollectionTransformationWithoutCache(): void
@@ -73,7 +74,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('object-transformation-without-cache'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupObjectTransformation']),
     ]
     public function benchObjectTransformationWithoutCache(): void
@@ -84,7 +85,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('collection-creation-without-cache'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupCollectionCreation']),
     ]
     public function benchCollectionCreationWithoutCache(): void
@@ -95,7 +96,7 @@ final class BagDataBench extends AbstractBagBench
 
     #[
         Bench('object-creation-without-cache'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupObjectCreation']),
     ]
     public function benchObjectCreationWithoutCache(): void

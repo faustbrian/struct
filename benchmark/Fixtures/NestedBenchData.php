@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Bag\Fixtures;
+namespace Benchmark\Fixtures;
 
-use Bag\Bag;
+use Cline\Struct\AbstractData;
 
-final readonly class NestedBenchData extends Bag
+final readonly class NestedBenchData extends AbstractData
 {
     public function __construct(
         public SimpleBenchData $value,

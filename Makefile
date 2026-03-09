@@ -22,20 +22,14 @@ composer: build
 bench: build
 	$(compose_command) composer bench
 
+bench-save: build
+	$(compose_command) composer bench:save
+
 bench-compare: build
 	$(compose_command) composer bench:compare
 
 bench\:compare: build
 	$(compose_command) composer bench:compare
-
-bench-cline: build
-	$(compose_command) composer bench:cline
-
-bench-cline-save: build
-	$(compose_command) composer bench:cline:save
-
-bench-cline-compare: build
-	$(compose_command) composer bench:cline:compare
 
 lint: build
 	$(compose_command) composer lint

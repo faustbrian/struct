@@ -1,21 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Support;
+namespace Benchmark\Support;
 
-use Bag\BagServiceProvider;
-use Bag\Collection;
-use Bag\Internal\Cache;
-use Benchmarks\Bag\Fixtures\ComplicatedBenchData;
-use Benchmarks\Bag\Fixtures\NestedBenchData;
-use Benchmarks\Bag\Fixtures\SimpleBenchData;
+use Benchmark\Fixtures\ComplicatedBenchData;
+use Benchmark\Fixtures\NestedBenchData;
+use Benchmark\Fixtures\SimpleBenchData;
+use Carbon\CarbonImmutable;
+use Cline\Struct\Metadata\MetadataFactory;
+use Cline\Struct\StructServiceProvider;
+use Cline\Struct\Support\DataCollection;
+use Cline\Struct\Support\DataList;
+use Cline\Struct\Support\Optional;
 use DateTimeImmutable;
+use Illuminate\Support\Collection;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 
-abstract class AbstractBagBench
+abstract class AbstractStructBench
 {
     use CreatesApplication;
 
-    protected Collection $collection;
+    protected DataCollection $collection;
 
     protected ComplicatedBenchData $object;
 
@@ -23,39 +27,40 @@ abstract class AbstractBagBench
 
     protected array $objectPayload;
 
+    private MetadataFactory $metadataFactory;
+
     public function __construct()
     {
         $this->createApplication();
+        $this->metadataFactory = app(MetadataFactory::class);
     }
 
     protected function getPackageProviders($app): array
     {
         return [
-            BagServiceProvider::class,
+            StructServiceProvider::class,
         ];
     }
 
     public function setupCache(): void
     {
-        Cache::reset();
-
-        SimpleBenchData::from(['string' => 'hello']);
-        NestedBenchData::from(['value' => ['string' => 'hello']]);
-        ComplicatedBenchData::from($this->makePayload(profile: false));
+        $this->metadataFactory->for(ComplicatedBenchData::class);
+        $this->metadataFactory->for(SimpleBenchData::class);
+        $this->metadataFactory->for(NestedBenchData::class);
     }
 
     public function resetCache(): void
     {
-        Cache::reset();
+        $this->metadataFactory->clearRuntimeCache();
     }
 
     public function setupCollectionTransformation(): void
     {
-        $this->collection = ComplicatedBenchData::collect(
-            array_map(
+        $this->collection = new DataCollection(
+            Collection::times(
+                15,
                 fn (): ComplicatedBenchData => $this->makeObject(profile: false),
-                range(1, 15),
-            ),
+            )->all(),
         );
     }
 
@@ -66,10 +71,10 @@ abstract class AbstractBagBench
 
     public function setupCollectionCreation(): void
     {
-        $this->collectionPayload = array_map(
+        $this->collectionPayload = Collection::times(
+            15,
             fn (): array => $this->makePayload(profile: false),
-            range(1, 15),
-        );
+        )->all();
     }
 
     public function setupObjectCreation(): void
@@ -79,11 +84,11 @@ abstract class AbstractBagBench
 
     public function setupProfileCollectionTransformation(): void
     {
-        $this->collection = ComplicatedBenchData::collect(
-            array_map(
+        $this->collection = new DataCollection(
+            Collection::times(
+                15,
                 fn (): ComplicatedBenchData => $this->makeObject(profile: true),
-                range(1, 15),
-            ),
+            )->all(),
         );
     }
 
@@ -94,10 +99,10 @@ abstract class AbstractBagBench
 
     public function setupProfileCollectionCreation(): void
     {
-        $this->collectionPayload = array_map(
+        $this->collectionPayload = Collection::times(
+            15,
             fn (): array => $this->makePayload(profile: true),
-            range(1, 15),
-        );
+        )->all();
     }
 
     public function setupProfileObjectCreation(): void
@@ -115,18 +120,21 @@ abstract class AbstractBagBench
             string: 'Hello World',
             array: [1, 1, 2, 3, 5, 8],
             nullable: null,
+            optionalInt: new Optional(),
             mixed: 42,
-            explicitCast: new DateTimeImmutable('1994-05-16T12:00:00+01:00'),
+            explicitCast: CarbonImmutable::create(1994, 5, 16),
             defaultCast: new DateTimeImmutable('1994-05-16T12:00:00+01:00'),
             nestedData: $profile ? null : new SimpleBenchData('hello'),
             nestedCollection: $profile
                 ? null
-                : Collection::make([
+                : new DataCollection([
                     new NestedBenchData(new SimpleBenchData('I')),
                     new NestedBenchData(new SimpleBenchData('am')),
                     new NestedBenchData(new SimpleBenchData('groot')),
                 ]),
-            nestedArray: $profile ? [] : ['never', 'gonna', 'give', 'you', 'up'],
+            nestedArray: new DataList($profile
+                ? []
+                : ['never', 'gonna', 'give', 'you', 'up']),
         );
     }
 

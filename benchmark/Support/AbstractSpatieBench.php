@@ -1,21 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Support;
+namespace Benchmark\Support;
 
-use Benchmarks\Fixtures\ComplicatedBenchData;
-use Benchmarks\Fixtures\NestedBenchData;
-use Benchmarks\Fixtures\SimpleBenchData;
+use Benchmark\Spatie\Fixtures\ComplicatedBenchData;
+use Benchmark\Spatie\Fixtures\NestedBenchData;
+use Benchmark\Spatie\Fixtures\SimpleBenchData;
 use Carbon\CarbonImmutable;
-use Cline\Struct\Metadata\MetadataFactory;
-use Cline\Struct\StructServiceProvider;
-use Cline\Struct\Support\DataCollection;
-use Cline\Struct\Support\DataList;
-use Cline\Struct\Support\Optional;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Orchestra\Testbench\Concerns\CreatesApplication;
+use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\LaravelDataServiceProvider;
+use Spatie\LaravelData\Optional;
+use Spatie\LaravelData\Support\DataConfig;
 
-abstract class AbstractStructBench
+abstract class AbstractSpatieBench
 {
     use CreatesApplication;
 
@@ -27,40 +26,41 @@ abstract class AbstractStructBench
 
     protected array $objectPayload;
 
-    private MetadataFactory $metadataFactory;
+    private DataConfig $dataConfig;
 
     public function __construct()
     {
         $this->createApplication();
-        $this->metadataFactory = app(MetadataFactory::class);
+        $this->dataConfig = app(DataConfig::class);
     }
 
     protected function getPackageProviders($app): array
     {
         return [
-            StructServiceProvider::class,
+            LaravelDataServiceProvider::class,
         ];
     }
 
     public function setupCache(): void
     {
-        $this->metadataFactory->for(ComplicatedBenchData::class);
-        $this->metadataFactory->for(SimpleBenchData::class);
-        $this->metadataFactory->for(NestedBenchData::class);
+        $this->dataConfig->getDataClass(ComplicatedBenchData::class)->prepareForCache();
+        $this->dataConfig->getDataClass(SimpleBenchData::class)->prepareForCache();
+        $this->dataConfig->getDataClass(NestedBenchData::class)->prepareForCache();
     }
 
     public function resetCache(): void
     {
-        $this->metadataFactory->clearRuntimeCache();
+        $this->dataConfig->reset();
     }
 
     public function setupCollectionTransformation(): void
     {
         $this->collection = new DataCollection(
+            ComplicatedBenchData::class,
             Collection::times(
                 15,
                 fn (): ComplicatedBenchData => $this->makeObject(profile: false),
-            )->all(),
+            ),
         );
     }
 
@@ -85,10 +85,11 @@ abstract class AbstractStructBench
     public function setupProfileCollectionTransformation(): void
     {
         $this->collection = new DataCollection(
+            ComplicatedBenchData::class,
             Collection::times(
                 15,
                 fn (): ComplicatedBenchData => $this->makeObject(profile: true),
-            )->all(),
+            ),
         );
     }
 
@@ -120,21 +121,19 @@ abstract class AbstractStructBench
             string: 'Hello World',
             array: [1, 1, 2, 3, 5, 8],
             nullable: null,
-            optionalInt: new Optional(),
+            optionalInt: Optional::create(),
             mixed: 42,
             explicitCast: CarbonImmutable::create(1994, 5, 16),
             defaultCast: new DateTimeImmutable('1994-05-16T12:00:00+01:00'),
             nestedData: $profile ? null : new SimpleBenchData('hello'),
             nestedCollection: $profile
                 ? null
-                : new DataCollection([
+                : new DataCollection(NestedBenchData::class, [
                     new NestedBenchData(new SimpleBenchData('I')),
                     new NestedBenchData(new SimpleBenchData('am')),
                     new NestedBenchData(new SimpleBenchData('groot')),
                 ]),
-            nestedArray: new DataList($profile
-                ? []
-                : ['never', 'gonna', 'give', 'you', 'up']),
+            nestedArray: $profile ? [] : ['never', 'gonna', 'give', 'you', 'up'],
         );
     }
 

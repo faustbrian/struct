@@ -1,24 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace BenchmarksCline;
+namespace Benchmark;
 
-use Benchmarks\Spatie\Fixtures\ComplicatedBenchData;
-use Benchmarks\Support\AbstractSpatieBench;
+use Benchmark\Fixtures\ComplicatedBenchData;
+use Benchmark\Support\AbstractStructBench;
 use Cline\Bench\Attributes\Before;
 use Cline\Bench\Attributes\Bench;
 use Cline\Bench\Attributes\Competitor;
 use Cline\Bench\Attributes\Group;
 use Cline\Bench\Attributes\Iterations;
 use Cline\Bench\Attributes\Regression;
-use Cline\Bench\Attributes\Revs;
+use Cline\Bench\Attributes\Revolutions;
 use Cline\Bench\Attributes\Scenario;
+use Cline\Bench\Enums\Metric;
 use Illuminate\Support\Collection;
 
 #[Scenario('baloo-profile')]
-#[Competitor('spatie')]
+#[Competitor('struct')]
 #[Group(['baloo', 'dto', 'comparison'])]
 #[Iterations(5)]
-final class SpatieDataProfileBench extends AbstractSpatieBench
+final class DataProfileBench extends AbstractStructBench
 {
     public function __construct()
     {
@@ -29,9 +30,9 @@ final class SpatieDataProfileBench extends AbstractSpatieBench
 
     #[
         Bench('profile-collection-transformation'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupProfileCollectionTransformation']),
-        Regression(metric: 'median', tolerance: '5%'),
+        Regression(metric: Metric::Median, tolerance: '5%'),
     ]
     public function benchProfileCollectionTransformation(): void
     {
@@ -40,7 +41,7 @@ final class SpatieDataProfileBench extends AbstractSpatieBench
 
     #[
         Bench('profile-object-transformation'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupProfileObjectTransformation']),
     ]
     public function benchProfileObjectTransformation(): void
@@ -50,21 +51,21 @@ final class SpatieDataProfileBench extends AbstractSpatieBench
 
     #[
         Bench('profile-collection-creation'),
-        Revs(500),
+        Revolutions(500),
         Before(['setupProfileCollectionCreation']),
     ]
     public function benchProfileCollectionCreation(): void
     {
-        ComplicatedBenchData::collect($this->collectionPayload, Collection::class);
+        ComplicatedBenchData::collectInto($this->collectionPayload, Collection::class);
     }
 
     #[
         Bench('profile-object-creation'),
-        Revs(5000),
+        Revolutions(5000),
         Before(['setupProfileObjectCreation']),
     ]
     public function benchProfileObjectCreation(): void
     {
-        ComplicatedBenchData::from($this->objectPayload);
+        ComplicatedBenchData::create($this->objectPayload);
     }
 }

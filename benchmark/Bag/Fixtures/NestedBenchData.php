@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Benchmarks\Spatie\Fixtures;
+namespace Benchmark\Bag\Fixtures;
 
-use Spatie\LaravelData\Data;
+use Bag\Bag;
 
-final class NestedBenchData extends Data
+final readonly class NestedBenchData extends Bag
 {
     public function __construct(
         public SimpleBenchData $value,

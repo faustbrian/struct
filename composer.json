@@ -26,11 +26,10 @@
     },
     "require-dev": {
         "beacon-hq/bag": "^2.6.2",
-        "cline/bench": "^1.0",
+        "cline/bench": "^1.0.1",
         "cline/coding-standard": "^2.0.1",
         "livewire/livewire": "^4.2.1",
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.9",
-        "phpbench/phpbench": "^1.5.1",
         "spatie/laravel-data": "^4.20",
         "symfony/var-dumper": "^6.0 || ^7.4.6"
     },
@@ -46,8 +45,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "BenchmarksCline\\": "benchmarks-cline/",
-            "Benchmarks\\": "benchmarks/",
+            "Benchmark\\": "benchmark/",
             "Tests\\": "tests/"
         }
     },
@@ -69,11 +67,9 @@
         }
     },
     "scripts": {
-        "bench": "vendor/bin/phpbench run benchmarks",
-        "bench:cline": "vendor/bin/bench run",
-        "bench:cline:compare": "vendor/bin/bench compare --against=snapshot:latest",
-        "bench:cline:save": "vendor/bin/bench snapshot:save baseline",
-        "bench:compare": "php bin/bench-compare.php",
+        "bench": "php bin/bench run",
+        "bench:compare": "php bin/bench compare --against=snapshot:latest",
+        "bench:save": "php bin/bench snapshot:save baseline",
         "lint": "vendor/bin/ecs check --fix",
         "refactor": "rector",
         "test": [
