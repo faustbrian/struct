@@ -312,6 +312,7 @@ function makeSerializationProperty(
         inferValidationRules: false,
         isOptional: false,
         isSensitive: false,
+        isEncrypted: false,
         isComputed: $isComputed,
         isLazy: false,
         computer: null,
