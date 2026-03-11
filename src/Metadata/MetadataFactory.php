@@ -21,6 +21,7 @@ use Cline\Struct\Attributes\AsDataList;
 use Cline\Struct\Attributes\CastWith;
 use Cline\Struct\Attributes\Computed;
 use Cline\Struct\Attributes\DoNotReplaceEmptyStringWithNull;
+use Cline\Struct\Attributes\Encrypted;
 use Cline\Struct\Attributes\ExcludeWhen;
 use Cline\Struct\Attributes\ForbidSuperfluousKeys;
 use Cline\Struct\Attributes\ForbidUndefinedValues;
@@ -278,6 +279,7 @@ final class MetadataFactory
                         && !$withoutPropertyInferredValidation),
                 isOptional: in_array(Optional::class, $types, true),
                 isSensitive: $sensitive,
+                isEncrypted: $attributeMap->isEncrypted,
                 isComputed: $computed instanceof Computed,
                 isLazy: $lazy instanceof Lazy || $lazyGroups !== [],
                 computer: $computed?->computer,
@@ -478,6 +480,7 @@ final class MetadataFactory
                 outputNameUsing: null,
                 mapName: null,
                 withoutReplacingEmptyStrings: false,
+                isEncrypted: false,
                 withPropertyInferredValidation: false,
                 withoutPropertyInferredValidation: false,
             );
@@ -499,6 +502,7 @@ final class MetadataFactory
         $outputNameUsing = null;
         $mapName = null;
         $withoutReplacingEmptyStrings = false;
+        $isEncrypted = false;
         $withPropertyInferredValidation = false;
         $withoutPropertyInferredValidation = false;
 
@@ -599,6 +603,12 @@ final class MetadataFactory
                 continue;
             }
 
+            if ($attribute instanceof Encrypted) {
+                $isEncrypted = true;
+
+                continue;
+            }
+
             if ($attribute instanceof WithInferredValidation) {
                 $withPropertyInferredValidation = true;
 
@@ -629,6 +639,7 @@ final class MetadataFactory
             outputNameUsing: $outputNameUsing,
             mapName: $mapName,
             withoutReplacingEmptyStrings: $withoutReplacingEmptyStrings,
+            isEncrypted: $isEncrypted,
             withPropertyInferredValidation: $withPropertyInferredValidation,
             withoutPropertyInferredValidation: $withoutPropertyInferredValidation,
         );
@@ -968,6 +979,7 @@ final readonly class PropertyAttributeMap
         public ?MapOutputNameUsing $outputNameUsing,
         public ?MapName $mapName,
         public bool $withoutReplacingEmptyStrings,
+        public bool $isEncrypted,
         public bool $withPropertyInferredValidation,
         public bool $withoutPropertyInferredValidation,
     ) {}

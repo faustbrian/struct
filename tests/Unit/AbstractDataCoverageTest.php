@@ -666,6 +666,7 @@ function makePropertyMetadata(
         inferValidationRules: $inferValidationRules,
         isOptional: $isOptional,
         isSensitive: $isSensitive,
+        isEncrypted: false,
         isComputed: $isComputed,
         isLazy: false,
         computer: $computer,

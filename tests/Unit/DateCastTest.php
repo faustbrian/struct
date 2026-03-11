@@ -64,6 +64,7 @@ function makeDateCastProperty(): PropertyMetadata
         inferValidationRules: false,
         isOptional: false,
         isSensitive: false,
+        isEncrypted: false,
         isComputed: false,
         isLazy: false,
         computer: null,

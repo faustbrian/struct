@@ -30,6 +30,7 @@ describe('PropertyMetadata', function (): void {
                 'types' => ['string'],
                 'typeKinds' => ['string'],
                 'castClass' => CountingCast::class,
+                'isEncrypted' => true,
             ],
         );
 
@@ -38,6 +39,7 @@ describe('PropertyMetadata', function (): void {
         $property->cast?->get($property, 'value');
         $property->cast?->set($property, 'value');
 
-        expect(CountingCast::$instances)->toBe(1);
+        expect(CountingCast::$instances)->toBe(1)
+            ->and($property->isEncrypted)->toBeTrue();
     });
 });
