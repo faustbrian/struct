@@ -15,11 +15,7 @@
         "php": "^8.5.0",
         "cline/attribute-reader": "^1.0",
         "facade/ignition-contracts": "^1.0.2",
-        "illuminate/collections": "^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/database": "^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
-        "illuminate/validation": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "laravel/framework": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "spatie/laravel-package-tools": "^1.93.0",
         "spatie/php-structure-discoverer": "^2.4",
         "symfony/yaml": "^7.4.6"
