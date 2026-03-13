@@ -24,5 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `StringCast`.
 - Expanded built-in string attributes to cover deterministic naming,
   prefix/suffix, replacement, padding, masking, and repetition helpers.
+- Added missing-only generated-value attributes for `UUID`, `ULID`,
+  random strings, and passwords, including validation-aware hydration.
 - Added built-in `Numerus` property casting when `cline/numerus` is installed.
 - Initial release

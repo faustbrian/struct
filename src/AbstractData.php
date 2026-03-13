@@ -13,6 +13,7 @@ use BackedEnum;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
 use Cline\Struct\Contracts\DataObjectInterface;
+use Cline\Struct\Contracts\GeneratesMissingValueInterface;
 use Cline\Struct\Contracts\ResolvesLazyValueInterface;
 use Cline\Struct\Contracts\SerializationConditionInterface;
 use Cline\Struct\Contracts\StringifierInterface;
@@ -23,6 +24,7 @@ use Cline\Struct\Exceptions\DataValidationException;
 use Cline\Struct\Exceptions\InvalidArrayCollectTargetException;
 use Cline\Struct\Exceptions\InvalidCollectionCollectTargetException;
 use Cline\Struct\Exceptions\InvalidEloquentCollectionCollectTargetException;
+use Cline\Struct\Exceptions\InvalidGeneratedValueAttributeException;
 use Cline\Struct\Exceptions\LengthAwarePaginatorCollectTargetException;
 use Cline\Struct\Exceptions\MissingDataValueException;
 use Cline\Struct\Exceptions\RequestDataValidationException;
@@ -53,6 +55,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use ReflectionAttribute;
 use stdClass;
 use Stringable;
 use Throwable;
@@ -62,6 +65,7 @@ use const JSON_THROW_ON_ERROR;
 
 use function array_key_exists;
 use function array_keys;
+use function array_merge;
 use function array_values;
 use function constant;
 use function get_object_vars;
@@ -407,6 +411,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $cascadeValidation = false,
     ): static {
         $metadata = $context->metadata;
+        $input = static::prepareInput($metadata, $input);
         static::assertNoRecursiveInput($input, $context);
         static::assertNoSuperfluousKeys($metadata, $input);
 
@@ -439,6 +444,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $input,
         bool $requestException = false,
     ): static {
+        $input = static::prepareInput($context->metadata, $input);
+
+        /** @var array<string, mixed> $input */
         $prepared = $context->validationFactory()->make($context->metadata, $input);
         $validator = $prepared->validator;
 
@@ -452,6 +460,30 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return static::createFromInput($context, $input, true);
+    }
+
+    /**
+     * @internal
+     * @param  array<array-key, mixed> $input
+     * @return array<array-key, mixed>
+     */
+    protected static function prepareInput(ClassMetadata $metadata, array $input): array
+    {
+        foreach ($metadata->hydratedProperties as $property) {
+            $attribute = static::generatedValueAttribute($metadata, $property);
+
+            if (!$attribute instanceof GeneratesMissingValueInterface) {
+                continue;
+            }
+
+            if (static::resolveInputValue($property, $input)[0]) {
+                continue;
+            }
+
+            $input[$property->inputName] = $attribute->generate();
+        }
+
+        return $input;
     }
 
     /**
@@ -723,6 +755,70 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return [false, null];
+    }
+
+    /**
+     * @internal
+     */
+    protected static function generatedValueAttribute(
+        ClassMetadata $metadata,
+        PropertyMetadata $property,
+    ): ?GeneratesMissingValueInterface {
+        $instances = [];
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof GeneratesMissingValueInterface) {
+                continue;
+            }
+
+            $instances[] = $instance;
+        }
+
+        if ($instances === []) {
+            return null;
+        }
+
+        if ($property->isOptional) {
+            throw InvalidGeneratedValueAttributeException::forOptionalProperty($metadata->class, $property->name);
+        }
+
+        if (!static::supportsGeneratedStringValue($property)) {
+            throw InvalidGeneratedValueAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
+        }
+
+        if (($instances[1] ?? null) instanceof GeneratesMissingValueInterface) {
+            throw InvalidGeneratedValueAttributeException::forMultipleAttributes($metadata->class, $property->name);
+        }
+
+        return $instances[0];
+    }
+
+    /**
+     * @return list<ReflectionAttribute<object>>
+     */
+    protected static function propertyAttributes(PropertyMetadata $property): array
+    {
+        $propertyAttributes = $property->property?->getAttributes() ?? [];
+        $parameterAttributes = $propertyAttributes === [] ? $property->parameter->getAttributes() : [];
+
+        return array_merge($propertyAttributes, $parameterAttributes);
+    }
+
+    protected static function supportsGeneratedStringValue(PropertyMetadata $property): bool
+    {
+        $types = [];
+
+        foreach ($property->types as $type) {
+            if ($type === 'null') {
+                continue;
+            }
+
+            $types[] = $type;
+        }
+
+        return $types === ['string'];
     }
 
     /**

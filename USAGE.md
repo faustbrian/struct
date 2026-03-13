@@ -14,6 +14,9 @@ Struct auto-discovers its service provider.
 
 If you use Livewire support, install Livewire 4 in your application.
 
+If you want the `#[Uuid(...)]` generated-value attribute, install
+`ramsey/uuid` in your application as well.
+
 ## Quick Example
 
 ```php
@@ -713,10 +716,52 @@ String attributes are applied in declaration order during hydration. Struct
 does not re-run them during serialization, which preserves non-idempotent
 transforms such as `#[After]`, `#[Before]`, and `#[Between]`.
 
-Generator-style string helpers such as random strings, UUIDs, ULIDs, and
-password generation are intentionally excluded from this attribute surface.
-They are stateful generators, not deterministic transforms over existing
-string input.
+### Built-In Generated Values
+
+Struct also supports missing-only string generators for new identifiers,
+tokens, and passwords.
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\Password;
+use Cline\Struct\Attributes\Ulid;
+use Cline\Struct\Attributes\Uuid;
+
+final readonly class UserData extends AbstractData
+{
+    public function __construct(
+        #[Uuid(version: 7)]
+        public string $id,
+        #[Ulid(lowerCase: true)]
+        public string $publicId,
+        #[Password(length: 20, symbols: false, lowerCase: true)]
+        public string $temporaryPassword,
+    ) {}
+}
+```
+
+Available built-in generated-value attributes include:
+
+- `#[Uuid]`
+- `#[Ulid]`
+- `#[Random]`
+- `#[Password]`
+
+Generated-value attributes follow these rules:
+
+- they only run when the input key is missing
+- explicit input always wins
+- explicit `null` is preserved under normal DTO rules
+- generated values are visible to `createWithValidation()`
+- `with(...)` preserves existing generated values and does not rerun them
+- they are only supported on `string` and `?string` properties
+- they cannot be combined with `Optional`
+
+`#[Uuid]` supports all UUID versions from `1` through `7`. Versions `3`
+and `5` require `namespace` and `name`, while version `2` may additionally
+use `localDomain`, `localIdentifier`, `node`, and `clockSeq`.
 
 ### Custom Property Casts
 

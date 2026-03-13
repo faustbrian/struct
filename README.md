@@ -28,6 +28,7 @@ composer require cline/money
 composer require cline/numerus
 composer require cline/phone-number
 composer require cline/postal-code
+composer require ramsey/uuid
 composer require cline/semver
 ```
 
@@ -75,6 +76,10 @@ DTO properties for semantic version payloads.
 Struct also ships built-in deterministic string transformation attributes such
 as `#[Trim]`, `#[SnakeCase]`, `#[Slug]`, `#[Limit]`, `#[Replace]`, and
 extraction attributes like `#[After]`, `#[Before]`, and `#[Between]`.
+It also ships missing-value generators such as `#[Uuid]`, `#[Ulid]`,
+`#[Random]`, and `#[Password]` for DTO fields that should be created only
+when the input key is absent. Install `ramsey/uuid` if you want to use
+`#[Uuid(...)]`.
 
 ## Documentation
 
