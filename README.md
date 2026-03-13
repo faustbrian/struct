@@ -23,8 +23,16 @@ composer require cline/struct
 Optional features:
 
 ```bash
+composer require cline/math
 composer require cline/money
 composer require cline/numerus
+```
+
+Install `cline/math` when you want first-class arbitrary-precision
+`BigNumber`, `BigInteger`, `BigDecimal`, or `BigRational` DTO properties.
+
+```bash
+composer require cline/money
 ```
 
 Install `cline/money` when you want first-class `Money` DTO properties or

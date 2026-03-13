@@ -13,6 +13,10 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Cline\AttributeReader\Attributes;
+use Cline\Math\BigDecimal;
+use Cline\Math\BigInteger;
+use Cline\Math\BigNumber;
+use Cline\Math\BigRational;
 use Cline\Money\Money;
 use Cline\Numerus\Numerus;
 use Cline\Struct\AbstractData;
@@ -43,6 +47,7 @@ use Cline\Struct\Attributes\UseRequestPayloadResolver;
 use Cline\Struct\Attributes\UseValidator;
 use Cline\Struct\Attributes\WithInferredValidation;
 use Cline\Struct\Attributes\WithoutInferredValidation;
+use Cline\Struct\Casts\BigNumberCast;
 use Cline\Struct\Casts\CarbonCast;
 use Cline\Struct\Casts\CarbonInterfaceCast;
 use Cline\Struct\Casts\DateTimeInterfaceCast;
@@ -464,6 +469,15 @@ final class MetadataFactory
 
             if ($type === Money::class) {
                 return MoneyCast::class;
+            }
+
+            if (
+                $type === BigNumber::class
+                || $type === BigInteger::class
+                || $type === BigDecimal::class
+                || $type === BigRational::class
+            ) {
+                return BigNumberCast::class;
             }
         }
 

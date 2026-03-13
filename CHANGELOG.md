@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added repository-level maintainer guidance in `AGENTS.md`.
+- Added built-in arbitrary-precision number casting for `cline/math`.
 - Added built-in money casting and the `#[AsMoney(...)]` attribute.
 - Added built-in numeric normalization attributes backed by Numerus.
 - Added built-in `Numerus` property casting when `cline/numerus` is installed.

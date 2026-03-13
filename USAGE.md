@@ -403,12 +403,41 @@ Struct natively supports:
 - scalar coercion for `int`, `float`, `bool`, `string`, and `array`
 - enums
 - nested Struct data objects
+- `BigNumber`, `BigInteger`, `BigDecimal`, and `BigRational` when `cline/math` is installed
 - `Money` when `cline/money` is installed
 - `Numerus` when `cline/numerus` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
 - `DateTimeInterface`, defaulting to `CarbonImmutable`
+
+### Built-In Big Number Casts
+
+When `cline/math` is installed, Struct can auto-cast arbitrary-precision
+numbers directly from scalar DTO input.
+
+```php
+<?php
+
+use Cline\Math\BigDecimal;
+use Cline\Math\BigInteger;
+use Cline\Math\BigNumber;
+use Cline\Math\BigRational;
+use Cline\Struct\AbstractData;
+
+final readonly class LedgerData extends AbstractData
+{
+    public function __construct(
+        public BigInteger $count,
+        public BigDecimal $rate,
+        public BigRational $ratio,
+        public BigNumber $dynamic,
+    ) {}
+}
+```
+
+Supported scalar inputs are `int`, `string`, and finite `float` values.
+Serialization returns the math type's string representation.
 
 ### Built-In Money Casts
 
