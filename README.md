@@ -45,6 +45,10 @@ composer require cline/numerus
 Install `cline/numerus` when you want first-class `Numerus` DTO properties or
 numeric normalization attributes such as `#[Round]`, `#[Clamp]`, and `#[Abs]`.
 
+Struct also ships built-in string transformation attributes such as `#[Trim]`,
+`#[Slug]`, `#[Limit]`, and extraction attributes like `#[After]`,
+`#[Before]`, and `#[Between]`.
+
 ## Documentation
 
 - Consumer guide: [USAGE.md](USAGE.md)

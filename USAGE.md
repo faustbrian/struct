@@ -523,6 +523,67 @@ Convenience attributes are also available for common rounding modes:
 - `#[Clamp]`
 - `#[Abs]`
 
+### Built-In String Attributes
+
+Struct also supports deterministic string normalization attributes for scalar
+string DTO fields.
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\After;
+use Cline\Struct\Attributes\Headline;
+use Cline\Struct\Attributes\Limit;
+use Cline\Struct\Attributes\Slug;
+use Cline\Struct\Attributes\Squish;
+use Cline\Struct\Attributes\Trim;
+
+final readonly class ArticleData extends AbstractData
+{
+    public function __construct(
+        #[Trim]
+        #[Squish]
+        #[Headline]
+        public string $title,
+        #[Trim]
+        #[Slug]
+        public string $slug,
+        #[Limit(160)]
+        public string $excerpt,
+        #[After(':')]
+        public string $externalId,
+    ) {}
+}
+```
+
+Available built-in string attributes include:
+
+- `#[Trim]`
+- `#[LeftTrim]`
+- `#[RightTrim]`
+- `#[Squish]`
+- `#[Lowercase]`
+- `#[Uppercase]`
+- `#[Titlecase]`
+- `#[Headline]`
+- `#[Ascii]`
+- `#[Transliterate]`
+- `#[Slug]`
+- `#[Limit]`
+- `#[Words]`
+- `#[Take]`
+- `#[After]`
+- `#[AfterLast]`
+- `#[Before]`
+- `#[BeforeLast]`
+- `#[Between]`
+- `#[BetweenFirst]`
+
+String attributes are applied in declaration order during hydration. Struct
+does not re-run them during serialization, which preserves non-idempotent
+transforms such as `#[After]`, `#[Before]`, and `#[Between]`.
+
 ### Custom Property Casts
 
 Use `#[CastWith(...)]` for explicit custom casting.
