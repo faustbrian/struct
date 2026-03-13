@@ -407,6 +407,7 @@ Struct natively supports:
 - `Money`, `RationalMoney`, and `MoneyBag` when `cline/money` is installed
 - `Numerus` when `cline/numerus` is installed
 - `PhoneNumber` when `cline/phone-number` is installed
+- `PostalCode` when `cline/postal-code` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
@@ -566,6 +567,40 @@ Structured payloads can use a `phoneNumber` and optional `regionCode` shape:
 ```
 
 Serialization returns the normalized E.164 string representation.
+
+### Built-In Postal Code Casts
+
+When `cline/postal-code` is installed, Struct can auto-cast
+`Cline\PostalCode\PostalCode` properties. Scalar postal code payloads must
+declare a country with `#[AsPostalCode(...)]`.
+
+```php
+<?php
+
+use Cline\PostalCode\PostalCode;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsPostalCode;
+
+final readonly class AddressData extends AbstractData
+{
+    public function __construct(
+        public PostalCode $shipping,
+        #[AsPostalCode(country: 'CA')]
+        public PostalCode $billing,
+    ) {}
+}
+```
+
+Structured payloads can use this shape:
+
+```php
+[
+    'postalCode' => '12345-6789',
+    'country' => 'US',
+]
+```
+
+Serialization returns the same `postalCode` and `country` shape.
 
 ### Built-In String Attributes
 

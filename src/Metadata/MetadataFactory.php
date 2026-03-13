@@ -22,6 +22,7 @@ use Cline\Money\MoneyBag;
 use Cline\Money\RationalMoney;
 use Cline\Numerus\Numerus;
 use Cline\PhoneNumber\PhoneNumber;
+use Cline\PostalCode\PostalCode;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AllowSuperfluousKeys;
 use Cline\Struct\Attributes\AllowUndefinedValues;
@@ -58,6 +59,7 @@ use Cline\Struct\Casts\MonetaryCast;
 use Cline\Struct\Casts\MoneyCast;
 use Cline\Struct\Casts\NumerusCast;
 use Cline\Struct\Casts\PhoneNumberCast;
+use Cline\Struct\Casts\PostalCodeCast;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
@@ -482,6 +484,10 @@ final class MetadataFactory
 
             if ($type === PhoneNumber::class) {
                 return PhoneNumberCast::class;
+            }
+
+            if ($type === PostalCode::class) {
+                return PostalCodeCast::class;
             }
 
             if (
