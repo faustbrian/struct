@@ -21,6 +21,7 @@ use Cline\Money\Money;
 use Cline\Money\MoneyBag;
 use Cline\Money\RationalMoney;
 use Cline\Numerus\Numerus;
+use Cline\PhoneNumber\PhoneNumber;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AllowSuperfluousKeys;
 use Cline\Struct\Attributes\AllowUndefinedValues;
@@ -56,6 +57,7 @@ use Cline\Struct\Casts\DateTimeInterfaceCast;
 use Cline\Struct\Casts\MonetaryCast;
 use Cline\Struct\Casts\MoneyCast;
 use Cline\Struct\Casts\NumerusCast;
+use Cline\Struct\Casts\PhoneNumberCast;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
@@ -476,6 +478,10 @@ final class MetadataFactory
 
             if ($type === MoneyBag::class || $type === RationalMoney::class) {
                 return MonetaryCast::class;
+            }
+
+            if ($type === PhoneNumber::class) {
+                return PhoneNumberCast::class;
             }
 
             if (

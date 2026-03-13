@@ -27,8 +27,6 @@ composer require cline/math
 composer require cline/money
 composer require cline/numerus
 composer require cline/phone-number
-composer require cline/postal-code
-composer require cline/semver
 ```
 
 Install `cline/math` when you want first-class arbitrary-precision
@@ -56,21 +54,6 @@ composer require cline/phone-number
 Install `cline/phone-number` when you want first-class `PhoneNumber` DTO
 properties, including scalar local-number hydration with
 `#[AsPhoneNumber(regionCode: ...)]`.
-
-```bash
-composer require cline/postal-code
-```
-
-Install `cline/postal-code` when you want first-class `PostalCode` DTO
-properties, including scalar postal-code hydration with
-`#[AsPostalCode(country: ...)]`.
-
-```bash
-composer require cline/semver
-```
-
-Install `cline/semver` when you want first-class `Version` and `Constraint`
-DTO properties for semantic version payloads.
 
 Struct also ships built-in deterministic string transformation attributes such
 as `#[Trim]`, `#[SnakeCase]`, `#[Slug]`, `#[Limit]`, `#[Replace]`, and
