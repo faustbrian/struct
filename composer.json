@@ -24,12 +24,14 @@
         "beacon-hq/bag": "^2.6.2",
         "cline/bench": "^1.0.1",
         "cline/coding-standard": "^2.0.1",
+        "cline/numerus": "^5.0",
         "livewire/livewire": "^4.2.1",
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.9",
         "spatie/laravel-data": "^4.20",
         "symfony/var-dumper": "^6.0 || ^7.4.6"
     },
     "suggest": {
+        "cline/numerus": "Enable built-in Numerus casting and numeric normalization attributes such as #[Round], #[Clamp], and #[Abs].",
         "livewire/livewire": "Add first-class Livewire Wireable and synthesizer support for data objects."
     },
     "minimum-stability": "stable",

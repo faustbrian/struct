@@ -403,10 +403,56 @@ Struct natively supports:
 - scalar coercion for `int`, `float`, `bool`, `string`, and `array`
 - enums
 - nested Struct data objects
+- `Numerus` when `cline/numerus` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
 - `DateTimeInterface`, defaulting to `CarbonImmutable`
+
+### Built-In Numeric Casts
+
+When `cline/numerus` is installed, Struct can auto-cast `Cline\Numerus\Numerus`
+properties and can normalize scalar numeric DTO fields through attributes.
+
+```php
+<?php
+
+use Cline\Numerus\Numerus;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\Abs;
+use Cline\Struct\Attributes\Clamp;
+use Cline\Struct\Attributes\Round;
+use Cline\Struct\Attributes\RoundHalfEven;
+
+final readonly class InvoiceLineData extends AbstractData
+{
+    public function __construct(
+        public Numerus $unitPrice,
+        #[Round(precision: 2)]
+        public float $subtotal,
+        #[RoundHalfEven(precision: 2)]
+        public float $tax,
+        #[Clamp(min: 0, max: 100)]
+        public int $discountPercent,
+        #[Abs]
+        public int $quantityDelta,
+    ) {}
+}
+```
+
+Convenience attributes are also available for common rounding modes:
+
+- `#[RoundUp]`
+- `#[RoundDown]`
+- `#[RoundHalfUp]`
+- `#[RoundHalfDown]`
+- `#[RoundHalfEven]`
+- `#[RoundCeiling]`
+- `#[RoundFloor]`
+- `#[Ceil]`
+- `#[Floor]`
+- `#[Clamp]`
+- `#[Abs]`
 
 ### Custom Property Casts
 

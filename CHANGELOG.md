@@ -9,4 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added repository-level maintainer guidance in `AGENTS.md`.
+- Added built-in numeric normalization attributes backed by Numerus.
+- Added built-in `Numerus` property casting when `cline/numerus` is installed.
 - Initial release

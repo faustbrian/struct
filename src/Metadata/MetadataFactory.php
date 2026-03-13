@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Cline\AttributeReader\Attributes;
+use Cline\Numerus\Numerus;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AllowSuperfluousKeys;
 use Cline\Struct\Attributes\AllowUndefinedValues;
@@ -44,7 +45,9 @@ use Cline\Struct\Attributes\WithoutInferredValidation;
 use Cline\Struct\Casts\CarbonCast;
 use Cline\Struct\Casts\CarbonInterfaceCast;
 use Cline\Struct\Casts\DateTimeInterfaceCast;
+use Cline\Struct\Casts\NumerusCast;
 use Cline\Struct\Contracts\CastInterface;
+use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
 use Cline\Struct\Contracts\ProvidesValidationRulesInterface;
 use Cline\Struct\Enums\DataListType;
@@ -452,6 +455,10 @@ final class MetadataFactory
             if ($type === CarbonInterface::class) {
                 return CarbonInterfaceCast::class;
             }
+
+            if ($type === Numerus::class) {
+                return NumerusCast::class;
+            }
         }
 
         return null;
@@ -539,6 +546,12 @@ final class MetadataFactory
 
             if ($attribute instanceof CastWith) {
                 $castClass = $attribute->cast;
+
+                continue;
+            }
+
+            if ($attribute instanceof ProvidesCastClassInterface) {
+                $castClass = $attribute->castClass();
 
                 continue;
             }

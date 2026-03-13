@@ -20,6 +20,15 @@ of `spatie/laravel-data` without the magic-heavy surface area.
 composer require cline/struct
 ```
 
+Optional features:
+
+```bash
+composer require cline/numerus
+```
+
+Install `cline/numerus` when you want first-class `Numerus` DTO properties or
+numeric normalization attributes such as `#[Round]`, `#[Clamp]`, and `#[Abs]`.
+
 ## Documentation
 
 - Consumer guide: [USAGE.md](USAGE.md)
