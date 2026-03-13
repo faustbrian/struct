@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Cline\AttributeReader\Attributes;
+use Cline\Money\Money;
 use Cline\Numerus\Numerus;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AllowSuperfluousKeys;
@@ -45,6 +46,7 @@ use Cline\Struct\Attributes\WithoutInferredValidation;
 use Cline\Struct\Casts\CarbonCast;
 use Cline\Struct\Casts\CarbonInterfaceCast;
 use Cline\Struct\Casts\DateTimeInterfaceCast;
+use Cline\Struct\Casts\MoneyCast;
 use Cline\Struct\Casts\NumerusCast;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
@@ -458,6 +460,10 @@ final class MetadataFactory
 
             if ($type === Numerus::class) {
                 return NumerusCast::class;
+            }
+
+            if ($type === Money::class) {
+                return MoneyCast::class;
             }
         }
 

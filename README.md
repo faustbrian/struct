@@ -23,6 +23,14 @@ composer require cline/struct
 Optional features:
 
 ```bash
+composer require cline/money
+composer require cline/numerus
+```
+
+Install `cline/money` when you want first-class `Money` DTO properties or
+the `#[AsMoney(...)]` attribute for scalar currency amounts.
+
+```bash
 composer require cline/numerus
 ```
 

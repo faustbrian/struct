@@ -24,6 +24,7 @@
         "beacon-hq/bag": "^2.6.2",
         "cline/bench": "^1.0.1",
         "cline/coding-standard": "^2.0.1",
+        "cline/money": "^2.0",
         "cline/numerus": "^5.0",
         "livewire/livewire": "^4.2.1",
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.9",
@@ -31,6 +32,7 @@
         "symfony/var-dumper": "^6.0 || ^7.4.6"
     },
     "suggest": {
+        "cline/money": "Enable built-in Money casting and the #[AsMoney(...)] attribute for currency-aware DTO fields.",
         "cline/numerus": "Enable built-in Numerus casting and numeric normalization attributes such as #[Round], #[Clamp], and #[Abs].",
         "livewire/livewire": "Add first-class Livewire Wireable and synthesizer support for data objects."
     },

@@ -403,11 +403,51 @@ Struct natively supports:
 - scalar coercion for `int`, `float`, `bool`, `string`, and `array`
 - enums
 - nested Struct data objects
+- `Money` when `cline/money` is installed
 - `Numerus` when `cline/numerus` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
 - `DateTimeInterface`, defaulting to `CarbonImmutable`
+
+### Built-In Money Casts
+
+When `cline/money` is installed, Struct can auto-cast `Cline\Money\Money`
+properties from structured payloads and can hydrate scalar amounts when a DTO
+declares a default currency with `#[AsMoney(...)]`.
+
+```php
+<?php
+
+use Cline\Money\Money;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsMoney;
+
+final readonly class InvoiceData extends AbstractData
+{
+    public function __construct(
+        public Money $total,
+        #[AsMoney(currency: 'USD')]
+        public Money $subtotal,
+        #[AsMoney(currency: 'JPY', minor: true)]
+        public Money $minorUnits,
+    ) {}
+}
+```
+
+Structured payloads can use Money's serialized shape:
+
+```php
+[
+    'amount' => '12.345',
+    'currency' => 'USD',
+    'context' => [
+        'type' => 'custom',
+        'scale' => 3,
+        'step' => 1,
+    ],
+]
+```
 
 ### Built-In Numeric Casts
 
