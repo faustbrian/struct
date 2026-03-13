@@ -406,6 +406,9 @@ Struct natively supports:
 - `BigNumber`, `BigInteger`, `BigDecimal`, and `BigRational` when `cline/math` is installed
 - `Money`, `RationalMoney`, and `MoneyBag` when `cline/money` is installed
 - `Numerus` when `cline/numerus` is installed
+- `PhoneNumber` when `cline/phone-number` is installed
+- `PostalCode` when `cline/postal-code` is installed
+- `Version` and `Constraint` when `cline/semver` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
@@ -532,6 +535,99 @@ Convenience attributes are also available for common rounding modes:
 - `#[Clamp]`
 - `#[Abs]`
 
+### Built-In Phone Number Casts
+
+When `cline/phone-number` is installed, Struct can auto-cast
+`Cline\PhoneNumber\PhoneNumber` properties. Scalar local-number payloads can
+declare a default parsing region with `#[AsPhoneNumber(...)]`.
+
+```php
+<?php
+
+use Cline\PhoneNumber\PhoneNumber;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsPhoneNumber;
+
+final readonly class ContactData extends AbstractData
+{
+    public function __construct(
+        public PhoneNumber $international,
+        #[AsPhoneNumber(regionCode: 'US')]
+        public PhoneNumber $local,
+    ) {}
+}
+```
+
+Structured payloads can use a `phoneNumber` and optional `regionCode` shape:
+
+```php
+[
+    'phoneNumber' => '202-555-0123',
+    'regionCode' => 'US',
+]
+```
+
+Serialization returns the normalized E.164 string representation.
+
+### Built-In Postal Code Casts
+
+When `cline/postal-code` is installed, Struct can auto-cast
+`Cline\PostalCode\PostalCode` properties. Scalar postal code payloads must
+declare a country with `#[AsPostalCode(...)]`.
+
+```php
+<?php
+
+use Cline\PostalCode\PostalCode;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsPostalCode;
+
+final readonly class AddressData extends AbstractData
+{
+    public function __construct(
+        public PostalCode $shipping,
+        #[AsPostalCode(country: 'CA')]
+        public PostalCode $billing,
+    ) {}
+}
+```
+
+Structured payloads can use this shape:
+
+```php
+[
+    'postalCode' => '12345-6789',
+    'country' => 'US',
+]
+```
+
+Serialization returns the same `postalCode` and `country` shape.
+
+### Built-In SemVer Casts
+
+When `cline/semver` is installed, Struct can auto-cast
+`Cline\SemVer\Version` and `Cline\SemVer\Constraint` properties directly from
+strings.
+
+```php
+<?php
+
+use Cline\SemVer\Constraint;
+use Cline\SemVer\Version;
+use Cline\Struct\AbstractData;
+
+final readonly class ReleaseData extends AbstractData
+{
+    public function __construct(
+        public Version $version,
+        public Constraint $constraint,
+    ) {}
+}
+```
+
+Serialization returns the normalized string form of each semantic version
+value object.
+
 ### Built-In String Attributes
 
 Struct also supports deterministic string normalization attributes for scalar
@@ -579,19 +675,48 @@ Available built-in string attributes include:
 - `#[Ascii]`
 - `#[Transliterate]`
 - `#[Slug]`
+- `#[SnakeCase]`
+- `#[KebabCase]`
+- `#[CamelCase]`
+- `#[StudlyCase]`
+- `#[PascalCase]`
 - `#[Limit]`
 - `#[Words]`
 - `#[Take]`
+- `#[Start]`
+- `#[Finish]`
+- `#[Wrap]`
+- `#[Unwrap]`
+- `#[ChopStart]`
+- `#[ChopEnd]`
 - `#[After]`
 - `#[AfterLast]`
 - `#[Before]`
 - `#[BeforeLast]`
 - `#[Between]`
 - `#[BetweenFirst]`
+- `#[Numbers]`
+- `#[Deduplicate]`
+- `#[Replace]`
+- `#[ReplaceFirst]`
+- `#[ReplaceLast]`
+- `#[ReplaceStart]`
+- `#[ReplaceEnd]`
+- `#[Mask]`
+- `#[PadLeft]`
+- `#[PadRight]`
+- `#[PadBoth]`
+- `#[Reverse]`
+- `#[Repeat]`
 
 String attributes are applied in declaration order during hydration. Struct
 does not re-run them during serialization, which preserves non-idempotent
 transforms such as `#[After]`, `#[Before]`, and `#[Between]`.
+
+Generator-style string helpers such as random strings, UUIDs, ULIDs, and
+password generation are intentionally excluded from this attribute surface.
+They are stateful generators, not deterministic transforms over existing
+string input.
 
 ### Custom Property Casts
 
