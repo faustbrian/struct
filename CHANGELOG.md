@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added built-in `PostalCode` casting plus the
   `#[AsPostalCode(...)]` attribute for country-aware scalar postal
   input.
+- Added built-in `Version` and `Constraint` casting for semantic
+  version DTO fields.
 - Added built-in string normalization and extraction attributes backed by
   `StringCast`.
 - Expanded built-in string attributes to cover deterministic naming,

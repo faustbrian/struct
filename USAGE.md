@@ -408,6 +408,7 @@ Struct natively supports:
 - `Numerus` when `cline/numerus` is installed
 - `PhoneNumber` when `cline/phone-number` is installed
 - `PostalCode` when `cline/postal-code` is installed
+- `Version` and `Constraint` when `cline/semver` is installed
 - `Carbon`
 - `CarbonImmutable`
 - `CarbonInterface`
@@ -601,6 +602,31 @@ Structured payloads can use this shape:
 ```
 
 Serialization returns the same `postalCode` and `country` shape.
+
+### Built-In SemVer Casts
+
+When `cline/semver` is installed, Struct can auto-cast
+`Cline\SemVer\Version` and `Cline\SemVer\Constraint` properties directly from
+strings.
+
+```php
+<?php
+
+use Cline\SemVer\Constraint;
+use Cline\SemVer\Version;
+use Cline\Struct\AbstractData;
+
+final readonly class ReleaseData extends AbstractData
+{
+    public function __construct(
+        public Version $version,
+        public Constraint $constraint,
+    ) {}
+}
+```
+
+Serialization returns the normalized string form of each semantic version
+value object.
 
 ### Built-In String Attributes
 

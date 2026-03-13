@@ -32,7 +32,8 @@
         "spatie/laravel-data": "^4.20",
         "symfony/var-dumper": "^6.0 || ^7.4.6",
         "cline/phone-number": "^1.0",
-        "cline/postal-code": "^1.0"
+        "cline/postal-code": "^1.0",
+        "cline/semver": "^1.0"
     },
     "suggest": {
         "cline/math": "Enable built-in BigNumber, BigInteger, BigDecimal, and BigRational casting for arbitrary-precision DTO fields.",
@@ -40,6 +41,7 @@
         "cline/numerus": "Enable built-in Numerus casting and numeric normalization attributes such as #[Round], #[Clamp], and #[Abs].",
         "cline/phone-number": "Enable built-in PhoneNumber casting plus the #[AsPhoneNumber(...)] attribute for region-aware scalar phone inputs.",
         "cline/postal-code": "Enable built-in PostalCode casting plus the #[AsPostalCode(...)] attribute for country-aware scalar postal inputs.",
+        "cline/semver": "Enable built-in Version and Constraint casting for semantic version DTO fields.",
         "livewire/livewire": "Add first-class Livewire Wireable and synthesizer support for data objects."
     },
     "minimum-stability": "stable",

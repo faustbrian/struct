@@ -9,8 +9,11 @@
 
 use Cline\PhoneNumber\PhoneNumber;
 use Cline\PostalCode\PostalCode;
+use Cline\SemVer\Constraint;
+use Cline\SemVer\Version;
 use Tests\Fixtures\Data\PhoneNumberData;
 use Tests\Fixtures\Data\PostalCodeData;
+use Tests\Fixtures\Data\SemVerData;
 
 describe('Built-in package value object casts', function (): void {
     test('hydrates phone numbers from scalar and structured payloads', function (): void {
@@ -53,6 +56,22 @@ describe('Built-in package value object casts', function (): void {
                     'postalCode' => 'K1A 0B1',
                     'country' => 'CA',
                 ],
+            ]);
+    });
+
+    test('hydrates semver value objects from strings and serializes them back to strings', function (): void {
+        $data = SemVerData::create([
+            'version' => 'v1.2.3-beta.1+build.5',
+            'constraint' => '^1.2 || ~2.0',
+        ]);
+
+        expect($data->version)->toBeInstanceOf(Version::class)
+            ->and((string) $data->version)->toBe('1.2.3-beta.1+build.5')
+            ->and($data->constraint)->toBeInstanceOf(Constraint::class)
+            ->and((string) $data->constraint)->toBe('^1.2 || ~2.0')
+            ->and($data->toArray())->toBe([
+                'version' => '1.2.3-beta.1+build.5',
+                'constraint' => '^1.2 || ~2.0',
             ]);
     });
 });
