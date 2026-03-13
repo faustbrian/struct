@@ -18,6 +18,8 @@ use Cline\Math\BigInteger;
 use Cline\Math\BigNumber;
 use Cline\Math\BigRational;
 use Cline\Money\Money;
+use Cline\Money\MoneyBag;
+use Cline\Money\RationalMoney;
 use Cline\Numerus\Numerus;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AllowSuperfluousKeys;
@@ -51,6 +53,7 @@ use Cline\Struct\Casts\BigNumberCast;
 use Cline\Struct\Casts\CarbonCast;
 use Cline\Struct\Casts\CarbonInterfaceCast;
 use Cline\Struct\Casts\DateTimeInterfaceCast;
+use Cline\Struct\Casts\MonetaryCast;
 use Cline\Struct\Casts\MoneyCast;
 use Cline\Struct\Casts\NumerusCast;
 use Cline\Struct\Contracts\CastInterface;
@@ -469,6 +472,10 @@ final class MetadataFactory
 
             if ($type === Money::class) {
                 return MoneyCast::class;
+            }
+
+            if ($type === MoneyBag::class || $type === RationalMoney::class) {
+                return MonetaryCast::class;
             }
 
             if (

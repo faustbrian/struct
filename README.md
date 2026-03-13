@@ -35,8 +35,9 @@ Install `cline/math` when you want first-class arbitrary-precision
 composer require cline/money
 ```
 
-Install `cline/money` when you want first-class `Money` DTO properties or
-the `#[AsMoney(...)]` attribute for scalar currency amounts.
+Install `cline/money` when you want first-class `Money`, `RationalMoney`,
+or `MoneyBag` DTO properties, or the `#[AsMoney(...)]` attribute for
+scalar currency amounts.
 
 ```bash
 composer require cline/numerus

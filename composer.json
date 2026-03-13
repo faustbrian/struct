@@ -34,7 +34,7 @@
     },
     "suggest": {
         "cline/math": "Enable built-in BigNumber, BigInteger, BigDecimal, and BigRational casting for arbitrary-precision DTO fields.",
-        "cline/money": "Enable built-in Money casting and the #[AsMoney(...)] attribute for currency-aware DTO fields.",
+        "cline/money": "Enable built-in Money, RationalMoney, and MoneyBag casting plus the #[AsMoney(...)] attribute for currency-aware DTO fields.",
         "cline/numerus": "Enable built-in Numerus casting and numeric normalization attributes such as #[Round], #[Clamp], and #[Abs].",
         "livewire/livewire": "Add first-class Livewire Wireable and synthesizer support for data objects."
     },

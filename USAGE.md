@@ -404,7 +404,7 @@ Struct natively supports:
 - enums
 - nested Struct data objects
 - `BigNumber`, `BigInteger`, `BigDecimal`, and `BigRational` when `cline/math` is installed
-- `Money` when `cline/money` is installed
+- `Money`, `RationalMoney`, and `MoneyBag` when `cline/money` is installed
 - `Numerus` when `cline/numerus` is installed
 - `Carbon`
 - `CarbonImmutable`
@@ -441,14 +441,17 @@ Serialization returns the math type's string representation.
 
 ### Built-In Money Casts
 
-When `cline/money` is installed, Struct can auto-cast `Cline\Money\Money`
-properties from structured payloads and can hydrate scalar amounts when a DTO
-declares a default currency with `#[AsMoney(...)]`.
+When `cline/money` is installed, Struct can auto-cast `Cline\Money\Money`,
+`Cline\Money\RationalMoney`, and `Cline\Money\MoneyBag` properties. `Money`
+properties can also hydrate scalar amounts when a DTO declares a default
+currency with `#[AsMoney(...)]`.
 
 ```php
 <?php
 
 use Cline\Money\Money;
+use Cline\Money\MoneyBag;
+use Cline\Money\RationalMoney;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AsMoney;
 
@@ -456,6 +459,8 @@ final readonly class InvoiceData extends AbstractData
 {
     public function __construct(
         public Money $total,
+        public RationalMoney $exactTotal,
+        public MoneyBag $totalsByCurrency,
         #[AsMoney(currency: 'USD')]
         public Money $subtotal,
         #[AsMoney(currency: 'JPY', minor: true)]
@@ -477,6 +482,10 @@ Structured payloads can use Money's serialized shape:
     ],
 ]
 ```
+
+`RationalMoney` uses the same `amount` / `currency` shape without a
+`context` key, and `MoneyBag` serializes as a list of those exact-money
+entries.
 
 ### Built-In Numeric Casts
 
