@@ -429,8 +429,17 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $values[$property->name] = static::resolveValue($metadata, $property, $input, $cascadeValidation, $context);
         }
 
+        $context->setProperties($values);
+
+        foreach ($metadata->hydratedProperties as $property) {
+            $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
+            $context->setProperties($values);
+        }
+
         foreach ($metadata->collectionSourceProperties as $property) {
             $values[$property->name] = static::resolveGeneratedCollectionValue($context, $property, $values);
+            $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
+            $context->setProperties($values);
         }
 
         foreach ($metadata->collectionResultProperties as $property) {
@@ -904,6 +913,29 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param array<string, mixed> $values
+     */
+    protected static function resolveHydratedLaravelCollectionValue(
+        PropertyMetadata $property,
+        array $values,
+        ClassMetadata $metadata,
+        ?CreationContext $context = null,
+    ): mixed {
+        $value = $values[$property->name] ?? null;
+
+        if (!$value instanceof Collection) {
+            return $value;
+        }
+
+        if ($property->laravelCollectionType === null && $property->laravelCollectionCastClass === null) {
+            return $value;
+        }
+
+        return static::transformLaravelCollectionValue($property, $value, $metadata, $values, $context);
+    }
+
+    /**
+     * @internal
      */
     protected static function collectionSourceAttribute(PropertyMetadata $property): ?GeneratesCollectionValueInterface
     {
@@ -1018,12 +1050,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null) {
-            return static::transformLaravelCollectionValue(
-                $property,
-                static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context),
-                $metadata,
-                $context,
-            );
+            return static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context);
         }
 
         foreach ($property->types as $index => $type) {
@@ -1139,11 +1166,16 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         PropertyMetadata $property,
         Collection $items,
         ClassMetadata $metadata,
+        array $properties = [],
         ?CreationContext $context = null,
     ): Collection {
         $attributes = static::laravelCollectionAttributes($property, $metadata);
 
         foreach ($attributes as $attribute) {
+            if ($context instanceof CreationContext) {
+                $context->setProperties($properties);
+            }
+
             $items = $attribute->transformCollection($items, $context);
         }
 

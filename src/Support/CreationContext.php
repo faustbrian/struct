@@ -173,6 +173,22 @@ final class CreationContext
         return $this->cache->collectionItemProperties[$property];
     }
 
+    /**
+     * @param array<string, mixed> $properties
+     */
+    public function setProperties(array $properties): void
+    {
+        $this->cache->properties = $properties;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function properties(): array
+    {
+        return $this->cache->properties;
+    }
+
     public function hydrationGuard(): HydrationGuard
     {
         if ($this->cache->hydrationGuard instanceof HydrationGuard) {
@@ -385,6 +401,9 @@ final class CreationContextCache
 
     /** @var array<string, bool> */
     public array $directInstantiationStrategies = [];
+
+    /** @var array<string, mixed> */
+    public array $properties = [];
 
     public function __construct()
     {

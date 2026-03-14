@@ -75,4 +75,21 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
             $source,
         ));
     }
+
+    public static function forInvalidOperandConfiguration(string $attribute): self
+    {
+        return new self(sprintf(
+            'Collection attribute [%s] requires exactly one of [source] or [values].',
+            $attribute,
+        ));
+    }
+
+    public static function forInvalidOperandSource(string $attribute, string $source): self
+    {
+        return new self(sprintf(
+            'Collection attribute [%s] requires source property [%s] to resolve to an array or Illuminate\\Support\\Collection.',
+            $attribute,
+            $source,
+        ));
+    }
 }
