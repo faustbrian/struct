@@ -22,6 +22,7 @@ describe('derived Laravel collection attributes', function (): void {
             'keyedValues' => ['only' => 'Only'],
             'combined' => ['first', 'second'],
             'forgotten' => ['keep' => 'Alpha', 'drop' => 'Beta'],
+            'whenEmptyCollection' => [],
             'scalarValue' => 'Only',
         ]);
 
@@ -39,15 +40,31 @@ describe('derived Laravel collection attributes', function (): void {
             ->and($data->containsStrictAlpha)->toBeTrue()
             ->and($data->doesntContainGamma)->toBeTrue()
             ->and($data->doesntContainStrictGamma)->toBeTrue()
+            ->and($data->afterAlpha)->toBe('Beta')
+            ->and($data->beforeBeta)->toBe('Alpha')
             ->and($data->everyEven)->toBeFalse()
             ->and($data->someEven)->toBeTrue()
             ->and($data->firstName)->toBe('Alpha')
+            ->and($data->firstNameOrFail)->toBe('Alpha')
             ->and($data->lastName)->toBe('Beta')
             ->and($data->soleWrappedValue)->toBe('Only')
             ->and($data->firstPageRecord)->toBe(['id' => 2, 'type' => 'page'])
+            ->and($data->gotOnlyValue)->toBe('Only')
+            ->and($data->hasOnlyKey)->toBeTrue()
+            ->and($data->hasAnyKnownKey)->toBeTrue()
+            ->and($data->hasManyRecords)->toBeTrue()
+            ->and($data->hasSoleWrappedValue)->toBeTrue()
+            ->and($data->emptyCollectionIsEmpty)->toBeTrue()
+            ->and($data->namesAreNotEmpty)->toBeTrue()
             ->and($data->searchBeta)->toBe(1)
             ->and($data->firstRecordType)->toBe('post')
             ->and($data->nameCount)->toBe(2)
+            ->and($data->allNames)->toBe(['Alpha', 'Beta'])
+            ->and($data->arrayNames)->toBe(['Alpha', 'Beta'])
+            ->and($data->jsonNames)->toBe('["Alpha","Beta"]')
+            ->and($data->prettyJsonNames)->toContain("\n")
+            ->and($data->randomName)->toBeString()
+            ->and($data->randomName)->toBeIn(['Alpha', 'Beta'])
             ->and($data->sumRange)->toBe(9)
             ->and($data->minRange)->toBe(2)
             ->and($data->maxRange)->toBe(4)
@@ -87,15 +104,30 @@ describe('derived Laravel collection attributes', function (): void {
                 'containsStrictAlpha' => true,
                 'doesntContainGamma' => true,
                 'doesntContainStrictGamma' => true,
+                'afterAlpha' => 'Beta',
+                'beforeBeta' => 'Alpha',
                 'everyEven' => false,
                 'someEven' => true,
                 'firstName' => 'Alpha',
+                'firstNameOrFail' => 'Alpha',
                 'lastName' => 'Beta',
                 'soleWrappedValue' => 'Only',
                 'firstPageRecord' => ['id' => 2, 'type' => 'page'],
+                'gotOnlyValue' => 'Only',
+                'hasOnlyKey' => true,
+                'hasAnyKnownKey' => true,
+                'hasManyRecords' => true,
+                'hasSoleWrappedValue' => true,
+                'emptyCollectionIsEmpty' => true,
+                'namesAreNotEmpty' => true,
                 'searchBeta' => 1,
                 'firstRecordType' => 'post',
                 'nameCount' => 2,
+                'allNames' => ['Alpha', 'Beta'],
+                'arrayNames' => ['Alpha', 'Beta'],
+                'jsonNames' => '["Alpha","Beta"]',
+                'prettyJsonNames' => json_encode(['Alpha', 'Beta'], \JSON_PRETTY_PRINT | \JSON_THROW_ON_ERROR),
+                'randomName' => $data->randomName,
                 'unwrappedNames' => ['Alpha', 'Beta'],
                 'sumRange' => 9,
                 'minRange' => 2,
@@ -112,6 +144,7 @@ describe('derived Laravel collection attributes', function (): void {
                 'poppedName' => 'Beta',
                 'shiftedName' => 'Alpha',
                 'pulledValue' => 'Only',
+                'whenEmptyCollection' => [],
                 'scalarValue' => 'Only',
             ]);
     });

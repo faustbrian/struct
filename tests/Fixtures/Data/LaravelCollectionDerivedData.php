@@ -11,8 +11,11 @@ namespace Tests\Fixtures\Data;
 
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AsCollection;
+use Cline\Struct\Attributes\CollectionResults\After;
+use Cline\Struct\Attributes\CollectionResults\All;
 use Cline\Struct\Attributes\CollectionResults\Average;
 use Cline\Struct\Attributes\CollectionResults\Avg;
+use Cline\Struct\Attributes\CollectionResults\Before;
 use Cline\Struct\Attributes\CollectionResults\Contains;
 use Cline\Struct\Attributes\CollectionResults\ContainsStrict;
 use Cline\Struct\Attributes\CollectionResults\Count;
@@ -20,8 +23,16 @@ use Cline\Struct\Attributes\CollectionResults\DoesntContain;
 use Cline\Struct\Attributes\CollectionResults\DoesntContainStrict;
 use Cline\Struct\Attributes\CollectionResults\Every;
 use Cline\Struct\Attributes\CollectionResults\First;
+use Cline\Struct\Attributes\CollectionResults\FirstOrFail;
 use Cline\Struct\Attributes\CollectionResults\FirstWhere;
+use Cline\Struct\Attributes\CollectionResults\Get;
+use Cline\Struct\Attributes\CollectionResults\Has;
+use Cline\Struct\Attributes\CollectionResults\HasAny;
+use Cline\Struct\Attributes\CollectionResults\HasMany;
+use Cline\Struct\Attributes\CollectionResults\HasSole;
 use Cline\Struct\Attributes\CollectionResults\Implode;
+use Cline\Struct\Attributes\CollectionResults\IsEmpty;
+use Cline\Struct\Attributes\CollectionResults\IsNotEmpty;
 use Cline\Struct\Attributes\CollectionResults\Join;
 use Cline\Struct\Attributes\CollectionResults\Last;
 use Cline\Struct\Attributes\CollectionResults\Max;
@@ -31,6 +42,7 @@ use Cline\Struct\Attributes\CollectionResults\Mode;
 use Cline\Struct\Attributes\CollectionResults\Percentage;
 use Cline\Struct\Attributes\CollectionResults\Pop;
 use Cline\Struct\Attributes\CollectionResults\Pull;
+use Cline\Struct\Attributes\CollectionResults\Random;
 use Cline\Struct\Attributes\CollectionResults\Reduce;
 use Cline\Struct\Attributes\CollectionResults\ReduceSpread;
 use Cline\Struct\Attributes\CollectionResults\Search;
@@ -38,6 +50,9 @@ use Cline\Struct\Attributes\CollectionResults\Shift;
 use Cline\Struct\Attributes\CollectionResults\Sole;
 use Cline\Struct\Attributes\CollectionResults\Some;
 use Cline\Struct\Attributes\CollectionResults\Sum;
+use Cline\Struct\Attributes\CollectionResults\ToArray;
+use Cline\Struct\Attributes\CollectionResults\ToJson;
+use Cline\Struct\Attributes\CollectionResults\ToPrettyJson;
 use Cline\Struct\Attributes\CollectionResults\Unwrap;
 use Cline\Struct\Attributes\CollectionResults\Value;
 use Cline\Struct\Attributes\Collections\Combine;
@@ -91,24 +106,54 @@ final readonly class LaravelCollectionDerivedData extends AbstractData
         public bool $doesntContainGamma,
         #[DoesntContainStrict('names', 'gamma')]
         public bool $doesntContainStrictGamma,
+        #[After('names', 'Alpha')]
+        public string $afterAlpha,
+        #[Before('names', 'Beta')]
+        public string $beforeBeta,
         #[Every('ranged', EvenNumberPredicate::class)]
         public bool $everyEven,
         #[Some('ranged', EvenNumberPredicate::class)]
         public bool $someEven,
         #[First('names')]
         public string $firstName,
+        #[FirstOrFail('names')]
+        public string $firstNameOrFail,
         #[Last('names')]
         public string $lastName,
         #[Sole('wrapped')]
         public string $soleWrappedValue,
         #[FirstWhere('records', 'type', 'page')]
         public array $firstPageRecord,
+        #[Get('keyedValues', 'only')]
+        public string $gotOnlyValue,
+        #[Has('keyedValues', 'only')]
+        public bool $hasOnlyKey,
+        #[HasAny('keyedValues', ['missing', 'only'])]
+        public bool $hasAnyKnownKey,
+        #[HasMany('records')]
+        public bool $hasManyRecords,
+        #[HasSole('wrapped')]
+        public bool $hasSoleWrappedValue,
+        #[IsEmpty('whenEmptyCollection')]
+        public bool $emptyCollectionIsEmpty,
+        #[IsNotEmpty('names')]
+        public bool $namesAreNotEmpty,
         #[Search('names', 'Beta')]
         public int $searchBeta,
         #[Value('records', 'type')]
         public string $firstRecordType,
         #[Count('names')]
         public int $nameCount,
+        #[All('names')]
+        public array $allNames,
+        #[ToArray('names')]
+        public array $arrayNames,
+        #[ToJson('names')]
+        public string $jsonNames,
+        #[ToPrettyJson('names')]
+        public string $prettyJsonNames,
+        #[Random('names')]
+        public string $randomName,
         #[Unwrap('names')]
         public array $unwrappedNames,
         #[Sum('ranged')]
@@ -141,6 +186,8 @@ final readonly class LaravelCollectionDerivedData extends AbstractData
         public string $shiftedName,
         #[Pull('keyedValues', 'only')]
         public string $pulledValue,
+        #[AsCollection(DataListType::String)]
+        public Collection $whenEmptyCollection,
         public string $scalarValue,
     ) {}
 }
