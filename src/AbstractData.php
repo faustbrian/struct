@@ -10,6 +10,7 @@
 namespace Cline\Struct;
 
 use BackedEnum;
+use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
 use Cline\Struct\Contracts\DataObjectInterface;
@@ -17,11 +18,13 @@ use Cline\Struct\Contracts\GeneratesMissingValueInterface;
 use Cline\Struct\Contracts\ResolvesLazyValueInterface;
 use Cline\Struct\Contracts\SerializationConditionInterface;
 use Cline\Struct\Contracts\StringifierInterface;
+use Cline\Struct\Contracts\TransformsCollectionValueInterface;
 use Cline\Struct\Eloquent\AsData;
 use Cline\Struct\Eloquent\AsDataCollection;
 use Cline\Struct\Exceptions\CursorPaginatorCollectTargetException;
 use Cline\Struct\Exceptions\DataValidationException;
 use Cline\Struct\Exceptions\InvalidArrayCollectTargetException;
+use Cline\Struct\Exceptions\InvalidCollectionAttributeException;
 use Cline\Struct\Exceptions\InvalidCollectionCollectTargetException;
 use Cline\Struct\Exceptions\InvalidEloquentCollectionCollectTargetException;
 use Cline\Struct\Exceptions\InvalidGeneratedValueAttributeException;
@@ -69,6 +72,7 @@ use function array_merge;
 use function array_values;
 use function constant;
 use function get_object_vars;
+use function in_array;
 use function is_a;
 use function is_array;
 use function is_bool;
@@ -873,26 +877,37 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return $value;
         }
 
+        $metadata = $context instanceof CreationContext ? $context->metadata : static::metadata();
+
         if ($property->cast instanceof CastInterface) {
             return $property->cast->get($property, $value);
         }
 
         if ($property->dataListType !== null) {
-            return new DataList(
+            return new DataList(static::transformCollectionValue(
+                $property,
                 static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context),
-            );
+                true,
+                $metadata,
+            ));
         }
 
         if ($property->dataListCastClass !== null) {
-            return new DataList(
+            return new DataList(static::transformCollectionValue(
+                $property,
                 static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context),
-            );
+                true,
+                $metadata,
+            ));
         }
 
         if ($property->dataCollectionType !== null || $property->dataCollectionCastClass !== null) {
-            return new DataCollection(
+            return new DataCollection(static::transformCollectionValue(
+                $property,
                 static::hydrateCollectionItems($property, $value, false, $cascadeValidation, $context),
-            );
+                false,
+                $metadata,
+            ));
         }
 
         foreach ($property->types as $index => $type) {
@@ -904,16 +919,97 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 continue;
             }
 
-            return static::hydrateTypedValue(
+            $hydrated = static::hydrateTypedValue(
                 $type,
                 $property->typeKinds[$index] ?? 'other',
                 $value,
                 $cascadeValidation,
                 $context,
             );
+
+            if (($property->typeKinds[$index] ?? 'other') === 'array') {
+                /** @var array<array-key, mixed> $hydrated */
+                return static::transformCollectionValue(
+                    $property,
+                    $hydrated,
+                    false,
+                    $metadata,
+                );
+            }
+
+            return $hydrated;
         }
 
         return $value;
+    }
+
+    /**
+     * @internal
+     * @param  array<array-key, mixed> $items
+     * @return array<array-key, mixed>
+     */
+    protected static function transformCollectionValue(
+        PropertyMetadata $property,
+        array $items,
+        bool $isList,
+        ClassMetadata $metadata,
+    ): array {
+        $attributes = static::collectionAttributes($property, $metadata, $isList);
+
+        foreach ($attributes as $attribute) {
+            $items = $attribute->transform($items);
+        }
+
+        return $items;
+    }
+
+    /**
+     * @internal
+     * @return list<TransformsCollectionValueInterface>
+     */
+    protected static function collectionAttributes(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+        bool $isList,
+    ): array {
+        $instances = [];
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof TransformsCollectionValueInterface) {
+                continue;
+            }
+
+            if (!$instance instanceof AbstractCollectionTransformer) {
+                continue;
+            }
+
+            if ($isList && !$instance->supportsLists()) {
+                throw InvalidCollectionAttributeException::forUnsupportedListAttribute(
+                    $metadata->class,
+                    $property->name,
+                    $instance::class,
+                );
+            }
+
+            $instances[] = $instance;
+        }
+
+        if ($instances === []) {
+            return [];
+        }
+
+        if (
+            !$isList
+            && $property->dataCollectionType === null
+            && $property->dataCollectionCastClass === null
+            && !in_array('array', $property->types, true)
+        ) {
+            throw InvalidCollectionAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
+        }
+
+        return $instances;
     }
 
     /**

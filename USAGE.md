@@ -763,6 +763,63 @@ Generated-value attributes follow these rules:
 and `5` require `namespace` and `name`, while version `2` may additionally
 use `localDomain`, `localIdentifier`, `node`, and `clockSeq`.
 
+### Built-In Collection Attributes
+
+Struct also supports deterministic collection transforms for plain `array`
+properties, `DataList`, and `DataCollection`.
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsDataList;
+use Cline\Struct\Attributes\Collections\RejectNulls;
+use Cline\Struct\Attributes\Collections\Reverse;
+use Cline\Struct\Attributes\Collections\Take;
+use Cline\Struct\Attributes\Collections\Unique;
+use Cline\Struct\Enums\DataListType;
+use Cline\Struct\Support\DataList;
+
+final readonly class BatchData extends AbstractData
+{
+    public function __construct(
+        #[Reverse]
+        public array $payload,
+        #[AsDataList(DataListType::String)]
+        #[Unique]
+        #[Take(10)]
+        public DataList $tags,
+        #[RejectNulls]
+        public array $metadata,
+    ) {}
+}
+```
+
+Available built-in collection attributes include:
+
+- `#[Collections\Reverse]`
+- `#[Collections\RejectNulls]`
+- `#[Collections\RejectEmptyStrings]`
+- `#[Collections\RejectFalsy]`
+- `#[Collections\Unique]`
+- `#[Collections\Slice]`
+- `#[Collections\Take]`
+- `#[Collections\Values]`
+- `#[Collections\OnlyKeys]`
+- `#[Collections\ExceptKeys]`
+- `#[Collections\SortValues]`
+- `#[Collections\SortKeys]`
+
+Collection attributes follow these rules:
+
+- they run in declaration order during hydration
+- they are not re-run during serialization
+- plain `array` properties preserve keys unless an attribute explicitly reindexes
+- `DataCollection` preserves keys by default
+- `DataList` always reindexes because it is a list container
+- key-based attributes such as `OnlyKeys`, `ExceptKeys`, and `SortKeys`
+  are intentionally rejected on `DataList`
+
 ### Custom Property Casts
 
 Use `#[CastWith(...)]` for explicit custom casting.

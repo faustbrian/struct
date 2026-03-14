@@ -26,5 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   prefix/suffix, replacement, padding, masking, and repetition helpers.
 - Added missing-only generated-value attributes for `UUID`, `ULID`,
   random strings, and passwords, including validation-aware hydration.
+- Added built-in collection transformation attributes for arrays,
+  `DataList`, and `DataCollection` under `Attributes\\Collections`.
 - Added built-in `Numerus` property casting when `cline/numerus` is installed.
 - Initial release

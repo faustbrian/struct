@@ -79,7 +79,10 @@ extraction attributes like `#[After]`, `#[Before]`, and `#[Between]`.
 It also ships missing-value generators such as `#[Uuid]`, `#[Ulid]`,
 `#[Random]`, and `#[Password]` for DTO fields that should be created only
 when the input key is absent. Install `ramsey/uuid` if you want to use
-`#[Uuid(...)]`.
+`#[Uuid(...)]`. Collection transforms now live under
+`Cline\Struct\Attributes\Collections`, including helpers such as
+`#[Collections\\Reverse]`, `#[Collections\\Unique]`, `#[Collections\\Slice]`,
+and `#[Collections\\OnlyKeys]`.
 
 ## Documentation
 
