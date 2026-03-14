@@ -15,7 +15,7 @@ use Cline\Money\Context\CashContext;
 use Cline\Money\Context\CustomContext;
 use Cline\Money\Context\DefaultContext;
 use Cline\Money\Money;
-use Cline\Struct\Attributes\AsMoney;
+use Cline\Struct\Attributes\Money\AsMoney;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Metadata\PropertyMetadata;

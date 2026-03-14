@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Struct\Attributes;
+namespace Cline\Struct\Attributes\Numerus;
 
 use Attribute;
 use Cline\Struct\Casts\NumericCast;
@@ -16,17 +16,17 @@ use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use RoundingMode;
 
 /**
- * Rounds a numeric property to the nearest value with ties toward zero.
+ * Rounds a numeric property during hydration and serialization.
  *
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class RoundHalfDown implements ConfiguresNumericRoundingInterface, ProvidesCastClassInterface
+final readonly class Round implements ConfiguresNumericRoundingInterface, ProvidesCastClassInterface
 {
     public function __construct(
         public int $precision = 0,
-        public RoundingMode $mode = RoundingMode::HalfTowardsZero,
+        public RoundingMode $mode = RoundingMode::HalfAwayFromZero,
     ) {}
 
     public function castClass(): string

@@ -7,28 +7,40 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Struct\Attributes;
+namespace Cline\Struct\Attributes\Numerus;
 
 use Attribute;
 use Cline\Struct\Casts\NumericCast;
+use Cline\Struct\Contracts\ConfiguresNumericRoundingInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
+use RoundingMode;
 
 /**
- * Clamps a numeric property into an inclusive range.
+ * Rounds a numeric property to the nearest even value.
  *
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class Clamp implements ProvidesCastClassInterface
+final readonly class RoundHalfEven implements ConfiguresNumericRoundingInterface, ProvidesCastClassInterface
 {
     public function __construct(
-        public int|float $min,
-        public int|float $max,
+        public int $precision = 0,
+        public RoundingMode $mode = RoundingMode::HalfEven,
     ) {}
 
     public function castClass(): string
     {
         return NumericCast::class;
+    }
+
+    public function precision(): int
+    {
+        return $this->precision;
+    }
+
+    public function mode(): RoundingMode
+    {
+        return $this->mode;
     }
 }

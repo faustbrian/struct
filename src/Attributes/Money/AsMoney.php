@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Struct\Attributes;
+namespace Cline\Struct\Attributes\Money;
 
 use Attribute;
 use Cline\Struct\Casts\MoneyCast;

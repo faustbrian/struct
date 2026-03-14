@@ -11,7 +11,7 @@ namespace Cline\Struct\Casts;
 
 use Cline\PostalCode\PostalCode;
 use Cline\PostalCode\PostalCodeManager;
-use Cline\Struct\Attributes\AsPostalCode;
+use Cline\Struct\Attributes\PostalCode\AsPostalCode;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Metadata\PropertyMetadata;

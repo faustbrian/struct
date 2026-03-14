@@ -11,7 +11,7 @@ namespace Tests\Fixtures\Data;
 
 use Cline\Money\Money;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsMoney;
+use Cline\Struct\Attributes\Money\AsMoney;
 
 /**
  * @author Brian Faust <brian@cline.sh>

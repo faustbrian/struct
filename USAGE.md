@@ -460,7 +460,7 @@ use Cline\Money\Money;
 use Cline\Money\MoneyBag;
 use Cline\Money\RationalMoney;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsMoney;
+use Cline\Struct\Attributes\Money\AsMoney;
 
 final readonly class InvoiceData extends AbstractData
 {
@@ -504,10 +504,10 @@ properties and can normalize scalar numeric DTO fields through attributes.
 
 use Cline\Numerus\Numerus;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\Abs;
-use Cline\Struct\Attributes\Clamp;
-use Cline\Struct\Attributes\Round;
-use Cline\Struct\Attributes\RoundHalfEven;
+use Cline\Struct\Attributes\Numerus\Abs;
+use Cline\Struct\Attributes\Numerus\Clamp;
+use Cline\Struct\Attributes\Numerus\Round;
+use Cline\Struct\Attributes\Numerus\RoundHalfEven;
 
 final readonly class InvoiceLineData extends AbstractData
 {
@@ -550,7 +550,7 @@ declare a default parsing region with `#[AsPhoneNumber(...)]`.
 
 use Cline\PhoneNumber\PhoneNumber;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsPhoneNumber;
+use Cline\Struct\Attributes\PhoneNumber\AsPhoneNumber;
 
 final readonly class ContactData extends AbstractData
 {
@@ -584,7 +584,7 @@ declare a country with `#[AsPostalCode(...)]`.
 
 use Cline\PostalCode\PostalCode;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsPostalCode;
+use Cline\Struct\Attributes\PostalCode\AsPostalCode;
 
 final readonly class AddressData extends AbstractData
 {

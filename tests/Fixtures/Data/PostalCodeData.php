@@ -11,7 +11,7 @@ namespace Tests\Fixtures\Data;
 
 use Cline\PostalCode\PostalCode;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsPostalCode;
+use Cline\Struct\Attributes\PostalCode\AsPostalCode;
 
 /**
  * @author Brian Faust <brian@cline.sh>

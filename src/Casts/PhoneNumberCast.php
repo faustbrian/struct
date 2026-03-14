@@ -10,7 +10,7 @@
 namespace Cline\Struct\Casts;
 
 use Cline\PhoneNumber\PhoneNumber;
-use Cline\Struct\Attributes\AsPhoneNumber;
+use Cline\Struct\Attributes\PhoneNumber\AsPhoneNumber;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Metadata\PropertyMetadata;

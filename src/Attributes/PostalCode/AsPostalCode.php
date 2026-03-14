@@ -7,27 +7,27 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Struct\Attributes;
+namespace Cline\Struct\Attributes\PostalCode;
 
 use Attribute;
-use Cline\Struct\Casts\PhoneNumberCast;
+use Cline\Struct\Casts\PostalCodeCast;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 
 /**
- * Configures built-in phone number casting for a property.
+ * Configures built-in postal code casting for a property.
  *
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class AsPhoneNumber implements ProvidesCastClassInterface
+final readonly class AsPostalCode implements ProvidesCastClassInterface
 {
     public function __construct(
-        public ?string $regionCode = null,
+        public ?string $country = null,
     ) {}
 
     public function castClass(): string
     {
-        return PhoneNumberCast::class;
+        return PostalCodeCast::class;
     }
 }

@@ -10,8 +10,8 @@
 namespace Cline\Struct\Casts;
 
 use Cline\Numerus\Numerus;
-use Cline\Struct\Attributes\Abs;
-use Cline\Struct\Attributes\Clamp;
+use Cline\Struct\Attributes\Numerus\Abs;
+use Cline\Struct\Attributes\Numerus\Clamp;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ConfiguresNumericRoundingInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;

@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cline\Struct\Attributes;
+namespace Cline\Struct\Attributes\Numerus;
 
 use Attribute;
 use Cline\Struct\Casts\NumericCast;
@@ -16,17 +16,17 @@ use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use RoundingMode;
 
 /**
- * Rounds a numeric property to the nearest even value.
+ * Rounds a numeric property toward positive infinity.
  *
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class RoundHalfEven implements ConfiguresNumericRoundingInterface, ProvidesCastClassInterface
+final readonly class RoundCeiling implements ConfiguresNumericRoundingInterface, ProvidesCastClassInterface
 {
     public function __construct(
         public int $precision = 0,
-        public RoundingMode $mode = RoundingMode::HalfEven,
+        public RoundingMode $mode = RoundingMode::PositiveInfinity,
     ) {}
 
     public function castClass(): string

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Moved the newer value-object and numeric attributes into dedicated
+  subnamespaces under `Cline\Struct\Attributes\Money`,
+  `Cline\Struct\Attributes\PhoneNumber`,
+  `Cline\Struct\Attributes\PostalCode`, and
+  `Cline\Struct\Attributes\Numerus`.
+
+### Breaking Changes
+- Updated attribute imports are required after the namespace move. For
+  example:
+  - `Cline\Struct\Attributes\AsMoney` becomes
+    `Cline\Struct\Attributes\Money\AsMoney`
+  - `Cline\Struct\Attributes\AsPhoneNumber` becomes
+    `Cline\Struct\Attributes\PhoneNumber\AsPhoneNumber`
+  - `Cline\Struct\Attributes\AsPostalCode` becomes
+    `Cline\Struct\Attributes\PostalCode\AsPostalCode`
+  - Numeric attributes such as `Round`, `Clamp`, and `Abs` now live
+    under `Cline\Struct\Attributes\Numerus\*`
+
 ### Added
 - Added repository-level maintainer guidance in `AGENTS.md`.
 - Added built-in arbitrary-precision number casting for `cline/math`.

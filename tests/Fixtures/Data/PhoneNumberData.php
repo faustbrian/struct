@@ -11,7 +11,7 @@ namespace Tests\Fixtures\Data;
 
 use Cline\PhoneNumber\PhoneNumber;
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\AsPhoneNumber;
+use Cline\Struct\Attributes\PhoneNumber\AsPhoneNumber;
 
 /**
  * @author Brian Faust <brian@cline.sh>

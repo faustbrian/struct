@@ -10,18 +10,18 @@
 namespace Tests\Fixtures\Data;
 
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\Abs;
-use Cline\Struct\Attributes\Ceil;
-use Cline\Struct\Attributes\Clamp;
-use Cline\Struct\Attributes\Floor;
-use Cline\Struct\Attributes\Round;
-use Cline\Struct\Attributes\RoundCeiling;
-use Cline\Struct\Attributes\RoundDown;
-use Cline\Struct\Attributes\RoundFloor;
-use Cline\Struct\Attributes\RoundHalfDown;
-use Cline\Struct\Attributes\RoundHalfEven;
-use Cline\Struct\Attributes\RoundHalfUp;
-use Cline\Struct\Attributes\RoundUp;
+use Cline\Struct\Attributes\Numerus\Abs;
+use Cline\Struct\Attributes\Numerus\Ceil;
+use Cline\Struct\Attributes\Numerus\Clamp;
+use Cline\Struct\Attributes\Numerus\Floor;
+use Cline\Struct\Attributes\Numerus\Round;
+use Cline\Struct\Attributes\Numerus\RoundCeiling;
+use Cline\Struct\Attributes\Numerus\RoundDown;
+use Cline\Struct\Attributes\Numerus\RoundFloor;
+use Cline\Struct\Attributes\Numerus\RoundHalfDown;
+use Cline\Struct\Attributes\Numerus\RoundHalfEven;
+use Cline\Struct\Attributes\Numerus\RoundHalfUp;
+use Cline\Struct\Attributes\Numerus\RoundUp;
 
 /**
  * @author Brian Faust <brian@cline.sh>
