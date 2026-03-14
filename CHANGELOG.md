@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added detached first-class `Illuminate\\Support\\Collection` DTO
   property support through `#[AsCollection(...)]`, including shared
   `Attributes\\Collections` transforms and inferred item validation.
+- Added callback-based `Illuminate\\Support\\Collection` attributes for
+  `#[AsCollection(...)]` properties, including `Filter`, `Reject`, `Map`,
+  `FlatMap`, `Each`, `SortBy`, `GroupBy`, `KeyBy`, and `Partition`.
 - Moved built-in string transforms and generators under
   `Attributes\\Strings` with backward-compatible aliases at
   `Attributes`.

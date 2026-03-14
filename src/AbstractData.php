@@ -10,6 +10,7 @@
 namespace Cline\Struct;
 
 use BackedEnum;
+use Cline\Struct\Attributes\Collections\AbstractCollectionCallbackTransformer;
 use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
@@ -880,6 +881,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         $metadata = $context instanceof CreationContext ? $context->metadata : static::metadata();
 
+        static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata);
+
         if ($property->cast instanceof CastInterface) {
             return $property->cast->get($property, $value);
         }
@@ -916,6 +919,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 $property,
                 static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context),
                 $metadata,
+                $context,
             );
         }
 
@@ -1032,11 +1036,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         PropertyMetadata $property,
         Collection $items,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): Collection {
         $attributes = static::laravelCollectionAttributes($property, $metadata);
 
         foreach ($attributes as $attribute) {
-            $items = $attribute->transformCollection($items);
+            $items = $attribute->transformCollection($items, $context);
         }
 
         return $items;
@@ -1075,6 +1080,36 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return $instances;
+    }
+
+    /**
+     * @internal
+     */
+    protected static function assertLaravelCollectionCallbackAttributesSupported(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+    ): void {
+        if (
+            $property->laravelCollectionType !== null
+            || $property->laravelCollectionCastClass !== null
+            || in_array(Collection::class, $property->types, true)
+        ) {
+            return;
+        }
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof AbstractCollectionCallbackTransformer) {
+                continue;
+            }
+
+            throw InvalidCollectionAttributeException::forLaravelCollectionOnly(
+                $metadata->class,
+                $property->name,
+                $instance::class,
+            );
+        }
     }
 
     /**
@@ -1464,7 +1499,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return static::serializeLaravelCollectionItems($property, $value, $context);
         }
 
-        if ($value instanceof Arrayable && !$value instanceof Collection) {
+        if ($value instanceof Arrayable) {
             return static::serializeAny($value->toArray(), $context, $property);
         }
 

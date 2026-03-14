@@ -86,7 +86,10 @@ available at `Cline\Struct\Attributes`. Collection transforms now live under
 `#[Collections\\Reverse]`, `#[Collections\\Unique]`, `#[Collections\\Slice]`,
 and `#[Collections\\OnlyKeys]`. Struct also ships first-class detached
 `Illuminate\\Support\\Collection` property support through
-`#[AsCollection(...)]`, separate from `DataList` and `DataCollection`.
+`#[AsCollection(...)]`, separate from `DataList` and `DataCollection`,
+including callback-based collection attributes such as
+`#[Collections\\Filter(...)]`, `#[Collections\\Map(...)]`, and
+`#[Collections\\GroupBy(...)]`.
 
 ## Documentation
 

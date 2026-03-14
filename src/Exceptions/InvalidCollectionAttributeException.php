@@ -21,7 +21,7 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
     public static function forUnsupportedPropertyType(string $data, string $property): self
     {
         return new self(sprintf(
-            'Property [%s::%s] can only use collection attributes on array, DataList, or DataCollection properties.',
+            'Property [%s::%s] can only use collection attributes on array, DataList, DataCollection, or Collection properties.',
             $data,
             $property,
         ));
@@ -34,6 +34,26 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
             $data,
             $property,
             $attribute,
+        ));
+    }
+
+    public static function forLaravelCollectionOnly(string $data, string $property, string $attribute): self
+    {
+        return new self(sprintf(
+            'Property [%s::%s] can only use [%s] on Illuminate\\Support\\Collection properties declared with AsCollection.',
+            $data,
+            $property,
+            $attribute,
+        ));
+    }
+
+    public static function forInvalidCallback(string $attribute, string $callback, string $expected): self
+    {
+        return new self(sprintf(
+            'Collection attribute [%s] requires callback [%s] to implement [%s].',
+            $attribute,
+            $callback,
+            $expected,
         ));
     }
 }

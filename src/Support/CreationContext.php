@@ -27,6 +27,7 @@ use function app;
 use function array_key_exists;
 use function class_exists;
 use function function_exists;
+use function is_object;
 use function is_subclass_of;
 use function resolve;
 
@@ -127,6 +128,39 @@ final class CreationContext
         return $this->cache->computers[$class] = $computer;
     }
 
+    public function collectionCallback(?string $class): ?object
+    {
+        if ($class === null) {
+            return null;
+        }
+
+        if (array_key_exists($class, $this->cache->collectionCallbacks)) {
+            return $this->cache->collectionCallbacks[$class] ?: null;
+        }
+
+        if (!class_exists($class)) {
+            $this->cache->collectionCallbackStrategies[$class] = 'invalid';
+            $this->cache->collectionCallbacks[$class] = false;
+
+            return null;
+        }
+
+        $strategy = $this->cache->collectionCallbackStrategies[$class]
+            ?? $this->collectionCallbackStrategyFor($class);
+
+        if ($strategy === 'direct') {
+            $callback = new $class();
+        } elseif ($strategy === 'container') {
+            $callback = $this->resolveCollectionCallbackFromContainer($class);
+        } else {
+            $this->cache->collectionCallbacks[$class] = false;
+
+            return null;
+        }
+
+        return $this->cache->collectionCallbacks[$class] = $callback;
+    }
+
     public function collectionItem(PropertyMetadata $property): CollectionItemRuntime
     {
         if (!isset($this->cache->collectionItemProperties[$property])) {
@@ -188,6 +222,19 @@ final class CreationContext
         }
 
         return $this->cache->computerStrategies[$class] = 'invalid';
+    }
+
+    private function collectionCallbackStrategyFor(string $class): string
+    {
+        if ($this->canInstantiateDirectly($class)) {
+            return $this->cache->collectionCallbackStrategies[$class] = 'direct';
+        }
+
+        if ($this->isBound($class)) {
+            return $this->cache->collectionCallbackStrategies[$class] = 'container';
+        }
+
+        return $this->cache->collectionCallbackStrategies[$class] = 'invalid';
     }
 
     private function resolveHelper(?string $preferredClass, string $abstract, string $fallbackClass): object
@@ -285,6 +332,17 @@ final class CreationContext
         return resolve($class);
     }
 
+    private function resolveCollectionCallbackFromContainer(string $class): object
+    {
+        $resolved = resolve($class);
+
+        if (is_object($resolved)) {
+            return $resolved;
+        }
+
+        return new $class();
+    }
+
     private function isBound(string $class): bool
     {
         return function_exists('app') && app()->bound($class);
@@ -315,6 +373,12 @@ final class CreationContextCache
 
     /** @var array<string, 'container'|'direct'|'invalid'> */
     public array $computerStrategies = [];
+
+    /** @var array<string, false|object> */
+    public array $collectionCallbacks = [];
+
+    /** @var array<string, 'container'|'direct'|'invalid'> */
+    public array $collectionCallbackStrategies = [];
 
     /** @var array<string, 'abstract'|'direct'|'fallback'|'preferred'> */
     public array $helperStrategies = [];

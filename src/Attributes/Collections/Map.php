@@ -9,26 +9,25 @@
 
 namespace Cline\Struct\Attributes\Collections;
 
-use Cline\Struct\Contracts\TransformsCollectionValueInterface;
-use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
+use Attribute;
+use Cline\Struct\Contracts\MapsCollectionItemsInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
 /**
- * Base attribute for deterministic collection transforms.
- *
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
-abstract readonly class AbstractCollectionTransformer implements TransformsCollectionValueInterface, TransformsLaravelCollectionValueInterface
+#[Attribute(Attribute::TARGET_PROPERTY)]
+final readonly class Map extends AbstractCollectionCallbackTransformer
 {
-    public function supportsLists(): bool
-    {
-        return true;
-    }
-
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection
     {
-        return new Collection($this->transform($items->all()));
+        /** @var MapsCollectionItemsInterface $callback */
+        $callback = $this->resolveCallback(MapsCollectionItemsInterface::class, $context);
+
+        return $items->map(
+            static fn (mixed $value, int|string $key): mixed => $callback->map($value, $key),
+        );
     }
 }

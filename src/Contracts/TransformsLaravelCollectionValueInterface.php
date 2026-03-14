@@ -9,6 +9,7 @@
 
 namespace Cline\Struct\Contracts;
 
+use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -22,5 +23,5 @@ interface TransformsLaravelCollectionValueInterface
      * @param  Collection<array-key, mixed> $items
      * @return Collection<array-key, mixed>
      */
-    public function transformCollection(Collection $items): Collection;
+    public function transformCollection(Collection $items, ?CreationContext $context = null): Collection;
 }

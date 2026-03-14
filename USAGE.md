@@ -832,6 +832,60 @@ Collection attributes follow these rules:
 - key-based attributes such as `OnlyKeys`, `ExceptKeys`, and `SortKeys`
   are intentionally rejected on `DataList`
 
+### Callback-Based Laravel Collection Attributes
+
+`Illuminate\Support\Collection` properties declared with
+`#[AsCollection(...)]` also support callback-driven transforms that resolve
+an invokable helper from the container when bound, or instantiate it
+directly when it has a zero-argument constructor.
+
+```php
+<?php
+
+use App\Struct\CollectionCallbacks\IsPublished;
+use App\Struct\CollectionCallbacks\PostSlugMap;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsCollection;
+use Cline\Struct\Attributes\Collections\Filter;
+use Cline\Struct\Attributes\Collections\Map;
+use App\Data\PostData;
+use Illuminate\Support\Collection;
+
+final readonly class FeedData extends AbstractData
+{
+    public function __construct(
+        #[AsCollection(PostData::class)]
+        #[Filter(IsPublished::class)]
+        #[Map(PostSlugMap::class)]
+        public Collection $posts,
+    ) {}
+}
+```
+
+Available callback-based Laravel collection attributes:
+
+- `#[Collections\Filter(...)]`
+- `#[Collections\Reject(...)]`
+- `#[Collections\Map(...)]`
+- `#[Collections\FlatMap(...)]`
+- `#[Collections\Each(...)]`
+- `#[Collections\SortBy(...)]`
+- `#[Collections\GroupBy(...)]`
+- `#[Collections\KeyBy(...)]`
+- `#[Collections\Partition(...)]`
+
+These attributes are only supported on `Collection` properties declared with
+`#[AsCollection(...)]`. They are intentionally rejected on `array`,
+`DataList`, and `DataCollection`.
+
+Callback contracts:
+
+- `FiltersCollectionItemsInterface` for `Filter`, `Reject`, and `Partition`
+- `MapsCollectionItemsInterface` for `Map` and `FlatMap`
+- `PerformsCollectionActionInterface` for `Each`
+- `ComputesCollectionSortValueInterface` for `SortBy`
+- `ComputesCollectionGroupKeyInterface` for `GroupBy` and `KeyBy`
+
 ### Custom Property Casts
 
 Use `#[CastWith(...)]` for explicit custom casting.
