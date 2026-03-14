@@ -66,6 +66,8 @@ function makeDateCastProperty(): PropertyMetadata
         isSensitive: false,
         isEncrypted: false,
         isComputed: false,
+        hasCollectionResultAttribute: false,
+        hasCollectionSourceAttribute: false,
         isLazy: false,
         computer: null,
         lazyResolver: null,

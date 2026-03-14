@@ -668,6 +668,8 @@ function makePropertyMetadata(
         isSensitive: $isSensitive,
         isEncrypted: false,
         isComputed: $isComputed,
+        hasCollectionResultAttribute: false,
+        hasCollectionSourceAttribute: false,
         isLazy: false,
         computer: $computer,
         lazyResolver: null,

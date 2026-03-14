@@ -33,6 +33,8 @@ describe('Collection item descriptors', function (): void {
             isSensitive: false,
             isEncrypted: false,
             isComputed: false,
+            hasCollectionResultAttribute: false,
+            hasCollectionSourceAttribute: false,
             isLazy: false,
             computer: null,
             lazyResolver: null,

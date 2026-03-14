@@ -314,6 +314,8 @@ function makeSerializationProperty(
         isSensitive: false,
         isEncrypted: false,
         isComputed: $isComputed,
+        hasCollectionResultAttribute: false,
+        hasCollectionSourceAttribute: false,
         isLazy: false,
         computer: null,
         lazyResolver: null,
