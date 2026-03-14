@@ -867,12 +867,22 @@ Available callback-based Laravel collection attributes:
 - `#[Collections\Filter(...)]`
 - `#[Collections\Reject(...)]`
 - `#[Collections\Map(...)]`
+- `#[Collections\MapInto(...)]`
+- `#[Collections\MapWithKeys(...)]`
 - `#[Collections\FlatMap(...)]`
 - `#[Collections\Each(...)]`
 - `#[Collections\SortBy(...)]`
+- `#[Collections\SortByDesc(...)]`
 - `#[Collections\GroupBy(...)]`
 - `#[Collections\KeyBy(...)]`
+- `#[Collections\UniqueBy(...)]`
+- `#[Collections\SkipUntil(...)]`
+- `#[Collections\SkipWhile(...)]`
+- `#[Collections\TakeUntil(...)]`
+- `#[Collections\TakeWhile(...)]`
 - `#[Collections\Partition(...)]`
+- `#[Collections\Chunk(...)]`
+- `#[Collections\Sliding(...)]`
 
 These attributes are only supported on `Collection` properties declared with
 `#[AsCollection(...)]`. They are intentionally rejected on `array`,
@@ -881,10 +891,19 @@ These attributes are only supported on `Collection` properties declared with
 Callback contracts:
 
 - `FiltersCollectionItemsInterface` for `Filter`, `Reject`, and `Partition`
+- `FiltersCollectionItemsInterface` for `SkipUntil`, `SkipWhile`,
+  `TakeUntil`, and `TakeWhile`
 - `MapsCollectionItemsInterface` for `Map` and `FlatMap`
+- `MapsCollectionItemsWithKeysInterface` for `MapWithKeys`
 - `PerformsCollectionActionInterface` for `Each`
 - `ComputesCollectionSortValueInterface` for `SortBy`
-- `ComputesCollectionGroupKeyInterface` for `GroupBy` and `KeyBy`
+- `ComputesCollectionSortValueInterface` for `SortByDesc`
+- `ComputesCollectionGroupKeyInterface` for `GroupBy`, `KeyBy`, and
+  `UniqueBy`
+
+`MapInto(...)` is type-driven rather than callback-driven. It maps each
+item into a target Struct data class and is useful when your collection
+starts as scalar or array payloads but should end up as DTO instances.
 
 ### Custom Property Casts
 

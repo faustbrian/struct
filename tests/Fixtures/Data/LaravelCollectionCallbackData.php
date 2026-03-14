@@ -11,23 +11,35 @@ namespace Tests\Fixtures\Data;
 
 use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AsCollection;
+use Cline\Struct\Attributes\Collections\Chunk;
 use Cline\Struct\Attributes\Collections\Each;
 use Cline\Struct\Attributes\Collections\Filter;
 use Cline\Struct\Attributes\Collections\FlatMap;
 use Cline\Struct\Attributes\Collections\GroupBy;
 use Cline\Struct\Attributes\Collections\KeyBy;
 use Cline\Struct\Attributes\Collections\Map;
+use Cline\Struct\Attributes\Collections\MapInto;
+use Cline\Struct\Attributes\Collections\MapWithKeys;
 use Cline\Struct\Attributes\Collections\Partition;
 use Cline\Struct\Attributes\Collections\Reject;
+use Cline\Struct\Attributes\Collections\SkipUntil;
+use Cline\Struct\Attributes\Collections\SkipWhile;
+use Cline\Struct\Attributes\Collections\Sliding;
 use Cline\Struct\Attributes\Collections\SortBy;
+use Cline\Struct\Attributes\Collections\SortByDesc;
+use Cline\Struct\Attributes\Collections\TakeUntil;
+use Cline\Struct\Attributes\Collections\TakeWhile;
+use Cline\Struct\Attributes\Collections\UniqueBy;
 use Cline\Struct\Attributes\Collections\Values;
 use Cline\Struct\Enums\DataListType;
 use Illuminate\Support\Collection;
+use Tests\Fixtures\Data\ValueData;
 use Tests\Fixtures\Support\CollectionCallbacks\DoubleNumberMapper;
 use Tests\Fixtures\Support\CollectionCallbacks\EvenNumberPredicate;
 use Tests\Fixtures\Support\CollectionCallbacks\ExplodeWordsMapper;
 use Tests\Fixtures\Support\CollectionCallbacks\FirstLetterGroupKey;
 use Tests\Fixtures\Support\CollectionCallbacks\KeyAwareUppercaseMapper;
+use Tests\Fixtures\Support\CollectionCallbacks\LowercaseKeyValueMap;
 use Tests\Fixtures\Support\CollectionCallbacks\RecordValueAction;
 use Tests\Fixtures\Support\CollectionCallbacks\StringLengthSortValue;
 
@@ -69,5 +81,35 @@ final readonly class LaravelCollectionCallbackData extends AbstractData
         #[AsCollection(DataListType::String)]
         #[Each(RecordValueAction::class)]
         public Collection $recorded,
+        #[AsCollection(DataListType::String)]
+        #[SortByDesc(StringLengthSortValue::class)]
+        public Collection $sortedDescending,
+        #[AsCollection(DataListType::String)]
+        #[UniqueBy(FirstLetterGroupKey::class)]
+        public Collection $uniqueBy,
+        #[AsCollection(DataListType::Int)]
+        #[SkipUntil(EvenNumberPredicate::class)]
+        public Collection $skipUntil,
+        #[AsCollection(DataListType::Int)]
+        #[SkipWhile(EvenNumberPredicate::class)]
+        public Collection $skipWhile,
+        #[AsCollection(DataListType::Int)]
+        #[TakeUntil(EvenNumberPredicate::class)]
+        public Collection $takeUntil,
+        #[AsCollection(DataListType::Int)]
+        #[TakeWhile(EvenNumberPredicate::class)]
+        public Collection $takeWhile,
+        #[AsCollection(DataListType::String)]
+        #[MapWithKeys(LowercaseKeyValueMap::class)]
+        public Collection $mappedWithKeys,
+        #[AsCollection(DataListType::String)]
+        #[Chunk(2)]
+        public Collection $chunked,
+        #[AsCollection(DataListType::String)]
+        #[Sliding(2)]
+        public Collection $sliding,
+        #[AsCollection(DataListType::String)]
+        #[MapInto(ValueData::class)]
+        public Collection $mappedInto,
     ) {}
 }

@@ -10,7 +10,6 @@
 namespace Cline\Struct;
 
 use BackedEnum;
-use Cline\Struct\Attributes\Collections\AbstractCollectionCallbackTransformer;
 use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
@@ -1100,7 +1099,11 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         foreach (static::propertyAttributes($property) as $attribute) {
             $instance = $attribute->newInstance();
 
-            if (!$instance instanceof AbstractCollectionCallbackTransformer) {
+            if (!$instance instanceof TransformsLaravelCollectionValueInterface) {
+                continue;
+            }
+
+            if ($instance instanceof AbstractCollectionTransformer) {
                 continue;
             }
 

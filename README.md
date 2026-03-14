@@ -88,8 +88,9 @@ and `#[Collections\\OnlyKeys]`. Struct also ships first-class detached
 `Illuminate\\Support\\Collection` property support through
 `#[AsCollection(...)]`, separate from `DataList` and `DataCollection`,
 including callback-based collection attributes such as
-`#[Collections\\Filter(...)]`, `#[Collections\\Map(...)]`, and
-`#[Collections\\GroupBy(...)]`.
+`#[Collections\\Filter(...)]`, `#[Collections\\Map(...)]`,
+`#[Collections\\GroupBy(...)]`, `#[Collections\\UniqueBy(...)]`, and
+`#[Collections\\MapInto(...)]`.
 
 ## Documentation
 

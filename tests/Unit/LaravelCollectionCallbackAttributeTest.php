@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Tests\Fixtures\Data\InvalidLaravelCollectionCallbackData;
 use Tests\Fixtures\Data\LaravelCollectionCallbackData;
 use Tests\Fixtures\Data\LaravelCollectionCallbackReuseData;
+use Tests\Fixtures\Data\ValueData;
 use Tests\Fixtures\Support\CollectionCallbacks\BoundPrefixMapper;
 use Tests\Fixtures\Support\CollectionCallbacks\CountingPassthroughMapper;
 use Tests\Fixtures\Support\CollectionCallbacks\RecordValueAction;
@@ -34,6 +35,16 @@ describe('Laravel collection callback attributes', function (): void {
             'partitioned' => [1, '2', 3, '4'],
             'ordered' => ['first' => 'a', 'second' => 'b'],
             'recorded' => ['alpha', 'beta'],
+            'sortedDescending' => ['tiny', 'alphabet', 'mid'],
+            'uniqueBy' => ['Alpha', 'Apex', 'Beta', 'Bravo'],
+            'skipUntil' => [1, 3, 4, 6],
+            'skipWhile' => [2, 4, 3, 6],
+            'takeUntil' => [1, 3, 4, 6],
+            'takeWhile' => [2, 4, 3, 6],
+            'mappedWithKeys' => ['Alpha', 'Beta'],
+            'chunked' => ['Alpha', 'Beta', 'Gamma'],
+            'sliding' => ['Alpha', 'Beta', 'Gamma'],
+            'mappedInto' => ['alpha', 'beta'],
         ]);
 
         expect($data->filtered)->toBeInstanceOf(Collection::class)
@@ -74,6 +85,31 @@ describe('Laravel collection callback attributes', function (): void {
                 0 => '0:A',
                 1 => '1:B',
             ])->and($data->recorded->all())->toBe([
+                0 => 'alpha',
+                1 => 'beta',
+            ])->and($data->sortedDescending->values()->all())->toBe(['alphabet', 'tiny', 'mid'])
+            ->and($data->uniqueBy->values()->all())->toBe(['Alpha', 'Beta'])
+            ->and($data->skipUntil->values()->all())->toBe([4, 6])
+            ->and($data->skipWhile->values()->all())->toBe([3, 6])
+            ->and($data->takeUntil->values()->all())->toBe([1, 3])
+            ->and($data->takeWhile->values()->all())->toBe([2, 4])
+            ->and($data->mappedWithKeys->all())->toBe([
+                'a' => 'Alpha',
+                'b' => 'Beta',
+            ])->and($data->chunked->map(
+                static fn (Collection $group): array => $group->all(),
+            )->all())->toBe([
+                0 => ['Alpha', 'Beta'],
+                1 => [2 => 'Gamma'],
+            ])->and($data->sliding->map(
+                static fn (Collection $group): array => $group->all(),
+            )->values()->all())->toBe([
+                ['Alpha', 'Beta'],
+                [1 => 'Beta', 2 => 'Gamma'],
+            ])->and($data->mappedInto->all())->each->toBeInstanceOf(ValueData::class)
+            ->and($data->mappedInto->map(
+                static fn (ValueData $value): string|int|null => $value->value,
+            )->all())->toBe([
                 0 => 'alpha',
                 1 => 'beta',
             ])->and(RecordValueAction::$calls)->toBe([
@@ -120,6 +156,35 @@ describe('Laravel collection callback attributes', function (): void {
                 ],
                 'ordered' => ['0:A', '1:B'],
                 'recorded' => ['alpha', 'beta'],
+                'sortedDescending' => [
+                    1 => 'alphabet',
+                    0 => 'tiny',
+                    2 => 'mid',
+                ],
+                'uniqueBy' => [
+                    0 => 'Alpha',
+                    2 => 'Beta',
+                ],
+                'skipUntil' => [2 => 4, 3 => 6],
+                'skipWhile' => [2 => 3, 3 => 6],
+                'takeUntil' => [0 => 1, 1 => 3],
+                'takeWhile' => [0 => 2, 1 => 4],
+                'mappedWithKeys' => [
+                    'a' => 'Alpha',
+                    'b' => 'Beta',
+                ],
+                'chunked' => [
+                    ['Alpha', 'Beta'],
+                    [2 => 'Gamma'],
+                ],
+                'sliding' => [
+                    ['Alpha', 'Beta'],
+                    [1 => 'Beta', 2 => 'Gamma'],
+                ],
+                'mappedInto' => [
+                    ['value' => 'alpha'],
+                    ['value' => 'beta'],
+                ],
             ]);
     });
 
