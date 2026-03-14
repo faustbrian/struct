@@ -49,6 +49,9 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
+        "files": [
+            "src/attributes_aliases.php"
+        ],
         "psr-4": {
             "Cline\\Struct\\": "src/"
         }

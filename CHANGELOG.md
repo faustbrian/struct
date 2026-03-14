@@ -28,5 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   random strings, and passwords, including validation-aware hydration.
 - Added built-in collection transformation attributes for arrays,
   `DataList`, and `DataCollection` under `Attributes\\Collections`.
+- Moved built-in string transforms and generators under
+  `Attributes\\Strings` with backward-compatible aliases at
+  `Attributes`.
 - Added built-in `Numerus` property casting when `cline/numerus` is installed.
 - Initial release

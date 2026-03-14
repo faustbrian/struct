@@ -10,10 +10,10 @@
 namespace Tests\Fixtures\Data;
 
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\Password;
-use Cline\Struct\Attributes\Random;
-use Cline\Struct\Attributes\Ulid;
-use Cline\Struct\Attributes\Uuid;
+use Cline\Struct\Attributes\Strings\Password;
+use Cline\Struct\Attributes\Strings\Random;
+use Cline\Struct\Attributes\Strings\Ulid;
+use Cline\Struct\Attributes\Strings\Uuid;
 use Cline\Struct\Attributes\Validate;
 
 /**

@@ -10,7 +10,7 @@
 namespace Tests\Fixtures\Data;
 
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\Uuid;
+use Cline\Struct\Attributes\Strings\Uuid;
 use Cline\Struct\Support\Optional;
 
 /**

@@ -640,12 +640,12 @@ string DTO fields.
 <?php
 
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\After;
-use Cline\Struct\Attributes\Headline;
-use Cline\Struct\Attributes\Limit;
-use Cline\Struct\Attributes\Slug;
-use Cline\Struct\Attributes\Squish;
-use Cline\Struct\Attributes\Trim;
+use Cline\Struct\Attributes\Strings\After;
+use Cline\Struct\Attributes\Strings\Headline;
+use Cline\Struct\Attributes\Strings\Limit;
+use Cline\Struct\Attributes\Strings\Slug;
+use Cline\Struct\Attributes\Strings\Squish;
+use Cline\Struct\Attributes\Strings\Trim;
 
 final readonly class ArticleData extends AbstractData
 {
@@ -715,6 +715,8 @@ Available built-in string attributes include:
 String attributes are applied in declaration order during hydration. Struct
 does not re-run them during serialization, which preserves non-idempotent
 transforms such as `#[After]`, `#[Before]`, and `#[Between]`.
+Their canonical namespace is `Cline\Struct\Attributes\Strings`, while
+compatibility aliases remain available under `Cline\Struct\Attributes`.
 
 ### Built-In Generated Values
 
@@ -725,9 +727,9 @@ tokens, and passwords.
 <?php
 
 use Cline\Struct\AbstractData;
-use Cline\Struct\Attributes\Password;
-use Cline\Struct\Attributes\Ulid;
-use Cline\Struct\Attributes\Uuid;
+use Cline\Struct\Attributes\Strings\Password;
+use Cline\Struct\Attributes\Strings\Ulid;
+use Cline\Struct\Attributes\Strings\Uuid;
 
 final readonly class UserData extends AbstractData
 {
@@ -758,6 +760,7 @@ Generated-value attributes follow these rules:
 - `with(...)` preserves existing generated values and does not rerun them
 - they are only supported on `string` and `?string` properties
 - they cannot be combined with `Optional`
+- their canonical namespace is `Cline\Struct\Attributes\Strings`
 
 `#[Uuid]` supports all UUID versions from `1` through `7`. Versions `3`
 and `5` require `namespace` and `name`, while version `2` may additionally
