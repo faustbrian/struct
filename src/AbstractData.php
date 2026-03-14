@@ -20,6 +20,7 @@ use Cline\Struct\Contracts\SerializationConditionInterface;
 use Cline\Struct\Contracts\StringifierInterface;
 use Cline\Struct\Contracts\TransformsCollectionValueInterface;
 use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
+use Cline\Struct\Contracts\WrapsLaravelCollectionTransformInterface;
 use Cline\Struct\Eloquent\AsData;
 use Cline\Struct\Eloquent\AsDataCollection;
 use Cline\Struct\Exceptions\CursorPaginatorCollectTargetException;
@@ -1060,6 +1061,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $instance = $attribute->newInstance();
 
             if (!$instance instanceof TransformsLaravelCollectionValueInterface) {
+                if (!$instance instanceof WrapsLaravelCollectionTransformInterface) {
+                    continue;
+                }
+
+                $instances[] = $instance;
+
                 continue;
             }
 
@@ -1078,7 +1085,33 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             throw InvalidCollectionAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
         }
 
-        return $instances;
+        $transforms = [];
+
+        foreach ($instances as $index => $instance) {
+            if ($instance instanceof WrapsLaravelCollectionTransformInterface) {
+                $next = $instances[$index + 1] ?? null;
+
+                if (!$next instanceof TransformsLaravelCollectionValueInterface) {
+                    throw InvalidCollectionAttributeException::forMissingFollowingTransform(
+                        $metadata->class,
+                        $property->name,
+                        $instance::class,
+                    );
+                }
+
+                $transforms[] = $instance->wrap($next);
+
+                continue;
+            }
+
+            if (($instances[$index - 1] ?? null) instanceof WrapsLaravelCollectionTransformInterface) {
+                continue;
+            }
+
+            $transforms[] = $instance;
+        }
+
+        return $transforms;
     }
 
     /**

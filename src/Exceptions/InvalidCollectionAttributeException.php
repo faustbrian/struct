@@ -56,4 +56,14 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
             $expected,
         ));
     }
+
+    public static function forMissingFollowingTransform(string $data, string $property, string $attribute): self
+    {
+        return new self(sprintf(
+            'Collection attribute [%s] on [%s::%s] must be followed by another Laravel collection transform attribute.',
+            $attribute,
+            $data,
+            $property,
+        ));
+    }
 }

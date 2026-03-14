@@ -90,7 +90,11 @@ and `#[Collections\\OnlyKeys]`. Struct also ships first-class detached
 including callback-based collection attributes such as
 `#[Collections\\Filter(...)]`, `#[Collections\\Map(...)]`,
 `#[Collections\\GroupBy(...)]`, `#[Collections\\UniqueBy(...)]`, and
-`#[Collections\\MapInto(...)]`.
+`#[Collections\\MapInto(...)]`. Collection-returning transforms also
+include attributes such as `#[Collections\\Where(...)]`,
+`#[Collections\\Pluck(...)]`, `#[Collections\\Flatten(...)]`,
+`#[Collections\\ChunkWhile(...)]`, `#[Collections\\MapToGroups(...)]`,
+and conditional wrappers like `#[Collections\\When(...)]`.
 
 ## Documentation
 

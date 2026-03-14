@@ -871,11 +871,32 @@ Available callback-based Laravel collection attributes:
 - `#[Collections\MapWithKeys(...)]`
 - `#[Collections\FlatMap(...)]`
 - `#[Collections\Each(...)]`
+- `#[Collections\Where(...)]`
+- `#[Collections\WhereStrict(...)]`
+- `#[Collections\WhereIn(...)]`
+- `#[Collections\WhereInStrict(...)]`
+- `#[Collections\WhereNotIn(...)]`
+- `#[Collections\WhereNotInStrict(...)]`
+- `#[Collections\WhereNull(...)]`
+- `#[Collections\WhereNotNull(...)]`
+- `#[Collections\WhereBetween(...)]`
+- `#[Collections\WhereNotBetween(...)]`
+- `#[Collections\Pluck(...)]`
+- `#[Collections\Flatten(...)]`
+- `#[Collections\Collapse(...)]`
+- `#[Collections\CollapseWithKeys(...)]`
+- `#[Collections\ChunkWhile(...)]`
+- `#[Collections\MapToGroups(...)]`
 - `#[Collections\SortBy(...)]`
 - `#[Collections\SortByDesc(...)]`
+- `#[Collections\SortKeysDesc(...)]`
+- `#[Collections\SortKeysUsing(...)]`
 - `#[Collections\GroupBy(...)]`
 - `#[Collections\KeyBy(...)]`
 - `#[Collections\UniqueBy(...)]`
+- `#[Collections\UniqueStrict(...)]`
+- `#[Collections\Duplicates(...)]`
+- `#[Collections\DuplicatesStrict(...)]`
 - `#[Collections\SkipUntil(...)]`
 - `#[Collections\SkipWhile(...)]`
 - `#[Collections\TakeUntil(...)]`
@@ -883,6 +904,14 @@ Available callback-based Laravel collection attributes:
 - `#[Collections\Partition(...)]`
 - `#[Collections\Chunk(...)]`
 - `#[Collections\Sliding(...)]`
+- `#[Collections\Zip(...)]`
+- `#[Collections\Concat(...)]`
+- `#[Collections\When(...)]`
+- `#[Collections\Unless(...)]`
+- `#[Collections\WhenEmpty]`
+- `#[Collections\WhenNotEmpty]`
+- `#[Collections\UnlessEmpty]`
+- `#[Collections\UnlessNotEmpty]`
 
 These attributes are only supported on `Collection` properties declared with
 `#[AsCollection(...)]`. They are intentionally rejected on `array`,
@@ -895,15 +924,22 @@ Callback contracts:
   `TakeUntil`, and `TakeWhile`
 - `MapsCollectionItemsInterface` for `Map` and `FlatMap`
 - `MapsCollectionItemsWithKeysInterface` for `MapWithKeys`
+- `MapsCollectionItemsWithKeysInterface` for `MapToGroups`
 - `PerformsCollectionActionInterface` for `Each`
 - `ComputesCollectionSortValueInterface` for `SortBy`
 - `ComputesCollectionSortValueInterface` for `SortByDesc`
 - `ComputesCollectionGroupKeyInterface` for `GroupBy`, `KeyBy`, and
   `UniqueBy`
+- `ChunksCollectionItemsInterface` for `ChunkWhile`
+- `ComparesCollectionKeysInterface` for `SortKeysUsing`
+- `DecidesCollectionPipelineConditionInterface` for `When` and `Unless`
 
 `MapInto(...)` is type-driven rather than callback-driven. It maps each
 item into a target Struct data class and is useful when your collection
 starts as scalar or array payloads but should end up as DTO instances.
+
+`When*` and `Unless*` attributes are next-transform wrappers. They only
+control the immediately following Laravel collection attribute.
 
 ### Custom Property Casts
 

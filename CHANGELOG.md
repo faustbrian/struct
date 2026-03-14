@@ -56,6 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded callback-based `Illuminate\\Support\\Collection` attributes
   with `SortByDesc`, `UniqueBy`, `SkipUntil`, `SkipWhile`, `TakeUntil`,
   `TakeWhile`, `MapWithKeys`, `Chunk`, `Sliding`, and `MapInto`.
+- Expanded detached `Illuminate\\Support\\Collection` attributes with
+  query, shape, and conditional transforms including `Where*`, `Pluck`,
+  `Flatten`, `Collapse`, `ChunkWhile`, `MapToGroups`, `SortKeysDesc`,
+  `SortKeysUsing`, `UniqueStrict`, `Duplicates*`, `Zip`, `Concat`, and
+  `When*` / `Unless*`.
 - Moved built-in string transforms and generators under
   `Attributes\\Strings` with backward-compatible aliases at
   `Attributes`.
