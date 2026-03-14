@@ -14,8 +14,6 @@ use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
-use function func_num_args;
-
 /**
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
@@ -31,7 +29,7 @@ final readonly class Where implements TransformsLaravelCollectionValueInterface
 
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection
     {
-        if (func_num_args() >= 0 && $this->value === null) {
+        if ($this->value === null) {
             return $items->where($this->key, $this->operatorOrValue);
         }
 

@@ -14,6 +14,9 @@ use Cline\Struct\Contracts\ComputesCollectionSortValueInterface;
 use function is_string;
 use function strlen;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class StringLengthSortValue implements ComputesCollectionSortValueInterface
 {
     public function sortValue(mixed $value, int|string $key): mixed

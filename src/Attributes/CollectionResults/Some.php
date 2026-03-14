@@ -36,7 +36,7 @@ final readonly class Some extends AbstractCollectionResultAttribute
         /** @var FiltersCollectionItemsInterface $callback */
         $callback = $this->resolveCallback($this->callback, FiltersCollectionItemsInterface::class, $context);
 
-        return $items->some(
+        return $items->contains(
             static fn (mixed $value, int|string $key): bool => $callback->passes($value, $key),
         );
     }

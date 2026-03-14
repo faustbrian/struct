@@ -29,6 +29,6 @@ final readonly class Average extends AbstractCollectionResultAttribute
 
     public function computeResult(Collection $items, array $properties, ?CreationContext $context = null): mixed
     {
-        return $items->average($this->key);
+        return $items->avg($this->key);
     }
 }

@@ -24,9 +24,7 @@ abstract readonly class AbstractConditionalCollectionTransformer implements Wrap
     public function wrap(TransformsLaravelCollectionValueInterface $next): TransformsLaravelCollectionValueInterface
     {
         return new ConditionalLaravelCollectionTransform(
-            function (Collection $items, ?CreationContext $context): bool {
-                return $this->shouldApply($items, $context);
-            },
+            fn (Collection $items, ?CreationContext $context): bool => $this->shouldApply($items, $context),
             $next,
         );
     }
