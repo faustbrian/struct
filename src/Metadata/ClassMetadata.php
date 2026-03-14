@@ -40,6 +40,12 @@ final readonly class ClassMetadata
     public array $computedProperties;
 
     /** @var list<PropertyMetadata> */
+    public array $collectionSourceProperties;
+
+    /** @var list<PropertyMetadata> */
+    public array $collectionResultProperties;
+
+    /** @var list<PropertyMetadata> */
     public array $defaultProjectionProperties;
 
     /** @var list<PropertyMetadata> */
@@ -68,6 +74,8 @@ final readonly class ClassMetadata
     ) {
         $hydratedProperties = [];
         $computedProperties = [];
+        $collectionSourceProperties = [];
+        $collectionResultProperties = [];
         $inputNames = [];
 
         $defaultProjectionProperties = [];
@@ -76,11 +84,14 @@ final readonly class ClassMetadata
         $hydratedPropertyLookup = [];
 
         foreach ($this->properties as $property) {
-            $inputNames[] = $property->inputName;
-
-            if ($property->isComputed) {
+            if ($property->hasCollectionSourceAttribute) {
+                $collectionSourceProperties[] = $property;
+            } elseif ($property->hasCollectionResultAttribute) {
+                $collectionResultProperties[] = $property;
+            } elseif ($property->isComputed) {
                 $computedProperties[] = $property;
             } else {
+                $inputNames[] = $property->inputName;
                 $hydratedProperties[] = $property;
                 $hydratedPropertyNames[] = $property->name;
                 $hydratedPropertyLookup[$property->name] = true;
@@ -106,6 +117,8 @@ final readonly class ClassMetadata
         $this->hydratedProperties = $hydratedProperties;
         $this->hydratedPropertyNames = $hydratedPropertyNames;
         $this->computedProperties = $computedProperties;
+        $this->collectionSourceProperties = $collectionSourceProperties;
+        $this->collectionResultProperties = $collectionResultProperties;
         $this->inputNameLookup = array_fill_keys($inputNames, true);
         $this->hydratedPropertyLookup = $hydratedPropertyLookup;
         $this->defaultProjectionProperties = $defaultProjectionProperties;

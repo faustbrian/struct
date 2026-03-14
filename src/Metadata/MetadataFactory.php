@@ -65,6 +65,8 @@ use Cline\Struct\Casts\PhoneNumberCast;
 use Cline\Struct\Casts\PostalCodeCast;
 use Cline\Struct\Casts\SemVerCast;
 use Cline\Struct\Contracts\CastInterface;
+use Cline\Struct\Contracts\ComputesCollectionResultValueInterface;
+use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
 use Cline\Struct\Contracts\ProvidesValidationRulesInterface;
@@ -305,7 +307,9 @@ final class MetadataFactory
                 isOptional: in_array(Optional::class, $types, true),
                 isSensitive: $sensitive,
                 isEncrypted: $attributeMap->isEncrypted,
-                isComputed: $computed instanceof Computed,
+                isComputed: $computed instanceof Computed || $attributeMap->hasCollectionResultAttribute || $attributeMap->hasCollectionSourceAttribute,
+                hasCollectionResultAttribute: $attributeMap->hasCollectionResultAttribute,
+                hasCollectionSourceAttribute: $attributeMap->hasCollectionSourceAttribute,
                 isLazy: $lazy instanceof Lazy || $lazyGroups !== [],
                 computer: $computed?->computer,
                 lazyResolver: $lazy?->resolver,
@@ -548,6 +552,8 @@ final class MetadataFactory
                 isEncrypted: false,
                 withPropertyInferredValidation: false,
                 withoutPropertyInferredValidation: false,
+                hasCollectionResultAttribute: false,
+                hasCollectionSourceAttribute: false,
             );
         }
 
@@ -571,8 +577,18 @@ final class MetadataFactory
         $isEncrypted = false;
         $withPropertyInferredValidation = false;
         $withoutPropertyInferredValidation = false;
+        $hasCollectionResultAttribute = false;
+        $hasCollectionSourceAttribute = false;
 
         foreach ($attributes as $attribute) {
+            if ($attribute instanceof ComputesCollectionResultValueInterface) {
+                $hasCollectionResultAttribute = true;
+            }
+
+            if ($attribute instanceof GeneratesCollectionValueInterface) {
+                $hasCollectionSourceAttribute = true;
+            }
+
             if ($attribute instanceof ProvidesValidationRulesInterface) {
                 foreach ($attribute->rules() as $rule) {
                     $validationRules[] = $rule;
@@ -721,6 +737,8 @@ final class MetadataFactory
             isEncrypted: $isEncrypted,
             withPropertyInferredValidation: $withPropertyInferredValidation,
             withoutPropertyInferredValidation: $withoutPropertyInferredValidation,
+            hasCollectionResultAttribute: $hasCollectionResultAttribute,
+            hasCollectionSourceAttribute: $hasCollectionSourceAttribute,
         );
     }
 
@@ -1066,5 +1084,7 @@ final readonly class PropertyAttributeMap
         public bool $isEncrypted,
         public bool $withPropertyInferredValidation,
         public bool $withoutPropertyInferredValidation,
+        public bool $hasCollectionResultAttribute,
+        public bool $hasCollectionSourceAttribute,
     ) {}
 }

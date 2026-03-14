@@ -12,8 +12,10 @@ namespace Cline\Struct;
 use BackedEnum;
 use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Cline\Struct\Contracts\CastInterface;
+use Cline\Struct\Contracts\ComputesCollectionResultValueInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
 use Cline\Struct\Contracts\DataObjectInterface;
+use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
 use Cline\Struct\Contracts\GeneratesMissingValueInterface;
 use Cline\Struct\Contracts\ResolvesLazyValueInterface;
 use Cline\Struct\Contracts\SerializationConditionInterface;
@@ -425,6 +427,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         foreach ($metadata->hydratedProperties as $property) {
             $values[$property->name] = static::resolveValue($metadata, $property, $input, $cascadeValidation, $context);
+        }
+
+        foreach ($metadata->collectionSourceProperties as $property) {
+            $values[$property->name] = static::resolveGeneratedCollectionValue($context, $property, $values);
+        }
+
+        foreach ($metadata->collectionResultProperties as $property) {
+            $values[$property->name] = static::resolveCollectionResultValue($context, $property, $values);
         }
 
         foreach ($metadata->computedProperties as $property) {
@@ -848,6 +858,99 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return null;
+    }
+
+    /**
+     * @internal
+     * @param array<string, mixed> $values
+     */
+    protected static function resolveGeneratedCollectionValue(CreationContext $context, PropertyMetadata $property, array $values): mixed
+    {
+        $attribute = static::collectionSourceAttribute($property);
+
+        if ($attribute instanceof GeneratesCollectionValueInterface) {
+            return $attribute->generateCollection($values, $context);
+        }
+
+        if ($property->hasDefaultValue) {
+            return $property->defaultValue;
+        }
+
+        return null;
+    }
+
+    /**
+     * @internal
+     * @param array<string, mixed> $values
+     */
+    protected static function resolveCollectionResultValue(CreationContext $context, PropertyMetadata $property, array $values): mixed
+    {
+        $attribute = static::collectionResultAttribute($property);
+
+        if ($attribute instanceof ComputesCollectionResultValueInterface) {
+            return $attribute->computeResult(
+                static::collectionResultSource($property, $attribute, $values),
+                $values,
+                $context,
+            );
+        }
+
+        if ($property->hasDefaultValue) {
+            return $property->defaultValue;
+        }
+
+        return null;
+    }
+
+    /**
+     * @internal
+     */
+    protected static function collectionSourceAttribute(PropertyMetadata $property): ?GeneratesCollectionValueInterface
+    {
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if ($instance instanceof GeneratesCollectionValueInterface) {
+                return $instance;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @internal
+     */
+    protected static function collectionResultAttribute(PropertyMetadata $property): ?ComputesCollectionResultValueInterface
+    {
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if ($instance instanceof ComputesCollectionResultValueInterface) {
+                return $instance;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @internal
+     * @param  array<string, mixed>         $values
+     * @return Collection<array-key, mixed>
+     */
+    protected static function collectionResultSource(
+        PropertyMetadata $property,
+        ComputesCollectionResultValueInterface $attribute,
+        array $values,
+    ): Collection {
+        $source = $values[$attribute->sourceProperty()] ?? null;
+
+        if ($source instanceof Collection) {
+            return $source;
+        }
+
+        throw InvalidCollectionAttributeException::forMissingSourceProperty($property->name, $attribute->sourceProperty());
     }
 
     /**

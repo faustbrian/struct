@@ -52,7 +52,7 @@ final class RuleInferrer
         $rules = [];
 
         foreach ($metadata->properties as $property) {
-            if ($property->isComputed) {
+            if ($property->isComputed || $property->hasCollectionResultAttribute || $property->hasCollectionSourceAttribute) {
                 continue;
             }
 

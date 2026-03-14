@@ -66,4 +66,13 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
             $property,
         ));
     }
+
+    public static function forMissingSourceProperty(string $attribute, string $source): self
+    {
+        return new self(sprintf(
+            'Collection attribute [%s] requires source property [%s] to resolve to an Illuminate\\Support\\Collection.',
+            $attribute,
+            $source,
+        ));
+    }
 }

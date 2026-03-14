@@ -941,6 +941,106 @@ starts as scalar or array payloads but should end up as DTO instances.
 `When*` and `Unless*` attributes are next-transform wrappers. They only
 control the immediately following Laravel collection attribute.
 
+### Derived Collection Results
+
+Use `Cline\Struct\Attributes\CollectionResults` when a property should
+be derived from another `Collection` property instead of being hydrated
+from input directly.
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsCollection;
+use Cline\Struct\Attributes\CollectionResults\Contains;
+use Cline\Struct\Attributes\CollectionResults\Sum;
+use Cline\Struct\Enums\DataListType;
+use Illuminate\Support\Collection;
+
+final readonly class MetricsData extends AbstractData
+{
+    public function __construct(
+        #[AsCollection(DataListType::Int)]
+        public Collection $totals,
+        #[Contains('totals', 10)]
+        public bool $hasTen,
+        #[Sum('totals')]
+        public int $sum,
+    ) {}
+}
+```
+
+Available derived result attributes:
+
+- `#[CollectionResults\Contains(...)]`
+- `#[CollectionResults\ContainsStrict(...)]`
+- `#[CollectionResults\DoesntContain(...)]`
+- `#[CollectionResults\DoesntContainStrict(...)]`
+- `#[CollectionResults\Every(...)]`
+- `#[CollectionResults\Some(...)]`
+- `#[CollectionResults\First(...)]`
+- `#[CollectionResults\Last(...)]`
+- `#[CollectionResults\Sole(...)]`
+- `#[CollectionResults\FirstWhere(...)]`
+- `#[CollectionResults\Search(...)]`
+- `#[CollectionResults\Value(...)]`
+- `#[CollectionResults\Count(...)]`
+- `#[CollectionResults\Sum(...)]`
+- `#[CollectionResults\Min(...)]`
+- `#[CollectionResults\Max(...)]`
+- `#[CollectionResults\Avg(...)]`
+- `#[CollectionResults\Average(...)]`
+- `#[CollectionResults\Median(...)]`
+- `#[CollectionResults\Mode(...)]`
+- `#[CollectionResults\Percentage(...)]`
+- `#[CollectionResults\Reduce(...)]`
+- `#[CollectionResults\ReduceSpread(...)]`
+- `#[CollectionResults\Implode(...)]`
+- `#[CollectionResults\Join(...)]`
+- `#[CollectionResults\Pop(...)]`
+- `#[CollectionResults\Shift(...)]`
+- `#[CollectionResults\Pull(...)]`
+- `#[CollectionResults\Unwrap(...)]`
+
+These attributes require an explicit source property name and operate on
+the source collection after it has finished hydrating and transforming.
+
+### Generated Collection Sources
+
+Use `Cline\Struct\Attributes\CollectionSources` when a `Collection`
+property should be generated instead of read from collection payload
+input.
+
+```php
+<?php
+
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsCollection;
+use Cline\Struct\Attributes\CollectionSources\Range;
+use Cline\Struct\Attributes\CollectionSources\Wrap;
+use Cline\Struct\Enums\DataListType;
+use Illuminate\Support\Collection;
+
+final readonly class GeneratedData extends AbstractData
+{
+    public function __construct(
+        public string $name,
+        #[AsCollection(DataListType::Mixed)]
+        #[Wrap(source: 'name')]
+        public Collection $wrappedName,
+        #[AsCollection(DataListType::Int)]
+        #[Range(1, 3)]
+        public Collection $numbers,
+    ) {}
+}
+```
+
+Available source attributes:
+
+- `#[CollectionSources\Wrap(...)]`
+- `#[CollectionSources\Range(...)]`
+- `#[CollectionSources\Times(...)]`
+
 ### Custom Property Casts
 
 Use `#[CastWith(...)]` for explicit custom casting.

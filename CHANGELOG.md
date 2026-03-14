@@ -61,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Flatten`, `Collapse`, `ChunkWhile`, `MapToGroups`, `SortKeysDesc`,
   `SortKeysUsing`, `UniqueStrict`, `Duplicates*`, `Zip`, `Concat`, and
   `When*` / `Unless*`.
+- Added `Attributes\\CollectionResults` for source-based derived values
+  such as `Contains`, `Every`, `FirstWhere`, `Count`, `Reduce`,
+  `Sum`, `Join`, `Pop`, `Pull`, and `Unwrap`.
+- Added `Attributes\\CollectionSources` for generated collection
+  properties through `Wrap`, `Range`, and `Times`, and added detached
+  collection transforms for `Combine` and `Forget`.
 - Moved built-in string transforms and generators under
   `Attributes\\Strings` with backward-compatible aliases at
   `Attributes`.
