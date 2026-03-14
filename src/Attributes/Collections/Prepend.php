@@ -23,7 +23,7 @@ final readonly class Prepend implements TransformsLaravelCollectionValueInterfac
 {
     public function __construct(
         public mixed $value,
-        public mixed $key = null,
+        public int|string|null $key = null,
     ) {}
 
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection

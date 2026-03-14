@@ -22,7 +22,8 @@ interface ComputesCollectionResultValueInterface
     public function sourceProperty(): string;
 
     /**
-     * @param array<string, mixed> $properties
+     * @param Collection<array-key, mixed> $items
+     * @param array<string, mixed>         $properties
      */
     public function computeResult(Collection $items, array $properties, ?CreationContext $context = null): mixed;
 }

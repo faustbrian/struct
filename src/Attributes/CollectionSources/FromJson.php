@@ -14,6 +14,7 @@ use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
 use function array_key_exists;
+use function is_string;
 
 /**
  * @author Brian Faust <brian@cline.sh>
@@ -32,9 +33,11 @@ final readonly class FromJson extends AbstractCollectionSourceAttribute
     public function generateCollection(array $properties, ?CreationContext $context = null): Collection
     {
         if ($this->source !== null && array_key_exists($this->source, $properties)) {
-            return Collection::fromJson((string) $properties[$this->source], $this->depth, $this->flags);
+            $value = $properties[$this->source];
+
+            return Collection::fromJson(is_string($value) ? $value : '', $this->depth, $this->flags);
         }
 
-        return Collection::fromJson((string) $this->json, $this->depth, $this->flags);
+        return Collection::fromJson($this->json ?? '', $this->depth, $this->flags);
     }
 }

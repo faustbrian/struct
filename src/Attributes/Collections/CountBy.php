@@ -13,6 +13,8 @@ use Attribute;
 use Cline\Struct\Contracts\ComputesCollectionGroupKeyInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
+use Stringable;
+use UnitEnum;
 
 /**
  * @author Brian Faust <brian@cline.sh>
@@ -26,8 +28,18 @@ final readonly class CountBy extends AbstractCollectionCallbackTransformer
         /** @var ComputesCollectionGroupKeyInterface $callback */
         $callback = $this->resolveCallback(ComputesCollectionGroupKeyInterface::class, $context);
 
-        return $items->countBy(
-            static fn (mixed $value, int|string $key): int|string => $callback->groupKey($value, $key),
-        );
+        return $items->countBy(static function (mixed $value, int|string $key) use ($callback): int|string|UnitEnum {
+            $group = $callback->groupKey($value, $key);
+
+            if ($group instanceof UnitEnum) {
+                return $group;
+            }
+
+            if ($group instanceof Stringable) {
+                return (string) $group;
+            }
+
+            return $group;
+        });
     }
 }

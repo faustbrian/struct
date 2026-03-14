@@ -18,5 +18,8 @@ use Illuminate\Support\Collection;
  */
 interface ChunksCollectionItemsInterface
 {
+    /**
+     * @param Collection<array-key, mixed> $chunk
+     */
     public function shouldStartNewChunk(mixed $value, int|string $key, Collection $chunk): bool;
 }

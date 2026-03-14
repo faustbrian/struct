@@ -32,6 +32,9 @@ abstract readonly class AbstractConditionalCollectionCallbackTransformer extends
         public string $callback,
     ) {}
 
+    /**
+     * @param Collection<array-key, mixed> $items
+     */
     protected function shouldApply(Collection $items, ?CreationContext $context = null): bool
     {
         /** @var DecidesCollectionPipelineConditionInterface $callback */
@@ -63,5 +66,8 @@ abstract readonly class AbstractConditionalCollectionCallbackTransformer extends
         );
     }
 
+    /**
+     * @param Collection<array-key, mixed> $items
+     */
     abstract protected function passes(DecidesCollectionPipelineConditionInterface $callback, Collection $items): bool;
 }

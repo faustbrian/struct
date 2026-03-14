@@ -67,6 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Attributes\\CollectionSources` for generated collection
   properties through `Wrap`, `Range`, and `Times`, and added detached
   collection transforms for `Combine` and `Forget`.
+- Expanded detached `Illuminate\\Support\\Collection` support with
+  terminal result attributes such as `After`, `All`, `FirstOrFail`,
+  `Has*`, `IsEmpty`, `ToJson`, and result `Random`; with transform
+  attributes such as `CountBy`, `WhereInstanceOf`, `Dot`, `Undot`,
+  `ForPage`, `Select`, `Transform`, `CrossJoin`, `Diff*`, `Intersect*`,
+  `Merge*`, `Replace*`, `Union`, collection `Random`, and `Splice`; and
+  with processor/source support through `EachSpread`, `MapSpread`,
+  `Ensure`, `Tap`, `Pipe*`, and `FromJson`.
 - Moved built-in string transforms and generators under
   `Attributes\\Strings` with backward-compatible aliases at
   `Attributes`.

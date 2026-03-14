@@ -13,6 +13,12 @@ use Attribute;
 use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
+use UnexpectedValueException;
+
+use function get_debug_type;
+use function implode;
+use function is_array;
+use function sprintf;
 
 /**
  * @author Brian Faust <brian@cline.sh>
@@ -30,6 +36,25 @@ final readonly class Ensure implements TransformsLaravelCollectionValueInterface
 
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection
     {
-        return $items->ensure($this->type);
+        $allowedTypes = is_array($this->type) ? $this->type : [$this->type];
+
+        return $items->each(static function (mixed $item, int|string $index) use ($allowedTypes): void {
+            $itemType = get_debug_type($item);
+
+            foreach ($allowedTypes as $allowedType) {
+                if ($itemType === $allowedType || ($allowedType !== 'null' && $item instanceof $allowedType)) {
+                    return;
+                }
+            }
+
+            throw new UnexpectedValueException(
+                sprintf(
+                    "Collection should only include [%s] items, but '%s' found at position %s.",
+                    implode(', ', $allowedTypes),
+                    $itemType,
+                    (string) $index,
+                ),
+            );
+        });
     }
 }

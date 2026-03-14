@@ -22,8 +22,8 @@ use Illuminate\Support\Collection;
 final readonly class Pluck implements TransformsLaravelCollectionValueInterface
 {
     public function __construct(
-        public string|array $value,
-        public string|array|null $key = null,
+        public string $value,
+        public ?string $key = null,
     ) {}
 
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection

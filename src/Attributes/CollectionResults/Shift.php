@@ -13,6 +13,8 @@ use Attribute;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
+use function max;
+
 /**
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
@@ -31,6 +33,6 @@ final readonly class Shift extends AbstractCollectionResultAttribute
     {
         $items = clone $items;
 
-        return $items->shift($this->count);
+        return $items->shift(max(0, $this->count));
     }
 }

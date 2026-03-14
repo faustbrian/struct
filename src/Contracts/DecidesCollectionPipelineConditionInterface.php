@@ -18,5 +18,8 @@ use Illuminate\Support\Collection;
  */
 interface DecidesCollectionPipelineConditionInterface
 {
+    /**
+     * @param Collection<array-key, mixed> $items
+     */
     public function shouldApply(Collection $items): bool;
 }

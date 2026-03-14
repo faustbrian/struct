@@ -27,6 +27,10 @@ abstract readonly class AbstractCollectionTransformer implements TransformsColle
         return true;
     }
 
+    /**
+     * @param  Collection<array-key, mixed> $items
+     * @return Collection<array-key, mixed>
+     */
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection
     {
         return new Collection($this->transform($items->all()));

@@ -22,7 +22,7 @@ final readonly class HasSole extends AbstractCollectionResultAttribute
 {
     public function __construct(
         string $source,
-        public mixed $key = null,
+        public ?string $key = null,
         public mixed $operator = null,
         public mixed $value = null,
     ) {

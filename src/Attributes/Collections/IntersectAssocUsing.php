@@ -14,6 +14,9 @@ use Cline\Struct\Contracts\ComparesCollectionKeysInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 
+use function is_int;
+use function is_string;
+
 /**
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
@@ -40,7 +43,10 @@ final readonly class IntersectAssocUsing extends AbstractCollectionOperandTransf
 
         return $items->intersectAssocUsing(
             $this->resolveOperand($context),
-            static fn (int|string $left, int|string $right): int => $callback->compare($left, $right),
+            static fn (mixed $left, mixed $right): int => $callback->compare(
+                is_int($left) ? $left : (is_string($left) ? $left : ''),
+                is_int($right) ? $right : (is_string($right) ? $right : ''),
+            ),
         );
     }
 }

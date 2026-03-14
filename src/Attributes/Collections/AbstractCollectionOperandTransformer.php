@@ -55,17 +55,19 @@ abstract readonly class AbstractCollectionOperandTransformer implements Transfor
 
         $properties = $context?->properties() ?? [];
 
-        if (!array_key_exists($this->source, $properties)) {
-            throw InvalidCollectionAttributeException::forInvalidOperandSource(static::class, (string) $this->source);
+        $source = (string) $this->source;
+
+        if (!array_key_exists($source, $properties)) {
+            throw InvalidCollectionAttributeException::forInvalidOperandSource(static::class, $source);
         }
 
-        $operand = $properties[$this->source];
+        $operand = $properties[$source];
 
         if ($operand instanceof Collection || is_array($operand)) {
             return $operand;
         }
 
-        throw InvalidCollectionAttributeException::forInvalidOperandSource(static::class, (string) $this->source);
+        throw InvalidCollectionAttributeException::forInvalidOperandSource(static::class, $source);
     }
 
     protected function resolveCallback(string $class, string $expected, ?CreationContext $context = null): object

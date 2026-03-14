@@ -1160,6 +1160,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      * @param  Collection<array-key, mixed> $items
+     * @param  array<string, mixed>         $properties
      * @return Collection<array-key, mixed>
      */
     protected static function transformLaravelCollectionValue(

@@ -11,6 +11,7 @@ namespace Cline\Struct\Attributes\Collections;
 
 use Attribute;
 use Cline\Struct\Contracts\PipesCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
 use Cline\Struct\Exceptions\InvalidCollectionAttributeException;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
@@ -25,7 +26,7 @@ use function resolve;
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class PipeThrough implements \Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface
+final readonly class PipeThrough implements TransformsLaravelCollectionValueInterface
 {
     /**
      * @param array<array-key, class-string> $callbacks

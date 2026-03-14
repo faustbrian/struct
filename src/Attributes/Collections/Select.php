@@ -22,7 +22,7 @@ use Illuminate\Support\Collection;
 final readonly class Select implements TransformsLaravelCollectionValueInterface
 {
     /**
-     * @param array<array-key, mixed> $keys
+     * @param array<array-key, int|string> $keys
      */
     public function __construct(
         public array $keys,

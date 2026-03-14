@@ -22,6 +22,7 @@ final readonly class Has extends AbstractCollectionResultAttribute
 {
     public function __construct(
         string $source,
+        /** @var array<array-key, int|string>|int|string */
         public string|int|array $key,
     ) {
         parent::__construct($source);

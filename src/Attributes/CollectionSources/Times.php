@@ -26,6 +26,6 @@ final readonly class Times extends AbstractCollectionSourceAttribute
 
     public function generateCollection(array $properties, ?CreationContext $context = null): Collection
     {
-        return Collection::times($this->count);
+        return Collection::times($this->count, static fn (int $number): int => $number);
     }
 }

@@ -94,12 +94,16 @@ including callback-based collection attributes such as
 include attributes such as `#[Collections\\Where(...)]`,
 `#[Collections\\Pluck(...)]`, `#[Collections\\Flatten(...)]`,
 `#[Collections\\ChunkWhile(...)]`, `#[Collections\\MapToGroups(...)]`,
-and conditional wrappers like `#[Collections\\When(...)]`. Derived
-collection results and generated collection sources live under
+`#[Collections\\CountBy(...)]`, `#[Collections\\Diff(...)]`,
+`#[Collections\\Merge(...)]`, `#[Collections\\Pipe(...)]`,
+`#[Collections\\Tap(...)]`, and conditional wrappers like
+`#[Collections\\When(...)]`. Derived collection results and generated
+collection sources live under
 `Cline\\Struct\\Attributes\\CollectionResults` and
 `Cline\\Struct\\Attributes\\CollectionSources`, for methods such as
-`#[Contains('posts', ...)]`, `#[Reduce('totals', ...)]`,
-`#[Wrap(source: 'name')]`, and `#[Range(1, 5)]`.
+`#[Contains('posts', ...)]`, `#[After('posts', ...)]`,
+`#[ToJson('posts')]`, `#[Reduce('totals', ...)]`,
+`#[Wrap(source: 'name')]`, and `#[FromJson(source: 'payload')]`.
 
 ## Documentation
 

@@ -29,5 +29,8 @@ abstract readonly class AbstractConditionalCollectionTransformer implements Wrap
         );
     }
 
+    /**
+     * @param Collection<array-key, mixed> $items
+     */
     abstract protected function shouldApply(Collection $items, ?CreationContext $context = null): bool;
 }

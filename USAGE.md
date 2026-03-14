@@ -906,6 +906,53 @@ Available callback-based Laravel collection attributes:
 - `#[Collections\Sliding(...)]`
 - `#[Collections\Zip(...)]`
 - `#[Collections\Concat(...)]`
+- `#[Collections\CountBy(...)]`
+- `#[Collections\WhereInstanceOf(...)]`
+- `#[Collections\Except(...)]`
+- `#[Collections\Flip(...)]`
+- `#[Collections\ForPage(...)]`
+- `#[Collections\Keys(...)]`
+- `#[Collections\Dot(...)]`
+- `#[Collections\Undot(...)]`
+- `#[Collections\Multiply(...)]`
+- `#[Collections\Nth(...)]`
+- `#[Collections\Only(...)]`
+- `#[Collections\Pad(...)]`
+- `#[Collections\Prepend(...)]`
+- `#[Collections\Push(...)]`
+- `#[Collections\Put(...)]`
+- `#[Collections\Random(...)]`
+- `#[Collections\Select(...)]`
+- `#[Collections\Shuffle(...)]`
+- `#[Collections\Skip(...)]`
+- `#[Collections\Sort(...)]`
+- `#[Collections\SortDesc(...)]`
+- `#[Collections\Split(...)]`
+- `#[Collections\SplitIn(...)]`
+- `#[Collections\Transform(...)]`
+- `#[Collections\EachSpread(...)]`
+- `#[Collections\MapSpread(...)]`
+- `#[Collections\Ensure(...)]`
+- `#[Collections\CrossJoin(...)]`
+- `#[Collections\Diff(...)]`
+- `#[Collections\DiffAssoc(...)]`
+- `#[Collections\DiffAssocUsing(...)]`
+- `#[Collections\DiffKeys(...)]`
+- `#[Collections\Intersect(...)]`
+- `#[Collections\IntersectUsing(...)]`
+- `#[Collections\IntersectAssoc(...)]`
+- `#[Collections\IntersectAssocUsing(...)]`
+- `#[Collections\IntersectByKeys(...)]`
+- `#[Collections\Merge(...)]`
+- `#[Collections\MergeRecursive(...)]`
+- `#[Collections\Replace(...)]`
+- `#[Collections\ReplaceRecursive(...)]`
+- `#[Collections\Splice(...)]`
+- `#[Collections\Union(...)]`
+- `#[Collections\Tap(...)]`
+- `#[Collections\Pipe(...)]`
+- `#[Collections\PipeInto(...)]`
+- `#[Collections\PipeThrough(...)]`
 - `#[Collections\When(...)]`
 - `#[Collections\Unless(...)]`
 - `#[Collections\WhenEmpty]`
@@ -926,13 +973,20 @@ Callback contracts:
 - `MapsCollectionItemsWithKeysInterface` for `MapWithKeys`
 - `MapsCollectionItemsWithKeysInterface` for `MapToGroups`
 - `PerformsCollectionActionInterface` for `Each`
+- `SpreadsCollectionItemsInterface` for `EachSpread` and `MapSpread`
 - `ComputesCollectionSortValueInterface` for `SortBy`
 - `ComputesCollectionSortValueInterface` for `SortByDesc`
 - `ComputesCollectionGroupKeyInterface` for `GroupBy`, `KeyBy`, and
-  `UniqueBy`
+  `UniqueBy`, and `CountBy`
 - `ChunksCollectionItemsInterface` for `ChunkWhile`
 - `ComparesCollectionKeysInterface` for `SortKeysUsing`
+- `ComparesCollectionKeysInterface` for `DiffAssocUsing` and
+  `IntersectAssocUsing`
+- `ComparesCollectionValuesInterface` for `IntersectUsing`
 - `DecidesCollectionPipelineConditionInterface` for `When` and `Unless`
+- `TapsCollectionValueInterface` for `Tap`
+- `PipesCollectionValueInterface` for `Pipe`, `PipeInto`, and
+  `PipeThrough`
 
 `MapInto(...)` is type-driven rather than callback-driven. It maps each
 item into a target Struct data class and is useful when your collection
@@ -978,10 +1032,20 @@ Available derived result attributes:
 - `#[CollectionResults\DoesntContainStrict(...)]`
 - `#[CollectionResults\Every(...)]`
 - `#[CollectionResults\Some(...)]`
+- `#[CollectionResults\After(...)]`
+- `#[CollectionResults\Before(...)]`
 - `#[CollectionResults\First(...)]`
+- `#[CollectionResults\FirstOrFail(...)]`
 - `#[CollectionResults\Last(...)]`
 - `#[CollectionResults\Sole(...)]`
 - `#[CollectionResults\FirstWhere(...)]`
+- `#[CollectionResults\Get(...)]`
+- `#[CollectionResults\Has(...)]`
+- `#[CollectionResults\HasAny(...)]`
+- `#[CollectionResults\HasMany(...)]`
+- `#[CollectionResults\HasSole(...)]`
+- `#[CollectionResults\IsEmpty(...)]`
+- `#[CollectionResults\IsNotEmpty(...)]`
 - `#[CollectionResults\Search(...)]`
 - `#[CollectionResults\Value(...)]`
 - `#[CollectionResults\Count(...)]`
@@ -1000,6 +1064,11 @@ Available derived result attributes:
 - `#[CollectionResults\Pop(...)]`
 - `#[CollectionResults\Shift(...)]`
 - `#[CollectionResults\Pull(...)]`
+- `#[CollectionResults\All(...)]`
+- `#[CollectionResults\ToArray(...)]`
+- `#[CollectionResults\ToJson(...)]`
+- `#[CollectionResults\ToPrettyJson(...)]`
+- `#[CollectionResults\Random(...)]`
 - `#[CollectionResults\Unwrap(...)]`
 
 These attributes require an explicit source property name and operate on
@@ -1040,6 +1109,7 @@ Available source attributes:
 - `#[CollectionSources\Wrap(...)]`
 - `#[CollectionSources\Range(...)]`
 - `#[CollectionSources\Times(...)]`
+- `#[CollectionSources\FromJson(...)]`
 
 ### Custom Property Casts
 
