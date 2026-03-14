@@ -19,6 +19,7 @@ use Cline\Struct\Contracts\ResolvesLazyValueInterface;
 use Cline\Struct\Contracts\SerializationConditionInterface;
 use Cline\Struct\Contracts\StringifierInterface;
 use Cline\Struct\Contracts\TransformsCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
 use Cline\Struct\Eloquent\AsData;
 use Cline\Struct\Eloquent\AsDataCollection;
 use Cline\Struct\Exceptions\CursorPaginatorCollectTargetException;
@@ -910,6 +911,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             ));
         }
 
+        if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null) {
+            return static::transformLaravelCollectionValue(
+                $property,
+                static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context),
+                $metadata,
+            );
+        }
+
         foreach ($property->types as $index => $type) {
             if ($type === 'null') {
                 continue;
@@ -1004,7 +1013,63 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             !$isList
             && $property->dataCollectionType === null
             && $property->dataCollectionCastClass === null
+            && $property->laravelCollectionType === null
+            && $property->laravelCollectionCastClass === null
             && !in_array('array', $property->types, true)
+        ) {
+            throw InvalidCollectionAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
+        }
+
+        return $instances;
+    }
+
+    /**
+     * @internal
+     * @param  Collection<array-key, mixed> $items
+     * @return Collection<array-key, mixed>
+     */
+    protected static function transformLaravelCollectionValue(
+        PropertyMetadata $property,
+        Collection $items,
+        ClassMetadata $metadata,
+    ): Collection {
+        $attributes = static::laravelCollectionAttributes($property, $metadata);
+
+        foreach ($attributes as $attribute) {
+            $items = $attribute->transformCollection($items);
+        }
+
+        return $items;
+    }
+
+    /**
+     * @internal
+     * @return list<TransformsLaravelCollectionValueInterface>
+     */
+    protected static function laravelCollectionAttributes(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+    ): array {
+        $instances = [];
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof TransformsLaravelCollectionValueInterface) {
+                continue;
+            }
+
+            $instances[] = $instance;
+        }
+
+        if ($instances === []) {
+            return [];
+        }
+
+        if (
+            $property->laravelCollectionType === null
+            && $property->laravelCollectionCastClass === null
+            && !in_array(Collection::class, $property->types, true)
         ) {
             throw InvalidCollectionAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
         }
@@ -1130,6 +1195,55 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return $items;
+    }
+
+    /**
+     * @internal
+     * @return Collection<array-key, mixed>
+     */
+    protected static function hydrateLaravelCollectionItems(
+        PropertyMetadata $property,
+        mixed $value,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+    ): Collection {
+        if ($value instanceof Collection) {
+            $value = $value->all();
+        }
+
+        if (!is_array($value)) {
+            return new Collection();
+        }
+
+        if (!static::propertyHasCollectionItemCast($property)) {
+            $items = [];
+
+            foreach ($value as $key => $item) {
+                $items[$key] = static::hydrateCollectionItemFromProperty(
+                    $property,
+                    $item,
+                    $cascadeValidation,
+                    $context,
+                );
+            }
+
+            return new Collection($items);
+        }
+
+        $itemRuntime = $context?->collectionItem($property)
+            ?? new CollectionItemRuntime($property, $property->collectionItemDescriptor());
+        $items = [];
+
+        foreach ($value as $key => $item) {
+            $items[$key] = static::hydrateCollectionItemValue(
+                $itemRuntime,
+                $item,
+                $cascadeValidation,
+                $context,
+            );
+        }
+
+        return new Collection($items);
     }
 
     /**
@@ -1346,6 +1460,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return static::serializeCollectionItems($property, $value, $context);
         }
 
+        if ($value instanceof Collection) {
+            return static::serializeLaravelCollectionItems($property, $value, $context);
+        }
+
         if ($value instanceof Arrayable && !$value instanceof Collection) {
             return static::serializeAny($value->toArray(), $context, $property);
         }
@@ -1505,6 +1623,32 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param  Collection<array-key, mixed> $value
+     * @return array<array-key, mixed>
+     */
+    protected static function serializeLaravelCollectionItems(
+        ?PropertyMetadata $property,
+        Collection $value,
+        SerializationContext $context,
+    ): array {
+        $items = [];
+        $itemRuntime = $property instanceof PropertyMetadata && static::propertyHasCollectionItemCast($property)
+            ? $context->collectionItem($property)
+            : null;
+
+        foreach ($value as $key => $item) {
+            $items[$key] = static::serializeCollectionItemValue(
+                $itemRuntime,
+                $item,
+                $context,
+            );
+        }
+
+        return $items;
+    }
+
+    /**
+     * @internal
      */
     protected static function serializeCollectionItem(
         ?PropertyMetadata $property,
@@ -1554,7 +1698,11 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return true;
         }
 
-        if ($property->dataListCastClass !== null || $property->dataCollectionCastClass !== null) {
+        if (
+            $property->dataListCastClass !== null
+            || $property->dataCollectionCastClass !== null
+            || $property->laravelCollectionCastClass !== null
+        ) {
             return true;
         }
 

@@ -84,7 +84,9 @@ when the input key is absent. Install `ramsey/uuid` if you want to use
 available at `Cline\Struct\Attributes`. Collection transforms now live under
 `Cline\Struct\Attributes\Collections`, including helpers such as
 `#[Collections\\Reverse]`, `#[Collections\\Unique]`, `#[Collections\\Slice]`,
-and `#[Collections\\OnlyKeys]`.
+and `#[Collections\\OnlyKeys]`. Struct also ships first-class detached
+`Illuminate\\Support\\Collection` property support through
+`#[AsCollection(...)]`, separate from `DataList` and `DataCollection`.
 
 ## Documentation
 

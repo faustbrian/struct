@@ -17,6 +17,7 @@ use Cline\Struct\Support\DataCollection;
 use Cline\Struct\Support\DataList;
 use Cline\Struct\Support\Optional;
 use DateTimeInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 use function enum_exists;
@@ -44,6 +45,10 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             return ['array'];
         }
 
+        if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null || $this->propertyHasType($property, Collection::class)) {
+            return ['array'];
+        }
+
         return $this->rulesForType($this->primaryType($property));
     }
 
@@ -53,11 +58,11 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             return [];
         }
 
-        if ($property->dataListCastClass !== null || $property->dataCollectionCastClass !== null) {
+        if ($property->dataListCastClass !== null || $property->dataCollectionCastClass !== null || $property->laravelCollectionCastClass !== null) {
             return [];
         }
 
-        $type = $property->dataListType ?? $property->dataCollectionType;
+        $type = $property->dataListType ?? $property->dataCollectionType ?? $property->laravelCollectionType;
 
         if ($type === null) {
             return [];

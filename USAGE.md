@@ -255,6 +255,7 @@ This applies to:
 
 - `DataList`
 - `DataCollection`
+- `Illuminate\Support\Collection` when paired with `#[AsCollection(...)]`
 - plain array properties
 
 ### Inferred Validation
@@ -769,12 +770,15 @@ use `localDomain`, `localIdentifier`, `node`, and `clockSeq`.
 ### Built-In Collection Attributes
 
 Struct also supports deterministic collection transforms for plain `array`
-properties, `DataList`, and `DataCollection`.
+properties, `DataList`, `DataCollection`, and
+`Illuminate\Support\Collection` properties declared with
+`#[AsCollection(...)]`.
 
 ```php
 <?php
 
 use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsCollection;
 use Cline\Struct\Attributes\AsDataList;
 use Cline\Struct\Attributes\Collections\RejectNulls;
 use Cline\Struct\Attributes\Collections\Reverse;
@@ -782,6 +786,7 @@ use Cline\Struct\Attributes\Collections\Take;
 use Cline\Struct\Attributes\Collections\Unique;
 use Cline\Struct\Enums\DataListType;
 use Cline\Struct\Support\DataList;
+use Illuminate\Support\Collection;
 
 final readonly class BatchData extends AbstractData
 {
@@ -792,6 +797,9 @@ final readonly class BatchData extends AbstractData
         #[Unique]
         #[Take(10)]
         public DataList $tags,
+        #[AsCollection(DataListType::String)]
+        #[RejectNulls]
+        public Collection $authors,
         #[RejectNulls]
         public array $metadata,
     ) {}
@@ -819,6 +827,7 @@ Collection attributes follow these rules:
 - they are not re-run during serialization
 - plain `array` properties preserve keys unless an attribute explicitly reindexes
 - `DataCollection` preserves keys by default
+- `Collection` preserves keys by default
 - `DataList` always reindexes because it is a list container
 - key-based attributes such as `OnlyKeys`, `ExceptKeys`, and `SortKeys`
   are intentionally rejected on `DataList`
@@ -905,7 +914,7 @@ Enums are first-class types in Struct.
 
 ## Lists and Collections
 
-Struct ships two separate container types.
+Struct ships three first-class collection options.
 
 ### `DataList`
 
@@ -955,13 +964,13 @@ public DataList $numbers;
 
 ### `DataCollection`
 
-`DataCollection` is the richer, Laravel-collection-based container.
+`DataCollection` is Struct's immutable keyed collection wrapper.
 
 Use it when you want:
 
-- collection helpers
-- richer manipulation after hydration
-- collection-style downstream APIs
+- Struct-owned immutable collection semantics
+- predictable keyed serialization without Laravel collection mutability
+- transport-oriented wrappers that stay detached from Laravel collection APIs
 
 ```php
 <?php
@@ -980,12 +989,50 @@ final readonly class UserData extends AbstractData
 }
 ```
 
+### `Collection`
+
+`Collection` support is a separate first-class feature for applications that
+want real Laravel collections on DTO properties without routing through
+`DataCollection`.
+
+Use it when you want:
+
+- downstream Laravel collection APIs after hydration
+- first-class typed item hydration for `Collection` properties
+- the shared `Attributes\Collections\*` transforms on real collections
+
+```php
+<?php
+
+use App\Data\PostData;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsCollection;
+use Illuminate\Support\Collection;
+
+final readonly class UserData extends AbstractData
+{
+    public function __construct(
+        #[AsCollection(PostData::class)]
+        public Collection $posts,
+    ) {}
+}
+```
+
+Supported descriptors for `AsCollection(...)`:
+
+- `DataListType::*`
+- primitive strings like `'int'` or `'string'`
+- Struct data class strings
+- enum class strings
+- cast classes implementing `CastInterface`
+
 ### Choosing Between Them
 
 Use:
 
 - `DataList` for strict schema boundaries and predictable list transport
-- `DataCollection` for richer collection workflows
+- `DataCollection` for immutable Struct-owned keyed collections
+- `Collection` for first-class Laravel collection workflows on DTO properties
 
 ## Collecting Many Records
 

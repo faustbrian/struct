@@ -10,8 +10,11 @@
 use Cline\Struct\Exceptions\AbstractStructInvalidArgumentException;
 use Cline\Struct\Support\DataCollection;
 use Cline\Struct\Support\DataList;
+use Illuminate\Support\Collection;
 use Tests\Fixtures\Data\CollectionAttributeData;
 use Tests\Fixtures\Data\InvalidCollectionAttributeData;
+use Tests\Fixtures\Data\LaravelCollectionAttributeData;
+use Tests\Fixtures\Data\SongData;
 
 describe('Collection transforms', function (): void {
     test('hydrates arrays, lists, and collections through collection attributes', function (): void {
@@ -137,5 +140,56 @@ describe('Collection transforms', function (): void {
         expect(fn (): InvalidCollectionAttributeData => InvalidCollectionAttributeData::create([
             'list' => ['keep', 'drop'],
         ]))->toThrow(AbstractStructInvalidArgumentException::class);
+    });
+
+    test('hydrates laravel collections through shared collection attributes', function (): void {
+        $data = LaravelCollectionAttributeData::create([
+            'reversed' => ['first' => 'A', 'second' => 'B', 'third' => 'C'],
+            'numbers' => ['first' => '1', 'second' => 2, 'third' => '3'],
+            'onlyKeys' => ['drop' => 'x', 'keep' => 'a', 'also' => 'b'],
+            'cleaned' => ['first' => 'A', 'second' => null, 'third' => 'B'],
+            'casted' => ['1', 2, '3'],
+            'songs' => [
+                ['title' => 'A', 'artist' => 'Artist A'],
+                ['title' => 'B', 'artist' => 'Artist B'],
+            ],
+        ]);
+
+        expect($data->reversed)->toBeInstanceOf(Collection::class)
+            ->and($data->reversed->all())->toBe([
+                'third' => 'C',
+                'second' => 'B',
+                'first' => 'A',
+            ])->and($data->numbers)->toBeInstanceOf(Collection::class)
+            ->and($data->numbers->all())->toBe([1, 2, 3])
+            ->and($data->onlyKeys->all())->toBe([
+                'keep' => 'a',
+                'also' => 'b',
+            ])->and($data->cleaned->all())->toBe([
+                'first' => 'A',
+                'third' => 'B',
+            ])->and($data->casted->all())->toBe([1, 2, 3])
+            ->and($data->songs->all()[0])->toBeInstanceOf(SongData::class)
+            ->and($data->toArray())->toBe([
+                'reversed' => [
+                    'third' => 'C',
+                    'second' => 'B',
+                    'first' => 'A',
+                ],
+                'numbers' => [1, 2, 3],
+                'onlyKeys' => [
+                    'keep' => 'a',
+                    'also' => 'b',
+                ],
+                'cleaned' => [
+                    'first' => 'A',
+                    'third' => 'B',
+                ],
+                'casted' => ['1', '2', '3'],
+                'songs' => [
+                    ['title' => 'A', 'artist' => 'Artist A'],
+                    ['title' => 'B', 'artist' => 'Artist B'],
+                ],
+            ]);
     });
 });

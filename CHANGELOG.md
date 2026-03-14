@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   random strings, and passwords, including validation-aware hydration.
 - Added built-in collection transformation attributes for arrays,
   `DataList`, and `DataCollection` under `Attributes\\Collections`.
+- Added detached first-class `Illuminate\\Support\\Collection` DTO
+  property support through `#[AsCollection(...)]`, including shared
+  `Attributes\\Collections` transforms and inferred item validation.
 - Moved built-in string transforms and generators under
   `Attributes\\Strings` with backward-compatible aliases at
   `Attributes`.

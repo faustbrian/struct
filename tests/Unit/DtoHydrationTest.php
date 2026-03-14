@@ -12,8 +12,11 @@ use Cline\Struct\Exceptions\SuperfluousInputKeyException;
 use Cline\Struct\Support\DataList;
 use Cline\Struct\Support\Optional;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Support\Collection;
 use Tests\Fixtures\Data\CastedListData;
+use Tests\Fixtures\Data\LaravelCollectionAttributeData;
 use Tests\Fixtures\Data\MappedUserData;
+use Tests\Fixtures\Data\SongData;
 use Tests\Fixtures\Data\StrictUserData;
 use Tests\Fixtures\Enums\UserStatus;
 
@@ -98,6 +101,33 @@ describe('Dto hydration', function (): void {
             // Assert
             expect($dto->numbers)->toBeInstanceOf(DataList::class)
                 ->and($dto->numbers->toArray())->toBe([1, 2, 3]);
+        });
+
+        test('hydrates laravel collections from existing collection inputs', function (): void {
+            // Arrange
+            $payload = [
+                'reversed' => collect(['first' => 'A', 'second' => 'B', 'third' => 'C']),
+                'numbers' => collect(['first' => '1', 'second' => 2, 'third' => '3']),
+                'onlyKeys' => collect(['drop' => 'x', 'keep' => 'a', 'also' => 'b']),
+                'cleaned' => collect(['first' => 'A', 'second' => null, 'third' => 'B']),
+                'casted' => collect(['1', 2, '3']),
+                'songs' => collect([
+                    ['title' => 'A', 'artist' => 'Artist A'],
+                    ['title' => 'B', 'artist' => 'Artist B'],
+                ]),
+            ];
+
+            // Act
+            $dto = LaravelCollectionAttributeData::create($payload);
+
+            // Assert
+            expect($dto->reversed)->toBeInstanceOf(Collection::class)
+                ->and($dto->reversed->all())->toBe([
+                    'third' => 'C',
+                    'second' => 'B',
+                    'first' => 'A',
+                ])
+                ->and($dto->songs->first())->toBeInstanceOf(SongData::class);
         });
 
         test('hydrates dates using configured date formats', function (): void {

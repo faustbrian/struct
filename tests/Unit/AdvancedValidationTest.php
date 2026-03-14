@@ -16,6 +16,7 @@ use Illuminate\Contracts\Config\Repository;
 use Tests\Fixtures\Data\CascadingRootData;
 use Tests\Fixtures\Data\CustomValidateArraySyntaxData;
 use Tests\Fixtures\Data\IgnoredInferredValidationData;
+use Tests\Fixtures\Data\InferredLaravelCollectionData;
 use Tests\Fixtures\Data\InferredValidationData;
 use Tests\Fixtures\Data\ItemValidatedData;
 use Tests\Fixtures\Data\MappedUserData;
@@ -76,6 +77,14 @@ describe('Advanced validation', function (): void {
                 'active' => 'not-a-bool',
                 'status' => 'missing',
                 'published_at' => 'not-a-date',
+                'scores' => ['1', 'nope'],
+            ]);
+        })->throws(DataValidationException::class);
+
+        test('throws when inferred validation fails for laravel collection items', function (): void {
+            // Arrange
+            // Act
+            InferredLaravelCollectionData::createWithValidation([
                 'scores' => ['1', 'nope'],
             ]);
         })->throws(DataValidationException::class);
