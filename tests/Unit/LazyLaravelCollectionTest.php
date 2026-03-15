@@ -20,18 +20,24 @@ describe('lazy laravel collection support', function (): void {
         $dto = LazyLaravelCollectionData::create([
             'numbers' => (function () use (&$numberItems): Generator {
                 ++$numberItems;
+
                 yield '1';
                 ++$numberItems;
+
                 yield '2';
                 ++$numberItems;
+
                 yield '3';
             })(),
             'mappedNames' => (function () use (&$nameItems): Generator {
                 ++$nameItems;
+
                 yield 'alpha';
                 ++$nameItems;
+
                 yield 'beta';
                 ++$nameItems;
+
                 yield 'gamma';
             })(),
             'derivedNumbers' => ['1', '2', '3'],

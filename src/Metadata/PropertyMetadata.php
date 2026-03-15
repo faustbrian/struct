@@ -550,10 +550,10 @@ final readonly class PropertyMetadata
      * @param array<string, mixed>             $payload
      * @param null|class-string<CastInterface> $dataListCastClass
      * @param null|class-string<CastInterface> $dataCollectionCastClass
-     * @param null|class-string<CastInterface> $laravelCollectionCastClass
      * @param null|class-string<CastInterface> $lazyLaravelCollectionCastClass
      * @param null|class-string<CastInterface> $lazyDataListCastClass
      * @param null|class-string<CastInterface> $lazyDataCollectionCastClass
+     * @param null|class-string<CastInterface> $laravelCollectionCastClass
      */
     private static function collectionItemDescriptorFromPayload(
         array $payload,

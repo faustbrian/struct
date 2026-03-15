@@ -10,8 +10,8 @@
 namespace Cline\Struct\Attributes\Collections;
 
 use Attribute;
-use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
 use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
