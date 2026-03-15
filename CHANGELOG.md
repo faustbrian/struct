@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   contracts for casts and attribute-backed string and collection
   transforms, allowing whole-DTO decisions from raw input and already
   resolved sibling values without mutating shared cast instances.
+- Added detached `Illuminate\\Support\\LazyCollection` DTO property
+  support through `#[AsLazyCollection(...)]`, including lazy-safe
+  transform attributes such as `Map`, `Filter`, `Skip`, and `Take`,
+  plus `CollectionResults` and `CollectionSources` support for lazy
+  sources and targets.
 
 ### Changed
 - Moved the newer value-object and numeric attributes into dedicated

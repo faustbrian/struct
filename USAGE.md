@@ -995,11 +995,58 @@ starts as scalar or array payloads but should end up as DTO instances.
 `When*` and `Unless*` attributes are next-transform wrappers. They only
 control the immediately following Laravel collection attribute.
 
+### Lazy Laravel Collection Attributes
+
+`Illuminate\Support\LazyCollection` properties are supported through
+`#[AsLazyCollection(...)]`. This lane is intentionally detached from
+`#[AsCollection(...)]` and preserves laziness strictly.
+
+```php
+<?php
+
+use App\Struct\CollectionCallbacks\IsPublished;
+use App\Struct\CollectionCallbacks\PostLabelMap;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsLazyCollection;
+use Cline\Struct\Attributes\Collections\Filter;
+use Cline\Struct\Attributes\Collections\Map;
+use Cline\Struct\Enums\DataListType;
+use Illuminate\Support\LazyCollection;
+
+final readonly class DeferredFeedData extends AbstractData
+{
+    public function __construct(
+        #[AsLazyCollection(DataListType::String)]
+        #[Filter(IsPublished::class)]
+        #[Map(PostLabelMap::class)]
+        public LazyCollection $labels,
+    ) {}
+}
+```
+
+Currently supported lazy-safe transforms:
+
+- `#[Collections\Map(...)]`
+- `#[Collections\Filter(...)]`
+- `#[Collections\Skip(...)]`
+- `#[Collections\Take(...)]`
+
+Rules for `LazyCollection` properties:
+
+- the property must be declared as `Illuminate\Support\LazyCollection`
+- use `#[AsLazyCollection(...)]` when you need typed item hydration
+- source attributes like `Wrap`, `Range`, `Times`, and `FromJson` can
+  target `LazyCollection` properties
+- derived `CollectionResults` may read from lazy sources and evaluate
+  them terminally
+- eager-only collection transforms are rejected on `LazyCollection`
+  properties instead of silently materializing them
+
 ### Derived Collection Results
 
 Use `Cline\Struct\Attributes\CollectionResults` when a property should
-be derived from another `Collection` property instead of being hydrated
-from input directly.
+be derived from another `Collection` or `LazyCollection` property instead
+of being hydrated from input directly.
 
 ```php
 <?php
@@ -1073,12 +1120,14 @@ Available derived result attributes:
 
 These attributes require an explicit source property name and operate on
 the source collection after it has finished hydrating and transforming.
+When the source is a `LazyCollection`, the result attribute evaluates it
+terminally to compute the derived value.
 
 ### Generated Collection Sources
 
-Use `Cline\Struct\Attributes\CollectionSources` when a `Collection`
-property should be generated instead of read from collection payload
-input.
+Use `Cline\Struct\Attributes\CollectionSources` when a `Collection` or
+`LazyCollection` property should be generated instead of read from
+collection payload input.
 
 ```php
 <?php

@@ -109,7 +109,13 @@ For deferred traversal, Struct also ships `LazyDataList` and
 `#[AsLazyDataCollection(...)]` attributes. These lazy wrappers keep
 Struct-owned collection semantics and typed item hydration, but they are
 transport-focused and intentionally reject `Attributes\\Collections\\*`
-transforms in v1.
+transforms in v1. Struct also now supports detached
+`Illuminate\\Support\\LazyCollection` DTO properties through
+`#[AsLazyCollection(...)]`, with a strict-lazy transform subset such as
+`#[Collections\\Map(...)]`, `#[Collections\\Filter(...)]`,
+`#[Collections\\Skip(...)]`, and `#[Collections\\Take(...)]`. Derived
+`CollectionResults` may read from lazy sources, but eager-only
+collection transforms are rejected on `LazyCollection` properties.
 
 ### Context-Aware Hydration
 
