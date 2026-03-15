@@ -56,6 +56,16 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
         ));
     }
 
+    public static function forLazyLaravelCollectionOnly(string $data, string $property, string $attribute): self
+    {
+        return new self(sprintf(
+            'Property [%s::%s] can only use [%s] on Illuminate\\Support\\LazyCollection properties declared with AsLazyCollection.',
+            $data,
+            $property,
+            $attribute,
+        ));
+    }
+
     public static function forInvalidCallback(string $attribute, string $callback, string $expected): self
     {
         return new self(sprintf(
@@ -79,7 +89,7 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
     public static function forMissingSourceProperty(string $attribute, string $source): self
     {
         return new self(sprintf(
-            'Collection attribute [%s] requires source property [%s] to resolve to an Illuminate\\Support\\Collection.',
+            'Collection attribute [%s] requires source property [%s] to resolve to an Illuminate\\Support\\Collection or Illuminate\\Support\\LazyCollection.',
             $attribute,
             $source,
         ));

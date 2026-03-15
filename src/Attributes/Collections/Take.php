@@ -10,6 +10,9 @@
 namespace Cline\Struct\Attributes\Collections;
 
 use Attribute;
+use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
+use Cline\Struct\Support\CreationContext;
+use Illuminate\Support\LazyCollection;
 
 use function array_slice;
 
@@ -18,7 +21,7 @@ use function array_slice;
  * @author Brian Faust <brian@cline.sh>
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class Take extends AbstractCollectionTransformer
+final readonly class Take extends AbstractCollectionTransformer implements TransformsLazyCollectionValueInterface
 {
     public function __construct(
         public int $limit,
@@ -28,5 +31,10 @@ final readonly class Take extends AbstractCollectionTransformer
     public function transform(array $items): array
     {
         return array_slice($items, 0, $this->limit, $this->preserveKeys);
+    }
+
+    public function transformLazyCollection(LazyCollection $items, ?CreationContext $context = null): LazyCollection
+    {
+        return $items->take($this->limit);
     }
 }

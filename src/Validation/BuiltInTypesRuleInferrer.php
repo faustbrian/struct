@@ -20,6 +20,7 @@ use Cline\Struct\Support\LazyDataList;
 use Cline\Struct\Support\Optional;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Validation\Rule;
 
 use function enum_exists;
@@ -65,6 +66,10 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             return ['array'];
         }
 
+        if ($property->lazyLaravelCollectionType !== null || $property->lazyLaravelCollectionCastClass !== null || $this->propertyHasType($property, LazyCollection::class)) {
+            return ['array'];
+        }
+
         return $this->rulesForType($this->primaryType($property));
     }
 
@@ -80,6 +85,7 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             || $property->lazyDataListCastClass !== null
             || $property->lazyDataCollectionCastClass !== null
             || $property->laravelCollectionCastClass !== null
+            || $property->lazyLaravelCollectionCastClass !== null
         ) {
             return [];
         }
@@ -88,7 +94,8 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             ?? $property->dataCollectionType
             ?? $property->lazyDataListType
             ?? $property->lazyDataCollectionType
-            ?? $property->laravelCollectionType;
+            ?? $property->laravelCollectionType
+            ?? $property->lazyLaravelCollectionType;
 
         if ($type === null) {
             return [];

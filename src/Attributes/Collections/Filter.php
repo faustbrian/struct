@@ -11,17 +11,29 @@ namespace Cline\Struct\Attributes\Collections;
 
 use Attribute;
 use Cline\Struct\Contracts\FiltersCollectionItemsInterface;
+use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
 use Cline\Struct\Support\CreationContext;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
 /**
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-final readonly class Filter extends AbstractCollectionCallbackTransformer
+final readonly class Filter extends AbstractCollectionCallbackTransformer implements TransformsLazyCollectionValueInterface
 {
     public function transformCollection(Collection $items, ?CreationContext $context = null): Collection
+    {
+        /** @var FiltersCollectionItemsInterface $callback */
+        $callback = $this->resolveCallback(FiltersCollectionItemsInterface::class, $context);
+
+        return $items->filter(
+            static fn (mixed $value, int|string $key): bool => $callback->passes($value, $key),
+        );
+    }
+
+    public function transformLazyCollection(LazyCollection $items, ?CreationContext $context = null): LazyCollection
     {
         /** @var FiltersCollectionItemsInterface $callback */
         $callback = $this->resolveCallback(FiltersCollectionItemsInterface::class, $context);

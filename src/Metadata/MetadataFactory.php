@@ -31,6 +31,7 @@ use Cline\Struct\Attributes\AllowUndefinedValues;
 use Cline\Struct\Attributes\AsCollection;
 use Cline\Struct\Attributes\AsDataCollection;
 use Cline\Struct\Attributes\AsDataList;
+use Cline\Struct\Attributes\AsLazyCollection;
 use Cline\Struct\Attributes\AsLazyDataCollection;
 use Cline\Struct\Attributes\AsLazyDataList;
 use Cline\Struct\Attributes\CastWith;
@@ -272,11 +273,13 @@ final class MetadataFactory
             $lazyDataList = $attributeMap->lazyDataList;
             $lazyDataCollection = $attributeMap->lazyDataCollection;
             $laravelCollection = $attributeMap->laravelCollection;
+            $lazyLaravelCollection = $attributeMap->lazyLaravelCollection;
             $dataListCast = $this->instantiateCast($dataList['castClass']);
             $dataCollectionCast = $this->instantiateCast($dataCollection['castClass']);
             $lazyDataListCast = $this->instantiateCast($lazyDataList['castClass']);
             $lazyDataCollectionCast = $this->instantiateCast($lazyDataCollection['castClass']);
             $laravelCollectionCast = $this->instantiateCast($laravelCollection['castClass']);
+            $lazyLaravelCollectionCast = $this->instantiateCast($lazyLaravelCollection['castClass']);
             $computed = $attributeMap->computed;
             $lazy = $attributeMap->lazy;
             $lazyGroups = $attributeMap->lazyGroups;
@@ -292,11 +295,13 @@ final class MetadataFactory
                 $lazyDataList,
                 $lazyDataCollection,
                 $laravelCollection,
+                $lazyLaravelCollection,
                 $dataListCast,
                 $dataCollectionCast,
                 $lazyDataListCast,
                 $lazyDataCollectionCast,
                 $laravelCollectionCast,
+                $lazyLaravelCollectionCast,
             );
 
             $properties[$parameter->getName()] = new PropertyMetadata(
@@ -340,7 +345,8 @@ final class MetadataFactory
                     || $dataCollectionCast instanceof CastInterface
                     || $lazyDataListCast instanceof CastInterface
                     || $lazyDataCollectionCast instanceof CastInterface
-                    || $laravelCollectionCast instanceof CastInterface,
+                    || $laravelCollectionCast instanceof CastInterface
+                    || $lazyLaravelCollectionCast instanceof CastInterface,
                 validationRules: $validationRules,
                 itemValidationRules: $itemValidationRules,
                 parameter: $parameter,
@@ -350,6 +356,10 @@ final class MetadataFactory
                 laravelCollectionCastClass: $laravelCollection['castClass'],
                 laravelCollectionCast: $laravelCollectionCast,
                 laravelCollectionTypeKind: PropertyMetadata::nullableTypeKind($laravelCollection['type']),
+                lazyLaravelCollectionType: $lazyLaravelCollection['type'],
+                lazyLaravelCollectionCastClass: $lazyLaravelCollection['castClass'],
+                lazyLaravelCollectionCast: $lazyLaravelCollectionCast,
+                lazyLaravelCollectionTypeKind: PropertyMetadata::nullableTypeKind($lazyLaravelCollection['type']),
                 lazyDataListType: $lazyDataList['type'],
                 lazyDataListCastClass: $lazyDataList['castClass'],
                 lazyDataListCast: $lazyDataListCast,
@@ -563,6 +573,7 @@ final class MetadataFactory
                 lazyDataList: ['type' => null, 'castClass' => null],
                 lazyDataCollection: ['type' => null, 'castClass' => null],
                 laravelCollection: ['type' => null, 'castClass' => null],
+                lazyLaravelCollection: ['type' => null, 'castClass' => null],
                 computed: null,
                 lazy: null,
                 inputName: null,
@@ -590,6 +601,7 @@ final class MetadataFactory
         $lazyDataList = ['type' => null, 'castClass' => null];
         $lazyDataCollection = ['type' => null, 'castClass' => null];
         $laravelCollection = ['type' => null, 'castClass' => null];
+        $lazyLaravelCollection = ['type' => null, 'castClass' => null];
         $computed = null;
         $lazy = null;
         $inputName = null;
@@ -685,6 +697,12 @@ final class MetadataFactory
                 continue;
             }
 
+            if ($attribute instanceof AsLazyCollection) {
+                $lazyLaravelCollection = $this->normalizeCollectionDescriptor($attribute->descriptor);
+
+                continue;
+            }
+
             if ($attribute instanceof Computed) {
                 $computed = $attribute;
 
@@ -764,6 +782,7 @@ final class MetadataFactory
             lazyDataList: $lazyDataList,
             lazyDataCollection: $lazyDataCollection,
             laravelCollection: $laravelCollection,
+            lazyLaravelCollection: $lazyLaravelCollection,
             computed: $computed,
             lazy: $lazy,
             inputName: $inputName,
@@ -804,6 +823,7 @@ final class MetadataFactory
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyDataList
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyDataCollection
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $laravelCollection
+     * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyLaravelCollection
      */
     private function collectionItemDescriptor(
         array $dataList,
@@ -811,17 +831,20 @@ final class MetadataFactory
         array $lazyDataList,
         array $lazyDataCollection,
         array $laravelCollection,
+        array $lazyLaravelCollection,
         ?CastInterface $dataListCast,
         ?CastInterface $dataCollectionCast,
         ?CastInterface $lazyDataListCast,
         ?CastInterface $lazyDataCollectionCast,
         ?CastInterface $laravelCollectionCast,
+        ?CastInterface $lazyLaravelCollectionCast,
     ): ?CollectionItemDescriptor {
         $type = $dataList['type']
             ?? $dataCollection['type']
             ?? $lazyDataList['type']
             ?? $lazyDataCollection['type']
             ?? $laravelCollection['type']
+            ?? $lazyLaravelCollection['type']
             ?? 'mixed';
 
         return PropertyMetadata::buildCollectionItemDescriptor(
@@ -831,12 +854,14 @@ final class MetadataFactory
                 ?? $dataCollection['castClass']
                 ?? $lazyDataList['castClass']
                 ?? $lazyDataCollection['castClass']
-                ?? $laravelCollection['castClass'],
+                ?? $laravelCollection['castClass']
+                ?? $lazyLaravelCollection['castClass'],
             cast: $dataListCast
                 ?? $dataCollectionCast
                 ?? $lazyDataListCast
                 ?? $lazyDataCollectionCast
-                ?? $laravelCollectionCast,
+                ?? $laravelCollectionCast
+                ?? $lazyLaravelCollectionCast,
         );
     }
 
@@ -1121,6 +1146,7 @@ final readonly class PropertyAttributeMap
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyDataList
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyDataCollection
      * @param array{type: null|string, castClass: null|class-string<CastInterface>} $laravelCollection
+     * @param array{type: null|string, castClass: null|class-string<CastInterface>} $lazyLaravelCollection
      */
     public function __construct(
         public array $validationRules,
@@ -1134,6 +1160,7 @@ final readonly class PropertyAttributeMap
         public array $lazyDataList,
         public array $lazyDataCollection,
         public array $laravelCollection,
+        public array $lazyLaravelCollection,
         public ?Computed $computed,
         public ?Lazy $lazy,
         public ?MapInputName $inputName,

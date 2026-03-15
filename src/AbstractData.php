@@ -24,6 +24,7 @@ use Cline\Struct\Contracts\SerializationConditionInterface;
 use Cline\Struct\Contracts\StringifierInterface;
 use Cline\Struct\Contracts\TransformsCollectionValueInterface;
 use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
 use Cline\Struct\Contracts\WrapsLaravelCollectionTransformInterface;
 use Cline\Struct\Eloquent\AsData;
 use Cline\Struct\Eloquent\AsDataCollection;
@@ -54,6 +55,7 @@ use Cline\Struct\Support\DateFormat;
 use Cline\Struct\Support\HydrationGuard;
 use Cline\Struct\Support\LazyDataCollection;
 use Cline\Struct\Support\LazyDataList;
+use Cline\Struct\Support\LazyCollectionState;
 use Cline\Struct\Support\Optional;
 use Cline\Struct\Support\PropertyHydrationContext;
 use Cline\Struct\Support\RecursionGuard;
@@ -69,6 +71,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use ReflectionAttribute;
 use stdClass;
 use Stringable;
@@ -443,12 +446,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         foreach ($metadata->hydratedProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
+            $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
             $context->setProperties($values);
         }
 
         foreach ($metadata->collectionSourceProperties as $property) {
             $values[$property->name] = static::resolveGeneratedCollectionValue($context, $property, $values);
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
+            $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
             $context->setProperties($values);
         }
 
@@ -949,6 +954,39 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param array<string, mixed> $values
+     */
+    protected static function resolveHydratedLazyLaravelCollectionValue(
+        PropertyMetadata $property,
+        array $values,
+        ClassMetadata $metadata,
+        ?CreationContext $context = null,
+    ): mixed {
+        if (
+            $property->lazyLaravelCollectionType === null
+            && $property->lazyLaravelCollectionCastClass === null
+            && !in_array(LazyCollection::class, $property->types, true)
+        ) {
+            return $values[$property->name] ?? null;
+        }
+
+        $value = $values[$property->name] ?? null;
+
+        if ($value instanceof LazyCollection) {
+            return static::transformLazyLaravelCollectionValue($property, $value, $metadata, $values, $context);
+        }
+
+        if (!is_iterable($value)) {
+            return $value;
+        }
+
+        $lazy = static::hydrateLazyLaravelCollectionItems($property, $value, false, $context);
+
+        return static::transformLazyLaravelCollectionValue($property, $lazy, $metadata, $values, $context);
+    }
+
+    /**
+     * @internal
      */
     protected static function collectionSourceAttribute(PropertyMetadata $property): ?GeneratesCollectionValueInterface
     {
@@ -995,6 +1033,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return $source;
         }
 
+        if ($source instanceof LazyCollection) {
+            return $source->collect();
+        }
+
         throw InvalidCollectionAttributeException::forMissingSourceProperty($property->name, $attribute->sourceProperty());
     }
 
@@ -1036,6 +1078,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $metadata = $context instanceof CreationContext ? $context->metadata : static::metadata();
 
         static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata);
+        static::assertLazyLaravelCollectionAttributesSupported($property, $metadata);
         static::assertLazyCollectionAttributesUnsupported($property, $metadata);
 
         if ($property->cast instanceof ContextualCastInterface) {
@@ -1099,6 +1142,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null) {
             return static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context, $rawInput);
+        }
+
+        if ($property->lazyLaravelCollectionType !== null || $property->lazyLaravelCollectionCastClass !== null) {
+            return static::hydrateLazyLaravelCollectionItems($property, $value, $cascadeValidation, $context, $rawInput);
         }
 
         foreach ($property->types as $index => $type) {
@@ -1261,6 +1308,32 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param  LazyCollection<array-key, mixed> $items
+     * @param  array<string, mixed>             $properties
+     * @return LazyCollection<array-key, mixed>
+     */
+    protected static function transformLazyLaravelCollectionValue(
+        PropertyMetadata $property,
+        LazyCollection $items,
+        ClassMetadata $metadata,
+        array $properties = [],
+        ?CreationContext $context = null,
+    ): LazyCollection {
+        $attributes = static::lazyLaravelCollectionAttributes($property, $metadata);
+
+        foreach ($attributes as $attribute) {
+            if ($context instanceof CreationContext) {
+                $context->setProperties($properties);
+            }
+
+            $items = $attribute->transformLazyCollection($items, $context);
+        }
+
+        return $items;
+    }
+
+    /**
+     * @internal
      * @return list<TransformsLaravelCollectionValueInterface>
      */
     protected static function laravelCollectionAttributes(
@@ -1328,6 +1401,41 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @return list<TransformsLazyCollectionValueInterface>
+     */
+    protected static function lazyLaravelCollectionAttributes(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+    ): array {
+        $instances = [];
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof TransformsLazyCollectionValueInterface) {
+                continue;
+            }
+
+            $instances[] = $instance;
+        }
+
+        if ($instances === []) {
+            return [];
+        }
+
+        if (
+            $property->lazyLaravelCollectionType === null
+            && $property->lazyLaravelCollectionCastClass === null
+            && !in_array(LazyCollection::class, $property->types, true)
+        ) {
+            throw InvalidCollectionAttributeException::forUnsupportedPropertyType($metadata->class, $property->name);
+        }
+
+        return $instances;
+    }
+
+    /**
+     * @internal
      */
     protected static function assertLaravelCollectionCallbackAttributesSupported(
         PropertyMetadata $property,
@@ -1337,6 +1445,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $property->laravelCollectionType !== null
             || $property->laravelCollectionCastClass !== null
             || in_array(Collection::class, $property->types, true)
+            || $property->lazyLaravelCollectionType !== null
+            || $property->lazyLaravelCollectionCastClass !== null
+            || in_array(LazyCollection::class, $property->types, true)
         ) {
             return;
         }
@@ -1357,6 +1468,46 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 $property->name,
                 $instance::class,
             );
+        }
+    }
+
+    /**
+     * @internal
+     */
+    protected static function assertLazyLaravelCollectionAttributesSupported(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+    ): void {
+        if (
+            $property->lazyLaravelCollectionType === null
+            && $property->lazyLaravelCollectionCastClass === null
+            && !in_array(LazyCollection::class, $property->types, true)
+        ) {
+            return;
+        }
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if ($instance instanceof TransformsLazyCollectionValueInterface) {
+                continue;
+            }
+
+            if ($instance instanceof TransformsCollectionValueInterface) {
+                throw InvalidCollectionAttributeException::forLazyLaravelCollectionOnly(
+                    $metadata->class,
+                    $property->name,
+                    $instance::class,
+                );
+            }
+
+            if ($instance instanceof TransformsLaravelCollectionValueInterface) {
+                throw InvalidCollectionAttributeException::forLazyLaravelCollectionOnly(
+                    $metadata->class,
+                    $property->name,
+                    $instance::class,
+                );
+            }
         }
     }
 
@@ -1580,6 +1731,32 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return new Collection($items);
+    }
+
+    /**
+     * @internal
+     * @param  array<string, mixed>             $rawInput
+     * @return LazyCollection<array-key, mixed>
+     */
+    protected static function hydrateLazyLaravelCollectionItems(
+        PropertyMetadata $property,
+        mixed $value,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+        array $rawInput = [],
+    ): LazyCollection {
+        /** @var LazyCollectionState<array-key, mixed> $state */
+        $state = new LazyCollectionState(
+            static::collectionInputIterable($value),
+            static::lazyCollectionHydrator($property, $cascadeValidation, $context, $rawInput),
+            false,
+        );
+
+        return LazyCollection::make(
+            static function () use ($state): Traversable {
+                yield from $state->iterate();
+            },
+        );
     }
 
     /**
@@ -1888,7 +2065,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return static::serializeCollectionItems($property, $value, $context);
         }
 
-        if ($value instanceof Collection) {
+        if ($value instanceof Collection || $value instanceof LazyCollection) {
             return static::serializeLaravelCollectionItems($property, $value, $context);
         }
 
@@ -2051,12 +2228,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
-     * @param  Collection<array-key, mixed> $value
+     * @param  Collection<array-key, mixed>|LazyCollection<array-key, mixed> $value
      * @return array<array-key, mixed>
      */
     protected static function serializeLaravelCollectionItems(
         ?PropertyMetadata $property,
-        Collection $value,
+        Collection|LazyCollection $value,
         SerializationContext $context,
     ): array {
         $items = [];
@@ -2132,6 +2309,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             || $property->lazyDataListCastClass !== null
             || $property->lazyDataCollectionCastClass !== null
             || $property->laravelCollectionCastClass !== null
+            || $property->lazyLaravelCollectionCastClass !== null
         ) {
             return true;
         }
