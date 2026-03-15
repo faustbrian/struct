@@ -10,6 +10,8 @@
 namespace Cline\Struct\Metadata;
 
 use Cline\Struct\Contracts\CastInterface;
+use Cline\Struct\Contracts\ContextualCastInterface;
+use Cline\Struct\Support\PropertyHydrationContext;
 
 /**
  * Defers cast construction until a cached metadata entry actually uses it.
@@ -18,7 +20,7 @@ use Cline\Struct\Contracts\CastInterface;
  *
  * @internal
  */
-final class LazyCast implements CastInterface
+final class LazyCast implements CastInterface, ContextualCastInterface
 {
     private ?CastInterface $instance = null;
 
@@ -32,6 +34,20 @@ final class LazyCast implements CastInterface
     public function get(PropertyMetadata $property, mixed $value): mixed
     {
         return $this->instance()->get($property, $value);
+    }
+
+    public function getWithContext(
+        PropertyMetadata $property,
+        mixed $value,
+        PropertyHydrationContext $context,
+    ): mixed {
+        $instance = $this->instance();
+
+        if ($instance instanceof ContextualCastInterface) {
+            return $instance->getWithContext($property, $value, $context);
+        }
+
+        return $instance->get($property, $value);
     }
 
     public function set(PropertyMetadata $property, mixed $value): mixed

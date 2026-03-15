@@ -23,6 +23,7 @@ use function is_int;
 use function is_string;
 
 /**
+ * @author Brian Faust <brian@cline.sh>
  * @internal
  * @template TKey of array-key
  * @template TValue

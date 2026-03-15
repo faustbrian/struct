@@ -14,6 +14,8 @@ use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesCollectionResultValueInterface;
 use Cline\Struct\Contracts\ComputesValueInterface;
+use Cline\Struct\Contracts\ContextualCastInterface;
+use Cline\Struct\Contracts\ContextualTransformsCollectionValueInterface;
 use Cline\Struct\Contracts\DataObjectInterface;
 use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
 use Cline\Struct\Contracts\GeneratesMissingValueInterface;
@@ -53,6 +55,7 @@ use Cline\Struct\Support\HydrationGuard;
 use Cline\Struct\Support\LazyDataCollection;
 use Cline\Struct\Support\LazyDataList;
 use Cline\Struct\Support\Optional;
+use Cline\Struct\Support\PropertyHydrationContext;
 use Cline\Struct\Support\RecursionGuard;
 use Cline\Struct\Support\StringifierResolver;
 use Cline\Struct\Validation\ValidationFactory;
@@ -432,6 +435,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $values = [];
 
         foreach ($metadata->hydratedProperties as $property) {
+            $context->setProperties($values);
             $values[$property->name] = static::resolveValue($metadata, $property, $input, $cascadeValidation, $context);
         }
 
@@ -759,7 +763,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return null;
         }
 
-        return static::hydrateValue($property, $value, $cascadeValidation, $context);
+        /** @var array<string, mixed> $rawInput */
+        $rawInput = $input;
+
+        return static::hydrateValue($property, $value, $cascadeValidation, $context, $rawInput);
     }
 
     /**
@@ -1013,9 +1020,15 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param array<string, mixed> $rawInput
      */
-    protected static function hydrateValue(PropertyMetadata $property, mixed $value, bool $cascadeValidation = false, ?CreationContext $context = null): mixed
-    {
+    protected static function hydrateValue(
+        PropertyMetadata $property,
+        mixed $value,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+        array $rawInput = [],
+    ): mixed {
         if ($value instanceof Optional) {
             return $value;
         }
@@ -1025,6 +1038,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata);
         static::assertLazyCollectionAttributesUnsupported($property, $metadata);
 
+        if ($property->cast instanceof ContextualCastInterface) {
+            return $property->cast->getWithContext(
+                $property,
+                $value,
+                static::propertyHydrationContext($property, $rawInput, $context),
+            );
+        }
+
         if ($property->cast instanceof CastInterface) {
             return $property->cast->get($property, $value);
         }
@@ -1032,46 +1053,52 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         if ($property->dataListType !== null) {
             return new DataList(static::transformCollectionValue(
                 $property,
-                static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context),
+                static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context, $rawInput),
                 true,
                 $metadata,
+                $context,
+                $rawInput,
             ));
         }
 
         if ($property->dataListCastClass !== null) {
             return new DataList(static::transformCollectionValue(
                 $property,
-                static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context),
+                static::hydrateCollectionItems($property, $value, true, $cascadeValidation, $context, $rawInput),
                 true,
                 $metadata,
+                $context,
+                $rawInput,
             ));
         }
 
         if ($property->dataCollectionType !== null || $property->dataCollectionCastClass !== null) {
             return new DataCollection(static::transformCollectionValue(
                 $property,
-                static::hydrateCollectionItems($property, $value, false, $cascadeValidation, $context),
+                static::hydrateCollectionItems($property, $value, false, $cascadeValidation, $context, $rawInput),
                 false,
                 $metadata,
+                $context,
+                $rawInput,
             ));
         }
 
         if ($property->lazyDataListType !== null || $property->lazyDataListCastClass !== null) {
             return new LazyDataList(
                 static::collectionInputIterable($value),
-                static::lazyCollectionHydrator($property, $cascadeValidation, $context),
+                static::lazyCollectionHydrator($property, $cascadeValidation, $context, $rawInput),
             );
         }
 
         if ($property->lazyDataCollectionType !== null || $property->lazyDataCollectionCastClass !== null) {
             return new LazyDataCollection(
                 static::collectionInputIterable($value),
-                static::lazyCollectionHydrator($property, $cascadeValidation, $context),
+                static::lazyCollectionHydrator($property, $cascadeValidation, $context, $rawInput),
             );
         }
 
         if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null) {
-            return static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context);
+            return static::hydrateLaravelCollectionItems($property, $value, $cascadeValidation, $context, $rawInput);
         }
 
         foreach ($property->types as $index => $type) {
@@ -1098,6 +1125,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                     $hydrated,
                     false,
                     $metadata,
+                    $context,
+                    $rawInput,
                 );
             }
 
@@ -1110,6 +1139,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      * @param  array<array-key, mixed> $items
+     * @param  array<string, mixed>    $rawInput
      * @return array<array-key, mixed>
      */
     protected static function transformCollectionValue(
@@ -1117,10 +1147,21 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $items,
         bool $isList,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
+        array $rawInput = [],
     ): array {
         $attributes = static::collectionAttributes($property, $metadata, $isList);
 
         foreach ($attributes as $attribute) {
+            if ($attribute instanceof ContextualTransformsCollectionValueInterface) {
+                $items = $attribute->transformWithContext(
+                    $items,
+                    static::propertyHydrationContext($property, $rawInput, $context),
+                );
+
+                continue;
+            }
+
             $items = $attribute->transform($items);
         }
 
@@ -1424,10 +1465,17 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param  array<string, mixed>    $rawInput
      * @return array<array-key, mixed>
      */
-    protected static function hydrateCollectionItems(PropertyMetadata $property, mixed $value, bool $normalizeKeys, bool $cascadeValidation = false, ?CreationContext $context = null): array
-    {
+    protected static function hydrateCollectionItems(
+        PropertyMetadata $property,
+        mixed $value,
+        bool $normalizeKeys,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+        array $rawInput = [],
+    ): array {
         if (!is_iterable($value)) {
             return [];
         }
@@ -1445,6 +1493,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                     $item,
                     $cascadeValidation,
                     $context,
+                    $rawInput,
                 );
             }
 
@@ -1465,6 +1514,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 $item,
                 $cascadeValidation,
                 $context,
+                $rawInput,
             );
         }
 
@@ -1477,6 +1527,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param  array<string, mixed>         $rawInput
      * @return Collection<array-key, mixed>
      */
     protected static function hydrateLaravelCollectionItems(
@@ -1484,6 +1535,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         mixed $value,
         bool $cascadeValidation = false,
         ?CreationContext $context = null,
+        array $rawInput = [],
     ): Collection {
         if (!is_iterable($value)) {
             return new Collection();
@@ -1502,6 +1554,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                     $item,
                     $cascadeValidation,
                     $context,
+                    $rawInput,
                 );
             }
 
@@ -1522,6 +1575,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 $item,
                 $cascadeValidation,
                 $context,
+                $rawInput,
             );
         }
 
@@ -1547,12 +1601,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param  array<string, mixed>              $rawInput
      * @return Closure(int|string, mixed): mixed
      */
     protected static function lazyCollectionHydrator(
         PropertyMetadata $property,
         bool $cascadeValidation = false,
         ?CreationContext $context = null,
+        array $rawInput = [],
     ): Closure {
         if (!static::propertyHasCollectionItemCast($property)) {
             return static fn (int|string $key, mixed $value): mixed => static::hydrateCollectionItemFromProperty(
@@ -1560,6 +1616,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 $value,
                 $cascadeValidation,
                 $context,
+                $rawInput,
             );
         }
 
@@ -1571,20 +1628,28 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $value,
             $cascadeValidation,
             $context,
+            $rawInput,
         );
     }
 
     /**
      * @internal
+     * @param array<string, mixed> $rawInput
      */
-    protected static function hydrateCollectionItem(PropertyMetadata $property, mixed $value, bool $cascadeValidation = false, ?CreationContext $context = null): mixed
-    {
+    protected static function hydrateCollectionItem(
+        PropertyMetadata $property,
+        mixed $value,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+        array $rawInput = [],
+    ): mixed {
         if (!static::propertyHasCollectionItemCast($property)) {
             return static::hydrateCollectionItemFromProperty(
                 $property,
                 $value,
                 $cascadeValidation,
                 $context,
+                $rawInput,
             );
         }
 
@@ -1596,19 +1661,30 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $value,
             $cascadeValidation,
             $context,
+            $rawInput,
         );
     }
 
     /**
      * @internal
+     * @param array<string, mixed> $rawInput
      */
     protected static function hydrateCollectionItemValue(
         CollectionItemRuntime $item,
         mixed $value,
         bool $cascadeValidation = false,
         ?CreationContext $context = null,
+        array $rawInput = [],
     ): mixed {
         $cast = $item->cast();
+
+        if ($cast instanceof ContextualCastInterface) {
+            return $cast->getWithContext(
+                $item->property(),
+                $value,
+                static::propertyHydrationContext($item->property(), $rawInput, $context),
+            );
+        }
 
         if ($cast instanceof CastInterface) {
             return $cast->get($item->property(), $value);
@@ -1637,12 +1713,14 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     * @param array<string, mixed> $rawInput
      */
     protected static function hydrateCollectionItemFromProperty(
         PropertyMetadata $property,
         mixed $value,
         bool $cascadeValidation = false,
         ?CreationContext $context = null,
+        array $rawInput = [],
     ): mixed {
         $type = $property->collectionItemType();
 
@@ -1656,6 +1734,23 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $value,
             $cascadeValidation,
             $context,
+        );
+    }
+
+    /**
+     * @internal
+     * @param array<string, mixed> $rawInput
+     */
+    protected static function propertyHydrationContext(
+        PropertyMetadata $property,
+        array $rawInput = [],
+        ?CreationContext $context = null,
+    ): PropertyHydrationContext {
+        return new PropertyHydrationContext(
+            dataClass: $context?->metadata->class ?? static::class,
+            property: $property,
+            rawInput: $rawInput,
+            resolvedProperties: $context?->properties() ?? [],
         );
     }
 

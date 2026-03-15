@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added `PropertyHydrationContext` plus contextual hydration companion
+  contracts for casts and attribute-backed string and collection
+  transforms, allowing whole-DTO decisions from raw input and already
+  resolved sibling values without mutating shared cast instances.
+
 ### Changed
 - Moved the newer value-object and numeric attributes into dedicated
   subnamespaces under `Cline\Struct\Attributes\Money`,

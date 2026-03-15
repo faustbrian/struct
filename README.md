@@ -111,6 +111,46 @@ Struct-owned collection semantics and typed item hydration, but they are
 transport-focused and intentionally reject `Attributes\\Collections\\*`
 transforms in v1.
 
+### Context-Aware Hydration
+
+Hydration hooks can opt into whole-DTO context when a cast or attribute
+needs to inspect the raw payload or sibling values that have already been
+resolved.
+
+```php
+use Cline\Struct\Contracts\ContextualCastInterface;
+use Cline\Struct\Metadata\PropertyMetadata;
+use Cline\Struct\Support\PropertyHydrationContext;
+
+final class SlugCast implements ContextualCastInterface
+{
+    public function get(PropertyMetadata $property, mixed $value): mixed
+    {
+        return $value;
+    }
+
+    public function getWithContext(
+        PropertyMetadata $property,
+        mixed $value,
+        PropertyHydrationContext $context,
+    ): mixed {
+        return ($context->resolvedProperties['mode'] ?? null) === 'strict'
+            ? mb_strtolower((string) $value)
+            : (string) $value;
+    }
+
+    public function set(PropertyMetadata $property, mixed $value): mixed
+    {
+        return $value;
+    }
+}
+```
+
+`PropertyHydrationContext` exposes the DTO class, current property, raw
+input, and the sibling properties resolved so far. The context is passed
+as an immutable argument during hydration; Struct does not mutate shared
+cast instances with request-scoped data.
+
 ## Documentation
 
 - Consumer guide: [USAGE.md](USAGE.md)

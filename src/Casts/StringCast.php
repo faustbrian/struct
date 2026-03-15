@@ -10,9 +10,12 @@
 namespace Cline\Struct\Casts;
 
 use Cline\Struct\Contracts\CastInterface;
+use Cline\Struct\Contracts\ContextualCastInterface;
+use Cline\Struct\Contracts\ContextualTransformsStringValueInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\TransformsStringValueInterface;
 use Cline\Struct\Metadata\PropertyMetadata;
+use Cline\Struct\Support\PropertyHydrationContext;
 use ReflectionAttribute;
 
 use function array_merge;
@@ -23,11 +26,19 @@ use function is_string;
  *
  * @author Brian Faust <brian@cline.sh>
  */
-final class StringCast implements CastInterface
+final class StringCast implements CastInterface, ContextualCastInterface
 {
     public function get(PropertyMetadata $property, mixed $value): mixed
     {
         return $this->transform($property, $value);
+    }
+
+    public function getWithContext(
+        PropertyMetadata $property,
+        mixed $value,
+        PropertyHydrationContext $context,
+    ): mixed {
+        return $this->transform($property, $value, $context);
     }
 
     public function set(PropertyMetadata $property, mixed $value): mixed
@@ -35,13 +46,22 @@ final class StringCast implements CastInterface
         return $value;
     }
 
-    private function transform(PropertyMetadata $property, mixed $value): mixed
-    {
+    private function transform(
+        PropertyMetadata $property,
+        mixed $value,
+        ?PropertyHydrationContext $context = null,
+    ): mixed {
         if (!is_string($value)) {
             return $value;
         }
 
         foreach ($this->attributes($property) as $attribute) {
+            if ($attribute instanceof ContextualTransformsStringValueInterface && $context instanceof PropertyHydrationContext) {
+                $value = $attribute->transformWithContext($value, $context);
+
+                continue;
+            }
+
             $value = $attribute->transform($value);
         }
 
