@@ -50,11 +50,15 @@ use Cline\Struct\Support\DataCollection;
 use Cline\Struct\Support\DataList;
 use Cline\Struct\Support\DateFormat;
 use Cline\Struct\Support\HydrationGuard;
+use Cline\Struct\Support\LazyDataCollection;
+use Cline\Struct\Support\LazyDataList;
 use Cline\Struct\Support\Optional;
 use Cline\Struct\Support\RecursionGuard;
 use Cline\Struct\Support\StringifierResolver;
 use Cline\Struct\Validation\ValidationFactory;
+use Closure;
 use DateTimeInterface;
+use EmptyIterator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
@@ -66,6 +70,7 @@ use ReflectionAttribute;
 use stdClass;
 use Stringable;
 use Throwable;
+use Traversable;
 use UnitEnum;
 
 use const JSON_THROW_ON_ERROR;
@@ -82,6 +87,7 @@ use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
+use function is_iterable;
 use function is_numeric;
 use function is_object;
 use function is_string;
@@ -1017,6 +1023,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $metadata = $context instanceof CreationContext ? $context->metadata : static::metadata();
 
         static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata);
+        static::assertLazyCollectionAttributesUnsupported($property, $metadata);
 
         if ($property->cast instanceof CastInterface) {
             return $property->cast->get($property, $value);
@@ -1047,6 +1054,20 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 false,
                 $metadata,
             ));
+        }
+
+        if ($property->lazyDataListType !== null || $property->lazyDataListCastClass !== null) {
+            return new LazyDataList(
+                static::collectionInputIterable($value),
+                static::lazyCollectionHydrator($property, $cascadeValidation, $context),
+            );
+        }
+
+        if ($property->lazyDataCollectionType !== null || $property->lazyDataCollectionCastClass !== null) {
+            return new LazyDataCollection(
+                static::collectionInputIterable($value),
+                static::lazyCollectionHydrator($property, $cascadeValidation, $context),
+            );
         }
 
         if ($property->laravelCollectionType !== null || $property->laravelCollectionCastClass !== null) {
@@ -1141,6 +1162,20 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         if ($instances === []) {
             return [];
+        }
+
+        if (
+            $property->lazyDataListType !== null
+            || $property->lazyDataListCastClass !== null
+            || $property->lazyDataCollectionType !== null
+            || $property->lazyDataCollectionCastClass !== null
+            || in_array(LazyDataList::class, $property->types, true)
+            || in_array(LazyDataCollection::class, $property->types, true)
+        ) {
+            throw InvalidCollectionAttributeException::forLazyCollectionTransform(
+                $metadata->class,
+                $property->name,
+            );
         }
 
         if (
@@ -1286,6 +1321,38 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
+     */
+    protected static function assertLazyCollectionAttributesUnsupported(
+        PropertyMetadata $property,
+        ClassMetadata $metadata,
+    ): void {
+        if (
+            $property->lazyDataListType === null
+            && $property->lazyDataListCastClass === null
+            && $property->lazyDataCollectionType === null
+            && $property->lazyDataCollectionCastClass === null
+            && !in_array(LazyDataList::class, $property->types, true)
+            && !in_array(LazyDataCollection::class, $property->types, true)
+        ) {
+            return;
+        }
+
+        foreach (static::propertyAttributes($property) as $attribute) {
+            $instance = $attribute->newInstance();
+
+            if (!$instance instanceof TransformsCollectionValueInterface) {
+                continue;
+            }
+
+            throw InvalidCollectionAttributeException::forLazyCollectionTransform(
+                $metadata->class,
+                $property->name,
+            );
+        }
+    }
+
+    /**
+     * @internal
      * @param array<array-key, mixed> $input
      */
     protected static function assertNoRecursiveInput(
@@ -1361,11 +1428,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
      */
     protected static function hydrateCollectionItems(PropertyMetadata $property, mixed $value, bool $normalizeKeys, bool $cascadeValidation = false, ?CreationContext $context = null): array
     {
-        if ($value instanceof DataList || $value instanceof DataCollection) {
-            $value = $value->all();
-        }
-
-        if (!is_array($value)) {
+        if (!is_iterable($value)) {
             return [];
         }
 
@@ -1373,6 +1436,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $items = [];
 
             foreach ($value as $key => $item) {
+                if (!is_int($key) && !is_string($key)) {
+                    continue;
+                }
+
                 $items[$key] = static::hydrateCollectionItemFromProperty(
                     $property,
                     $item,
@@ -1389,6 +1456,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $items = [];
 
         foreach ($value as $key => $item) {
+            if (!is_int($key) && !is_string($key)) {
+                continue;
+            }
+
             $items[$key] = static::hydrateCollectionItemValue(
                 $itemRuntime,
                 $item,
@@ -1414,11 +1485,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $cascadeValidation = false,
         ?CreationContext $context = null,
     ): Collection {
-        if ($value instanceof Collection) {
-            $value = $value->all();
-        }
-
-        if (!is_array($value)) {
+        if (!is_iterable($value)) {
             return new Collection();
         }
 
@@ -1426,6 +1493,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $items = [];
 
             foreach ($value as $key => $item) {
+                if (!is_int($key) && !is_string($key)) {
+                    continue;
+                }
+
                 $items[$key] = static::hydrateCollectionItemFromProperty(
                     $property,
                     $item,
@@ -1442,6 +1513,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $items = [];
 
         foreach ($value as $key => $item) {
+            if (!is_int($key) && !is_string($key)) {
+                continue;
+            }
+
             $items[$key] = static::hydrateCollectionItemValue(
                 $itemRuntime,
                 $item,
@@ -1451,6 +1526,52 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         }
 
         return new Collection($items);
+    }
+
+    /**
+     * @internal
+     * @return iterable<array-key, mixed>
+     */
+    protected static function collectionInputIterable(mixed $value): iterable
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if ($value instanceof Traversable) {
+            return $value;
+        }
+
+        return new EmptyIterator();
+    }
+
+    /**
+     * @internal
+     * @return Closure(int|string, mixed): mixed
+     */
+    protected static function lazyCollectionHydrator(
+        PropertyMetadata $property,
+        bool $cascadeValidation = false,
+        ?CreationContext $context = null,
+    ): Closure {
+        if (!static::propertyHasCollectionItemCast($property)) {
+            return static fn (int|string $key, mixed $value): mixed => static::hydrateCollectionItemFromProperty(
+                $property,
+                $value,
+                $cascadeValidation,
+                $context,
+            );
+        }
+
+        $itemRuntime = $context?->collectionItem($property)
+            ?? new CollectionItemRuntime($property, $property->collectionItemDescriptor());
+
+        return static fn (int|string $key, mixed $value): mixed => static::hydrateCollectionItemValue(
+            $itemRuntime,
+            $value,
+            $cascadeValidation,
+            $context,
+        );
     }
 
     /**
@@ -1663,7 +1784,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             );
         }
 
-        if ($value instanceof DataList || $value instanceof DataCollection) {
+        if (
+            $value instanceof DataList
+            || $value instanceof DataCollection
+            || $value instanceof LazyDataList
+            || $value instanceof LazyDataCollection
+        ) {
             return static::serializeCollectionItems($property, $value, $context);
         }
 
@@ -1791,15 +1917,15 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
-     * @param  DataCollection<array-key, mixed>|DataList<mixed> $value
+     * @param  DataCollection<array-key, mixed>|DataList<mixed>|LazyDataCollection<array-key, mixed>|LazyDataList<mixed> $value
      * @return array<array-key, mixed>
      */
     protected static function serializeCollectionItems(
         ?PropertyMetadata $property,
-        DataList|DataCollection $value,
+        DataList|DataCollection|LazyDataList|LazyDataCollection $value,
         SerializationContext $context,
     ): array {
-        $normalizeKeys = $value instanceof DataList;
+        $normalizeKeys = $value instanceof DataList || $value instanceof LazyDataList;
         $items = [];
         $itemRuntime = $property instanceof PropertyMetadata && static::propertyHasCollectionItemCast($property)
             ? $context->collectionItem($property)
@@ -1908,6 +2034,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         if (
             $property->dataListCastClass !== null
             || $property->dataCollectionCastClass !== null
+            || $property->lazyDataListCastClass !== null
+            || $property->lazyDataCollectionCastClass !== null
             || $property->laravelCollectionCastClass !== null
         ) {
             return true;

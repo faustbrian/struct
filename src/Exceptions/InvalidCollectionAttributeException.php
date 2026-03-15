@@ -37,6 +37,15 @@ final class InvalidCollectionAttributeException extends AbstractStructInvalidArg
         ));
     }
 
+    public static function forLazyCollectionTransform(string $data, string $property): self
+    {
+        return new self(sprintf(
+            'Property [%s::%s] cannot use collection transform attributes on lazy Struct collection wrappers.',
+            $data,
+            $property,
+        ));
+    }
+
     public static function forLaravelCollectionOnly(string $data, string $property, string $attribute): self
     {
         return new self(sprintf(

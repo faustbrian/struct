@@ -15,6 +15,8 @@ use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\PropertyMetadata;
 use Cline\Struct\Support\DataCollection;
 use Cline\Struct\Support\DataList;
+use Cline\Struct\Support\LazyDataCollection;
+use Cline\Struct\Support\LazyDataList;
 use Cline\Struct\Support\Optional;
 use DateTimeInterface;
 use Illuminate\Support\Collection;
@@ -37,11 +39,25 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             return [];
         }
 
-        if ($property->dataListType !== null || $property->dataListCastClass !== null || $this->propertyHasType($property, DataList::class)) {
+        if (
+            $property->dataListType !== null
+            || $property->dataListCastClass !== null
+            || $property->lazyDataListType !== null
+            || $property->lazyDataListCastClass !== null
+            || $this->propertyHasType($property, DataList::class)
+            || $this->propertyHasType($property, LazyDataList::class)
+        ) {
             return ['array', 'list'];
         }
 
-        if ($property->dataCollectionType !== null || $property->dataCollectionCastClass !== null || $this->propertyHasType($property, DataCollection::class)) {
+        if (
+            $property->dataCollectionType !== null
+            || $property->dataCollectionCastClass !== null
+            || $property->lazyDataCollectionType !== null
+            || $property->lazyDataCollectionCastClass !== null
+            || $this->propertyHasType($property, DataCollection::class)
+            || $this->propertyHasType($property, LazyDataCollection::class)
+        ) {
             return ['array'];
         }
 
@@ -58,11 +74,21 @@ final class BuiltInTypesRuleInferrer implements InfersValidationRules
             return [];
         }
 
-        if ($property->dataListCastClass !== null || $property->dataCollectionCastClass !== null || $property->laravelCollectionCastClass !== null) {
+        if (
+            $property->dataListCastClass !== null
+            || $property->dataCollectionCastClass !== null
+            || $property->lazyDataListCastClass !== null
+            || $property->lazyDataCollectionCastClass !== null
+            || $property->laravelCollectionCastClass !== null
+        ) {
             return [];
         }
 
-        $type = $property->dataListType ?? $property->dataCollectionType ?? $property->laravelCollectionType;
+        $type = $property->dataListType
+            ?? $property->dataCollectionType
+            ?? $property->lazyDataListType
+            ?? $property->lazyDataCollectionType
+            ?? $property->laravelCollectionType;
 
         if ($type === null) {
             return [];

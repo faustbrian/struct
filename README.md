@@ -104,6 +104,12 @@ collection sources live under
 `#[Contains('posts', ...)]`, `#[After('posts', ...)]`,
 `#[ToJson('posts')]`, `#[Reduce('totals', ...)]`,
 `#[Wrap(source: 'name')]`, and `#[FromJson(source: 'payload')]`.
+For deferred traversal, Struct also ships `LazyDataList` and
+`LazyDataCollection` with explicit `#[AsLazyDataList(...)]` and
+`#[AsLazyDataCollection(...)]` attributes. These lazy wrappers keep
+Struct-owned collection semantics and typed item hydration, but they are
+transport-focused and intentionally reject `Attributes\\Collections\\*`
+transforms in v1.
 
 ## Documentation
 

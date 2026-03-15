@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added repository-level maintainer guidance in `AGENTS.md`.
+- Added `LazyDataList` and `LazyDataCollection` plus
+  `#[AsLazyDataList(...)]` and `#[AsLazyDataCollection(...)]` for
+  deferred Struct-owned collection hydration and serialization.
 - Added built-in arbitrary-precision number casting for `cline/math`.
 - Added built-in `Money`, `RationalMoney`, and `MoneyBag` casting plus the `#[AsMoney(...)]` attribute.
 - Added built-in numeric normalization attributes backed by Numerus.

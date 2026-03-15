@@ -45,6 +45,8 @@ final readonly class PropertyMetadata
      * @param array<int, mixed>                $validationRules
      * @param array<int, mixed>                $itemValidationRules
      * @param null|class-string<CastInterface> $laravelCollectionCastClass
+     * @param null|class-string<CastInterface> $lazyDataListCastClass
+     * @param null|class-string<CastInterface> $lazyDataCollectionCastClass
      */
     public function __construct(
         public string $name,
@@ -89,6 +91,14 @@ final readonly class PropertyMetadata
         public ?string $laravelCollectionCastClass = null,
         public ?CastInterface $laravelCollectionCast = null,
         public ?string $laravelCollectionTypeKind = null,
+        public ?string $lazyDataListType = null,
+        public ?string $lazyDataListCastClass = null,
+        public ?CastInterface $lazyDataListCast = null,
+        public ?string $lazyDataListTypeKind = null,
+        public ?string $lazyDataCollectionType = null,
+        public ?string $lazyDataCollectionCastClass = null,
+        public ?CastInterface $lazyDataCollectionCast = null,
+        public ?string $lazyDataCollectionTypeKind = null,
     ) {}
 
     /**
@@ -115,22 +125,34 @@ final readonly class PropertyMetadata
         $dataListCastClass = self::castClass($payload['dataListCastClass'] ?? null);
         $dataCollectionType = is_string($payload['dataCollectionType'] ?? null) ? $payload['dataCollectionType'] : null;
         $dataCollectionCastClass = self::castClass($payload['dataCollectionCastClass'] ?? null);
+        $lazyDataListType = is_string($payload['lazyDataListType'] ?? null) ? $payload['lazyDataListType'] : null;
+        $lazyDataListCastClass = self::castClass($payload['lazyDataListCastClass'] ?? null);
+        $lazyDataCollectionType = is_string($payload['lazyDataCollectionType'] ?? null) ? $payload['lazyDataCollectionType'] : null;
+        $lazyDataCollectionCastClass = self::castClass($payload['lazyDataCollectionCastClass'] ?? null);
         $laravelCollectionType = is_string($payload['laravelCollectionType'] ?? null) ? $payload['laravelCollectionType'] : null;
         $laravelCollectionCastClass = self::castClass($payload['laravelCollectionCastClass'] ?? null);
         $dataListCast = self::deferredCast($dataListCastClass);
         $dataCollectionCast = self::deferredCast($dataCollectionCastClass);
+        $lazyDataListCast = self::deferredCast($lazyDataListCastClass);
+        $lazyDataCollectionCast = self::deferredCast($lazyDataCollectionCastClass);
         $laravelCollectionCast = self::deferredCast($laravelCollectionCastClass);
         $hasCollectionItemCast = (bool) ($payload['hasCollectionItemCast'] ?? null);
         $collectionItemDescriptor = self::collectionItemDescriptorFromPayload(
             $payload,
             $dataListType,
             $dataCollectionType,
+            $lazyDataListType,
+            $lazyDataCollectionType,
             $laravelCollectionType,
             $dataListCastClass,
             $dataCollectionCastClass,
+            $lazyDataListCastClass,
+            $lazyDataCollectionCastClass,
             $laravelCollectionCastClass,
             $dataListCast,
             $dataCollectionCast,
+            $lazyDataListCast,
+            $lazyDataCollectionCast,
             $laravelCollectionCast,
         );
 
@@ -170,6 +192,8 @@ final readonly class PropertyMetadata
             hasCollectionItemCast: $hasCollectionItemCast
                 ?: $dataListCast instanceof CastInterface
                 || $dataCollectionCast instanceof CastInterface
+                || $lazyDataListCast instanceof CastInterface
+                || $lazyDataCollectionCast instanceof CastInterface
                 || $laravelCollectionCast instanceof CastInterface,
             validationRules: self::mixedList($payload['validationRules'] ?? null),
             itemValidationRules: self::mixedList($payload['itemValidationRules'] ?? null),
@@ -180,6 +204,14 @@ final readonly class PropertyMetadata
             laravelCollectionCastClass: $laravelCollectionCastClass,
             laravelCollectionCast: $laravelCollectionCast,
             laravelCollectionTypeKind: self::nullableTypeKind($laravelCollectionType),
+            lazyDataListType: $lazyDataListType,
+            lazyDataListCastClass: $lazyDataListCastClass,
+            lazyDataListCast: $lazyDataListCast,
+            lazyDataListTypeKind: self::nullableTypeKind($lazyDataListType),
+            lazyDataCollectionType: $lazyDataCollectionType,
+            lazyDataCollectionCastClass: $lazyDataCollectionCastClass,
+            lazyDataCollectionCast: $lazyDataCollectionCast,
+            lazyDataCollectionTypeKind: self::nullableTypeKind($lazyDataCollectionType),
         );
     }
 
@@ -250,6 +282,14 @@ final readonly class PropertyMetadata
             return [$this->dataCollectionType];
         }
 
+        if ($this->lazyDataListType !== null) {
+            return [$this->lazyDataListType];
+        }
+
+        if ($this->lazyDataCollectionType !== null) {
+            return [$this->lazyDataCollectionType];
+        }
+
         if ($this->laravelCollectionType !== null) {
             return [$this->laravelCollectionType];
         }
@@ -270,6 +310,14 @@ final readonly class PropertyMetadata
             return [$this->dataCollectionTypeKind ?? 'other'];
         }
 
+        if ($this->lazyDataListType !== null) {
+            return [$this->lazyDataListTypeKind ?? 'other'];
+        }
+
+        if ($this->lazyDataCollectionType !== null) {
+            return [$this->lazyDataCollectionTypeKind ?? 'other'];
+        }
+
         if ($this->laravelCollectionType !== null) {
             return [$this->laravelCollectionTypeKind ?? 'other'];
         }
@@ -279,17 +327,29 @@ final readonly class PropertyMetadata
 
     public function collectionItemCast(): ?CastInterface
     {
-        return $this->dataListCast ?? $this->dataCollectionCast ?? $this->laravelCollectionCast;
+        return $this->dataListCast
+            ?? $this->dataCollectionCast
+            ?? $this->lazyDataListCast
+            ?? $this->lazyDataCollectionCast
+            ?? $this->laravelCollectionCast;
     }
 
     public function collectionItemType(): ?string
     {
-        return $this->dataListType ?? $this->dataCollectionType ?? $this->laravelCollectionType;
+        return $this->dataListType
+            ?? $this->dataCollectionType
+            ?? $this->lazyDataListType
+            ?? $this->lazyDataCollectionType
+            ?? $this->laravelCollectionType;
     }
 
     public function collectionItemTypeKind(): ?string
     {
-        return $this->dataListTypeKind ?? $this->dataCollectionTypeKind ?? $this->laravelCollectionTypeKind;
+        return $this->dataListTypeKind
+            ?? $this->dataCollectionTypeKind
+            ?? $this->lazyDataListTypeKind
+            ?? $this->lazyDataCollectionTypeKind
+            ?? $this->laravelCollectionTypeKind;
     }
 
     public function forCollectionItem(): self
@@ -327,7 +387,11 @@ final readonly class PropertyMetadata
             lazyGroups: [],
             includeConditions: [],
             excludeConditions: [],
-            castClass: $this->dataListCastClass ?? $this->dataCollectionCastClass ?? $this->laravelCollectionCastClass,
+            castClass: $this->dataListCastClass
+                ?? $this->dataCollectionCastClass
+                ?? $this->lazyDataListCastClass
+                ?? $this->lazyDataCollectionCastClass
+                ?? $this->laravelCollectionCastClass,
             cast: $this->collectionItemCast(),
             dataListType: null,
             dataListCastClass: null,
@@ -346,6 +410,14 @@ final readonly class PropertyMetadata
             laravelCollectionCastClass: null,
             laravelCollectionCast: null,
             laravelCollectionTypeKind: null,
+            lazyDataListType: null,
+            lazyDataListCastClass: null,
+            lazyDataListCast: null,
+            lazyDataListTypeKind: null,
+            lazyDataCollectionType: null,
+            lazyDataCollectionCastClass: null,
+            lazyDataCollectionCast: null,
+            lazyDataCollectionTypeKind: null,
         );
     }
 
@@ -382,6 +454,10 @@ final readonly class PropertyMetadata
             'dataListCastClass' => $this->dataListCastClass,
             'dataCollectionType' => $this->dataCollectionType,
             'dataCollectionCastClass' => $this->dataCollectionCastClass,
+            'lazyDataListType' => $this->lazyDataListType,
+            'lazyDataListCastClass' => $this->lazyDataListCastClass,
+            'lazyDataCollectionType' => $this->lazyDataCollectionType,
+            'lazyDataCollectionCastClass' => $this->lazyDataCollectionCastClass,
             'laravelCollectionType' => $this->laravelCollectionType,
             'laravelCollectionCastClass' => $this->laravelCollectionCastClass,
             'hasCollectionItemCast' => $this->hasCollectionItemCast,
@@ -441,18 +517,26 @@ final readonly class PropertyMetadata
      * @param array<string, mixed>             $payload
      * @param null|class-string<CastInterface> $dataListCastClass
      * @param null|class-string<CastInterface> $dataCollectionCastClass
+     * @param null|class-string<CastInterface> $lazyDataListCastClass
+     * @param null|class-string<CastInterface> $lazyDataCollectionCastClass
      * @param null|class-string<CastInterface> $laravelCollectionCastClass
      */
     private static function collectionItemDescriptorFromPayload(
         array $payload,
         ?string $dataListType,
         ?string $dataCollectionType,
+        ?string $lazyDataListType,
+        ?string $lazyDataCollectionType,
         ?string $laravelCollectionType,
         ?string $dataListCastClass,
         ?string $dataCollectionCastClass,
+        ?string $lazyDataListCastClass,
+        ?string $lazyDataCollectionCastClass,
         ?string $laravelCollectionCastClass,
         ?CastInterface $dataListCast,
         ?CastInterface $dataCollectionCast,
+        ?CastInterface $lazyDataListCast,
+        ?CastInterface $lazyDataCollectionCast,
         ?CastInterface $laravelCollectionCast,
     ): ?CollectionItemDescriptor {
         $descriptorPayload = $payload['collectionItemDescriptor'] ?? null;
@@ -475,16 +559,32 @@ final readonly class PropertyMetadata
                 ? [$dataListType]
                 : ($dataCollectionType !== null
                     ? [$dataCollectionType]
-                    : ($laravelCollectionType !== null ? [$laravelCollectionType] : ['mixed'])),
+                    : ($lazyDataListType !== null
+                        ? [$lazyDataListType]
+                        : ($lazyDataCollectionType !== null
+                            ? [$lazyDataCollectionType]
+                            : ($laravelCollectionType !== null ? [$laravelCollectionType] : ['mixed'])))),
             typeKinds: $dataListType !== null
                 ? [self::nullableTypeKind($dataListType) ?? 'other']
                 : ($dataCollectionType !== null
                     ? [self::nullableTypeKind($dataCollectionType) ?? 'other']
-                    : ($laravelCollectionType !== null
-                        ? [self::nullableTypeKind($laravelCollectionType) ?? 'other']
-                        : ['mixed'])),
-            castClass: $dataListCastClass ?? $dataCollectionCastClass ?? $laravelCollectionCastClass,
-            cast: $dataListCast ?? $dataCollectionCast ?? $laravelCollectionCast,
+                    : ($lazyDataListType !== null
+                        ? [self::nullableTypeKind($lazyDataListType) ?? 'other']
+                        : ($lazyDataCollectionType !== null
+                            ? [self::nullableTypeKind($lazyDataCollectionType) ?? 'other']
+                            : ($laravelCollectionType !== null
+                                ? [self::nullableTypeKind($laravelCollectionType) ?? 'other']
+                                : ['mixed'])))),
+            castClass: $dataListCastClass
+                ?? $dataCollectionCastClass
+                ?? $lazyDataListCastClass
+                ?? $lazyDataCollectionCastClass
+                ?? $laravelCollectionCastClass,
+            cast: $dataListCast
+                ?? $dataCollectionCast
+                ?? $lazyDataListCast
+                ?? $lazyDataCollectionCast
+                ?? $laravelCollectionCast,
         );
     }
 

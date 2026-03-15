@@ -1268,6 +1268,48 @@ final readonly class UserData extends AbstractData
 }
 ```
 
+### `LazyDataList` and `LazyDataCollection`
+
+Use the lazy wrappers when you want Struct-owned collection containers that
+defer item hydration and source traversal until the property is iterated or
+materialized.
+
+```php
+<?php
+
+use App\Data\PostData;
+use Cline\Struct\AbstractData;
+use Cline\Struct\Attributes\AsLazyDataCollection;
+use Cline\Struct\Attributes\AsLazyDataList;
+use Cline\Struct\Enums\DataListType;
+use Cline\Struct\Support\LazyDataCollection;
+use Cline\Struct\Support\LazyDataList;
+
+final readonly class FeedData extends AbstractData
+{
+    public function __construct(
+        #[AsLazyDataList(DataListType::Int)]
+        public LazyDataList $scores,
+        #[AsLazyDataCollection(PostData::class)]
+        public LazyDataCollection $posts,
+    ) {}
+}
+```
+
+Use them when you want:
+
+- deferred source consumption
+- deferred typed item hydration
+- Struct-owned immutable wrappers without Laravel collection mutability
+
+In v1, lazy Struct collection wrappers are transport-focused:
+
+- `first()` only consumes enough items to resolve the first value
+- `all()`, `count()`, `toArray()`, and `jsonSerialize()` materialize the
+  remaining source once and cache the result
+- `Attributes\\Collections\\*` transforms are intentionally rejected on
+  `LazyDataList` and `LazyDataCollection`
+
 ### `Collection`
 
 `Collection` support is a separate first-class feature for applications that
@@ -1311,6 +1353,8 @@ Use:
 
 - `DataList` for strict schema boundaries and predictable list transport
 - `DataCollection` for immutable Struct-owned keyed collections
+- `LazyDataList` and `LazyDataCollection` for deferred Struct-owned
+  transport wrappers
 - `Collection` for first-class Laravel collection workflows on DTO properties
 
 ## Collecting Many Records
