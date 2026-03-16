@@ -15,6 +15,7 @@ use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;
 
 /**
  * @psalm-immutable
+ * @author Brian Faust <brian@cline.sh>
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class CountedCollectionTransform extends AbstractCollectionTransformer

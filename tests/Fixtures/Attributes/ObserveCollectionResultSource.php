@@ -18,6 +18,7 @@ use function spl_object_id;
 
 /**
  * @psalm-immutable
+ * @author Brian Faust <brian@cline.sh>
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class ObserveCollectionResultSource implements ComputesCollectionResultValueInterface

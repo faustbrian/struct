@@ -9,6 +9,9 @@
 
 namespace Tests\Fixtures\Support;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ObservedCollectionAttributeScans
 {
     public static int $count = 0;

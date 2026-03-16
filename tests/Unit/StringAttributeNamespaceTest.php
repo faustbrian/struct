@@ -14,9 +14,9 @@ test('string attributes use the strings namespace', function (): void {
     expect(class_exists(Trim::class))->toBeTrue()
         ->and(class_exists(Uuid::class))->toBeTrue()
         ->and(
-            new Trim()
+            new Trim(),
         )->toBeInstanceOf(Trim::class)
         ->and(
-            new Uuid()
+            new Uuid(),
         )->toBeInstanceOf(Uuid::class);
 });

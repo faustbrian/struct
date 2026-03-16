@@ -9,6 +9,9 @@
 
 namespace Tests\Fixtures\Support;
 
+/**
+ * @author Brian Faust <brian@cline.sh>
+ */
 final class ObservedCollectionResultSources
 {
     /** @var list<int> */

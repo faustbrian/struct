@@ -14,6 +14,7 @@ use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 
 /**
  * @psalm-immutable
+ * @author Brian Faust <brian@cline.sh>
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class ObserveCollectionAttributeScan
