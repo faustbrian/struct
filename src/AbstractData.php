@@ -916,7 +916,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         if ($attribute instanceof ComputesCollectionResultValueInterface) {
             return $attribute->computeResult(
-                static::collectionResultSource($property, $attribute, $values),
+                static::collectionResultSource($property, $attribute, $values, $context),
                 $values,
                 $context,
             );
@@ -1026,18 +1026,27 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         PropertyMetadata $property,
         ComputesCollectionResultValueInterface $attribute,
         array $values,
+        ?CreationContext $context = null,
     ): Collection {
-        $source = $values[$attribute->sourceProperty()] ?? null;
+        $sourceProperty = $attribute->sourceProperty();
+        $source = $values[$sourceProperty] ?? null;
 
         if ($source instanceof Collection) {
             return $source;
         }
 
         if ($source instanceof LazyCollection) {
+            if ($context instanceof CreationContext) {
+                return $context->materializedCollectionSource(
+                    $sourceProperty,
+                    static fn (): Collection => $source->collect(),
+                );
+            }
+
             return $source->collect();
         }
 
-        throw InvalidCollectionAttributeException::forMissingSourceProperty($property->name, $attribute->sourceProperty());
+        throw InvalidCollectionAttributeException::forMissingSourceProperty($property->name, $sourceProperty);
     }
 
     /**

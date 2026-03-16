@@ -16,6 +16,8 @@ use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\CollectionItemRuntime;
 use Cline\Struct\Metadata\MetadataFactory;
 use Cline\Struct\Metadata\PropertyMetadata;
+use Closure;
+use Illuminate\Support\Collection;
 use Cline\Struct\Resolvers\DefaultModelPayloadResolver;
 use Cline\Struct\Resolvers\DefaultRequestPayloadResolver;
 use Cline\Struct\Validation\ValidationFactory;
@@ -187,6 +189,18 @@ final class CreationContext
     public function properties(): array
     {
         return $this->cache->properties;
+    }
+
+    /**
+     * @param Closure(): Collection<array-key, mixed> $resolver
+     */
+    public function materializedCollectionSource(string $property, Closure $resolver): Collection
+    {
+        if (isset($this->cache->materializedCollectionSources[$property])) {
+            return $this->cache->materializedCollectionSources[$property];
+        }
+
+        return $this->cache->materializedCollectionSources[$property] = $resolver();
     }
 
     public function hydrationGuard(): HydrationGuard
@@ -404,6 +418,9 @@ final class CreationContextCache
 
     /** @var array<string, mixed> */
     public array $properties = [];
+
+    /** @var array<string, Collection<array-key, mixed>> */
+    public array $materializedCollectionSources = [];
 
     public function __construct()
     {

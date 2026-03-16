@@ -11,6 +11,8 @@ use Cline\Struct\Exceptions\InvalidCollectionAttributeException;
 use Illuminate\Support\LazyCollection;
 use Tests\Fixtures\Data\InvalidLazyLaravelCollectionAttributeData;
 use Tests\Fixtures\Data\LazyLaravelCollectionData;
+use Tests\Fixtures\Data\ObservedLazyCollectionResultSourceData;
+use Tests\Fixtures\Support\ObservedCollectionResultSources;
 
 describe('lazy laravel collection support', function (): void {
     test('hydrates typed lazy laravel collections without eager consumption', function (): void {
@@ -77,6 +79,23 @@ describe('lazy laravel collection support', function (): void {
             ->and($dto->numberCount)->toBe(3)
             ->and($dto->numberSum)->toBe(6)
             ->and($dto->decodedContainsBeta)->toBeTrue();
+    });
+
+    test('reuses one materialized collection for shared lazy result sources', function (): void {
+        ObservedLazyCollectionResultSourceData::reset();
+
+        $dto = ObservedLazyCollectionResultSourceData::create([
+            'items' => LazyCollection::make(static function (): Generator {
+                yield '1';
+                yield '2';
+                yield '3';
+            }),
+        ]);
+
+        expect($dto->firstObservation)->toBeInt()
+            ->and($dto->secondObservation)->toBeInt()
+            ->and($dto->firstObservation)->toBe($dto->secondObservation)
+            ->and(ObservedCollectionResultSources::$ids)->toHaveCount(2);
     });
 
     test('serializes lazy laravel collections with hydrated items', function (): void {
