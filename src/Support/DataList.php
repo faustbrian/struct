@@ -10,13 +10,16 @@
 namespace Cline\Struct\Support;
 
 use ArrayAccess;
+use Cline\Struct\AbstractData;
 use Cline\Struct\Exceptions\ImmutableDataListException;
 use Cline\Struct\Exceptions\MissingDataListIndexException;
+use Cline\Struct\Serialization\SerializationContext;
 use Countable;
 use Illuminate\Contracts\Support\Arrayable;
 use IteratorAggregate;
 use JsonSerializable;
 use OutOfBoundsException;
+use stdClass;
 use Traversable;
 
 use function array_key_exists;
@@ -25,6 +28,10 @@ use function array_map;
 use function array_values;
 use function count;
 use function is_array;
+use function is_bool;
+use function is_float;
+use function is_int;
+use function is_string;
 use function iterator_to_array;
 use function throw_unless;
 
@@ -145,10 +152,128 @@ final readonly class DataList implements Arrayable, ArrayAccess, Countable, Iter
     }
 
     /**
+     * @internal
+     * @return list<mixed>
+     */
+    public function toArrayUsingContext(SerializationContext $context): array
+    {
+        $fastPath = $this->serializeFastPath($context);
+
+        if (is_array($fastPath)) {
+            return $fastPath;
+        }
+
+        $items = [];
+
+        foreach ($this->items as $item) {
+            $items[] = AbstractData::serializeValueUsingContext($item, $context);
+        }
+
+        return $items;
+    }
+
+    /**
      * @return list<TValue>
      */
     public function jsonSerialize(): array
     {
         return $this->items;
+    }
+
+    /**
+     * @return null|list<mixed>
+     */
+    private function serializeFastPath(?SerializationContext $context = null): ?array
+    {
+        $plainItems = [];
+        $onlyPlainValues = true;
+        $onlyDataObjects = $context instanceof SerializationContext;
+
+        foreach ($this->items as $item) {
+            if ($onlyPlainValues) {
+                if ($this->normalizePlainValue($item, $normalized)) {
+                    $plainItems[] = $normalized;
+                } else {
+                    $onlyPlainValues = false;
+                    $plainItems = [];
+                }
+            }
+
+            if ($onlyDataObjects && !$item instanceof AbstractData) {
+                $onlyDataObjects = false;
+            }
+
+            if (!$onlyPlainValues && !$onlyDataObjects) {
+                return null;
+            }
+        }
+
+        if ($onlyPlainValues) {
+            return $plainItems;
+        }
+
+        if (!$context instanceof SerializationContext || !$onlyDataObjects) {
+            return null;
+        }
+
+        $serialized = [];
+
+        foreach ($this->items as $item) {
+            /** @var AbstractData $item */
+            $serialized[] = $item->toArrayUsingContext($context);
+        }
+
+        return $serialized;
+    }
+
+    private function normalizePlainValue(mixed $value, mixed &$normalized): bool
+    {
+        if (
+            $value === null
+            || is_string($value)
+            || is_int($value)
+            || is_float($value)
+            || is_bool($value)
+        ) {
+            $normalized = $value;
+
+            return true;
+        }
+
+        if (is_array($value)) {
+            $normalized = [];
+
+            foreach ($value as $item) {
+                if (!$this->normalizePlainValue($item, $normalizedItem)) {
+                    $normalized = null;
+
+                    return false;
+                }
+
+                $normalized[] = $normalizedItem;
+            }
+
+            return true;
+        }
+
+        if (!$value instanceof stdClass) {
+            $normalized = null;
+
+            return false;
+        }
+
+        $normalized = [];
+
+        foreach (get_object_vars($value) as $key => $item) {
+            if (!$this->normalizePlainValue($item, $normalizedItem)) {
+                $normalized = null;
+
+                return false;
+            }
+
+            $normalized[$key] = $normalizedItem;
+        }
+
+        return true;
     }
 }

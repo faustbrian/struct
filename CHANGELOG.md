@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   source materializations, reusing hydrated attribute/context state per
   operation, and narrowing post-hydration collection passes to only the
   properties that actually require them.
+- Reduced serialization overhead for uncast `DataList`,
+  `DataCollection`, `LazyDataList`, and `LazyDataCollection`
+  properties by reusing the wrapper's shared-context serializer instead
+  of re-entering item-level serialization from `AbstractData`.
 - Reduced collection hydration overhead for plain array, `DataList`,
   `DataCollection`, and Laravel collection properties by skipping
   runtime attribute scans when metadata proves that no collection

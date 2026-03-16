@@ -2264,11 +2264,18 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         DataList|DataCollection|LazyDataList|LazyDataCollection $value,
         SerializationContext $context,
     ): array {
+        if ($property instanceof PropertyMetadata) {
+            if (!static::propertyHasCollectionItemCast($property)) {
+                return $value->toArrayUsingContext($context);
+            }
+
+            $itemRuntime = $context->collectionItem($property);
+        } else {
+            $itemRuntime = null;
+        }
+
         $normalizeKeys = $value instanceof DataList || $value instanceof LazyDataList;
         $items = [];
-        $itemRuntime = $property instanceof PropertyMetadata && static::propertyHasCollectionItemCast($property)
-            ? $context->collectionItem($property)
-            : null;
 
         if ($normalizeKeys) {
             foreach ($value as $item) {

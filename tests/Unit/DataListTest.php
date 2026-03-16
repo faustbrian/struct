@@ -9,7 +9,12 @@
 
 use Cline\Struct\Exceptions\ImmutableDataListException;
 use Cline\Struct\Exceptions\MissingDataListIndexException;
+use Cline\Struct\Serialization\SerializationContext;
+use Cline\Struct\Serialization\SerializationOptions;
 use Cline\Struct\Support\DataList;
+use Cline\Struct\Support\RecursionGuard;
+use Tests\Fixtures\Data\ObservedSerializationContextData;
+use Tests\Fixtures\Support\SerializationContextTracker;
 
 describe('DataList', function (): void {
     test('returns items by index', function (): void {
@@ -43,5 +48,25 @@ describe('DataList', function (): void {
         expect(function () use ($list): void {
             unset($list[0]);
         })->toThrow(ImmutableDataListException::class);
+    });
+
+    test('serializes dto-only lists through the shared context path', function (): void {
+        SerializationContextTracker::$seen = [];
+
+        $list = new DataList([
+            new ObservedSerializationContextData('A'),
+            new ObservedSerializationContextData('B'),
+        ]);
+        $context = new SerializationContext(
+            new RecursionGuard(),
+            resolve(SerializationOptions::class),
+        );
+
+        expect($list->toArrayUsingContext($context))->toBe([
+            ['value' => 'A'],
+            ['value' => 'B'],
+        ])->and(SerializationContextTracker::$seen)->toHaveCount(2)
+            ->and(SerializationContextTracker::$seen[0])->toBe($context)
+            ->and(SerializationContextTracker::$seen[1])->toBe($context);
     });
 });
