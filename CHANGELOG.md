@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `DataCollection`, `LazyDataList`, and `LazyDataCollection`
   properties by reusing the wrapper's shared-context serializer instead
   of re-entering item-level serialization from `AbstractData`.
+- Reduced default transformation overhead by short-circuiting scalar
+  values before the object-heavy serialization decision tree.
 - Reduced collection hydration overhead for plain array, `DataList`,
   `DataCollection`, and Laravel collection properties by skipping
   runtime attribute scans when metadata proves that no collection

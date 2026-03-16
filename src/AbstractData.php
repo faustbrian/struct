@@ -2097,6 +2097,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return $property->cast->set($property, $value);
         }
 
+        if (!is_object($value) && !is_array($value)) {
+            return $value;
+        }
+
         if ($value instanceof self) {
             return $value->toArrayUsingContext($context);
         }
@@ -2160,11 +2164,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return $items;
         }
 
-        if (is_object($value)) {
-            return static::serializeObject($value, $context);
-        }
-
-        return $value;
+        return static::serializeObject($value, $context);
     }
 
     /**
