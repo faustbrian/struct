@@ -46,18 +46,15 @@ final class SerializationContext
     /** @var WeakMap<PropertyMetadata, CollectionItemRuntime> */
     private WeakMap $collectionItemProperties;
 
-    private ?MetadataFactory $metadataFactory;
-
     public function __construct(
         public readonly RecursionGuard $guard,
         public readonly SerializationOptions $options,
         private readonly SerializableResolverCache $resolverCache = new SerializableResolverCache(),
-        ?MetadataFactory $metadataFactory = null,
+        private ?MetadataFactory $metadataFactory = null,
     ) {
         $this->hydratedInputs = new WeakMap();
         $this->computedInputsByExcludedProperty = new WeakMap();
         $this->collectionItemProperties = new WeakMap();
-        $this->metadataFactory = $metadataFactory;
     }
 
     public function child(string $path): self

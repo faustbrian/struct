@@ -14,7 +14,6 @@ use Cline\Struct\AbstractData;
 use Cline\Struct\Exceptions\ImmutableDataCollectionException;
 use Cline\Struct\Serialization\SerializationContext;
 use Cline\Struct\Serialization\SerializationDefaults;
-use Cline\Struct\Serialization\SerializationOptions;
 use Closure;
 use Countable;
 use Illuminate\Contracts\Support\Arrayable;

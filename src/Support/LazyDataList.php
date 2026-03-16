@@ -15,7 +15,6 @@ use Cline\Struct\Exceptions\ImmutableDataListException;
 use Cline\Struct\Exceptions\MissingDataListIndexException;
 use Cline\Struct\Serialization\SerializationContext;
 use Cline\Struct\Serialization\SerializationDefaults;
-use Cline\Struct\Serialization\SerializationOptions;
 use Closure;
 use Countable;
 use Illuminate\Contracts\Support\Arrayable;
