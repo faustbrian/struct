@@ -19,13 +19,13 @@ use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;
  */
 final readonly class ObservedCollectionTransformData extends AbstractData
 {
-    public static function reset(): void
-    {
-        ObservedCollectionTransformInstantiations::$count = 0;
-    }
-
     public function __construct(
         #[CountedCollectionTransform()]
         public array $items,
     ) {}
+
+    public static function reset(): void
+    {
+        ObservedCollectionTransformInstantiations::$count = 0;
+    }
 }

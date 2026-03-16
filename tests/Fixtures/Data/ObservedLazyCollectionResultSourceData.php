@@ -22,11 +22,6 @@ use Tests\Fixtures\Support\ObservedCollectionResultSources;
  */
 final readonly class ObservedLazyCollectionResultSourceData extends AbstractData
 {
-    public static function reset(): void
-    {
-        ObservedCollectionResultSources::$ids = [];
-    }
-
     public function __construct(
         #[AsLazyCollection(DataListType::String)]
         public LazyCollection $items,
@@ -39,5 +34,10 @@ final readonly class ObservedLazyCollectionResultSourceData extends AbstractData
             $this->firstObservation,
             $this->secondObservation,
         ];
+    }
+
+    public static function reset(): void
+    {
+        ObservedCollectionResultSources::$ids = [];
     }
 }

@@ -9,6 +9,7 @@
 
 namespace Cline\Struct\Metadata;
 
+use Illuminate\Support\LazyCollection;
 use ReflectionClass;
 
 use function array_fill_keys;
@@ -100,7 +101,7 @@ final readonly class ClassMetadata
                 || $property->laravelCollectionCastClass !== null
                 || $property->lazyLaravelCollectionType !== null
                 || $property->lazyLaravelCollectionCastClass !== null
-                || in_array('Illuminate\\Support\\LazyCollection', $property->types, true);
+                || in_array(LazyCollection::class, $property->types, true);
 
             if ($property->hasCollectionSourceAttribute) {
                 $collectionSourceProperties[] = $property;

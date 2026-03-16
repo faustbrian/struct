@@ -11,6 +11,39 @@ use Illuminate\Support\Collection;
 use Tests\Fixtures\Data\LaravelCollectionOperandData;
 
 describe('operand Laravel collection attributes', function (): void {
+    test('resolves operand sources without contextual hydration', function (): void {
+        $data = LaravelCollectionOperandData::create([
+            'otherNames' => ['Beta'],
+            'diffed' => ['Alpha', 'Beta'],
+            'otherAssoc' => [],
+            'diffAssoced' => [],
+            'otherAssocUsing' => [],
+            'diffAssocUsing' => [],
+            'otherKeys' => [],
+            'diffKeys' => [],
+            'crossJoined' => [],
+            'intersected' => [],
+            'intersectUsing' => [],
+            'intersectAssoc' => [],
+            'otherAssocIntersectUsing' => [],
+            'intersectAssocUsing' => [],
+            'intersectByKeys' => [],
+            'merged' => [],
+            'mergedRecursive' => [],
+            'replaced' => [],
+            'replacedRecursive' => [],
+            'unioned' => [],
+            'randomized' => ['Alpha', 'Beta'],
+            'spliced' => [1, 2],
+            'piped' => [],
+            'pipedInto' => [],
+            'pipedThrough' => [],
+        ]);
+
+        expect($data->otherNames)->toBeInstanceOf(Collection::class)
+            ->and($data->diffed->values()->all())->toBe(['Alpha']);
+    });
+
     test('hydrates operand aware Laravel collection transforms', function (): void {
         $data = LaravelCollectionOperandData::create([
             'otherNames' => ['Beta'],

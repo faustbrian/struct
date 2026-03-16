@@ -16,6 +16,9 @@ use Illuminate\Support\Collection;
 
 use function spl_object_id;
 
+/**
+ * @psalm-immutable
+ */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class ObserveCollectionResultSource implements ComputesCollectionResultValueInterface
 {

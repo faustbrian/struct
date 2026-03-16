@@ -13,6 +13,9 @@ use Attribute;
 use Cline\Struct\Attributes\Collections\AbstractCollectionTransformer;
 use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;
 
+/**
+ * @psalm-immutable
+ */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class CountedCollectionTransform extends AbstractCollectionTransformer
 {

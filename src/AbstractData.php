@@ -83,7 +83,7 @@ use const JSON_THROW_ON_ERROR;
 
 use function array_key_exists;
 use function array_keys;
-use function array_merge;
+use function array_map;
 use function array_values;
 use function constant;
 use function get_object_vars;
@@ -431,7 +431,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $cascadeValidation = false,
     ): static {
         $metadata = $context->metadata;
-        $context->beginHydration($input);
+
+        /** @var array<string, mixed> $rawInput */
+        $rawInput = $input;
+        $context->beginHydration($rawInput);
         $input = static::prepareInput($metadata, $input, $context);
         static::assertNoRecursiveInput($input, $context);
         static::assertNoSuperfluousKeys($metadata, $input);
@@ -443,6 +446,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             if ($tracksContextualHydration) {
                 $context->setProperties($values);
             }
+
             $values[$property->name] = static::resolveValue($metadata, $property, $input, $cascadeValidation, $context);
         }
 
@@ -453,9 +457,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         foreach ($metadata->postHydrationProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
-            if ($tracksContextualHydration) {
-                $context->setProperties($values);
+
+            if (!$tracksContextualHydration) {
+                continue;
             }
+
+            $context->setProperties($values);
         }
 
         foreach ($metadata->collectionSourceProperties as $property) {
@@ -465,9 +472,12 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         foreach ($metadata->postHydrationCollectionSourceProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
-            if ($tracksContextualHydration) {
-                $context->setProperties($values);
+
+            if (!$tracksContextualHydration) {
+                continue;
             }
+
+            $context->setProperties($values);
         }
 
         foreach ($metadata->collectionResultProperties as $property) {

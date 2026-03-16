@@ -16,11 +16,11 @@ use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\CollectionItemRuntime;
 use Cline\Struct\Metadata\MetadataFactory;
 use Cline\Struct\Metadata\PropertyMetadata;
-use Closure;
-use Illuminate\Support\Collection;
 use Cline\Struct\Resolvers\DefaultModelPayloadResolver;
 use Cline\Struct\Resolvers\DefaultRequestPayloadResolver;
 use Cline\Struct\Validation\ValidationFactory;
+use Closure;
+use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
 use WeakMap;
@@ -228,11 +228,12 @@ final class CreationContext
      */
     public function setProperties(array $properties): void
     {
+        $this->cache->properties = $properties;
+
         if (!$this->metadata->usesContextualHydration) {
             return;
         }
 
-        $this->cache->properties = $properties;
         $this->cache->propertyHydrationContexts = new WeakMap();
     }
 
@@ -245,7 +246,8 @@ final class CreationContext
     }
 
     /**
-     * @param Closure(): Collection<array-key, mixed> $resolver
+     * @param  Closure(): Collection<array-key, mixed> $resolver
+     * @return Collection<array-key, mixed>
      */
     public function materializedCollectionSource(string $property, Closure $resolver): Collection
     {

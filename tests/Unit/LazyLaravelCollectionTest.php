@@ -87,7 +87,9 @@ describe('lazy laravel collection support', function (): void {
         $dto = ObservedLazyCollectionResultSourceData::create([
             'items' => LazyCollection::make(static function (): Generator {
                 yield '1';
+
                 yield '2';
+
                 yield '3';
             }),
         ]);
