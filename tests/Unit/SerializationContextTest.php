@@ -90,6 +90,31 @@ describe('SerializationContext', function (): void {
             ->and($calls)->toBe(1);
     });
 
+    test('reuses directly remembered metadata within one serialization pass', function (): void {
+        $context = new SerializationContext(
+            new RecursionGuard(),
+            new SerializationOptions(),
+        );
+        $metadata = new ClassMetadata(
+            class: MultiComputedData::class,
+            reflection: new ReflectionClass(MultiComputedData::class),
+            properties: [],
+            forbidUndefinedValues: false,
+            forbidSuperfluousKeys: false,
+            inferValidationRules: false,
+            validatorMutator: null,
+            requestPayloadResolver: null,
+            modelPayloadResolver: null,
+            stringifier: null,
+            factory: null,
+        );
+
+        expect($context->cachedMetadata(MultiComputedData::class))->toBeNull()
+            ->and($context->rememberMetadata($metadata))->toBe($metadata)
+            ->and($context->cachedMetadata(MultiComputedData::class))->toBe($metadata)
+            ->and($context->rememberMetadata($metadata))->toBe($metadata);
+    });
+
     test('caches computed input payloads per object for one pass', function (): void {
         $context = new SerializationContext(
             new RecursionGuard(),

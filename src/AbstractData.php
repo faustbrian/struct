@@ -2402,7 +2402,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $context->guard->enter($this);
 
         try {
-            $metadata = $context->metadataFor(static::class, static fn (): ClassMetadata => static::metadata());
+            $metadata = $context->cachedMetadata(static::class)
+                ?? $context->rememberMetadata(static::metadata());
             $useScopedChildContexts = $context->options->hasScopedPaths();
 
             $payload = [];
@@ -2448,7 +2449,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         $context->guard->enter($this);
 
         try {
-            $metadata = $context->metadataFor(static::class, static fn (): ClassMetadata => static::metadata());
+            $metadata = $context->cachedMetadata(static::class)
+                ?? $context->rememberMetadata(static::metadata());
 
             return $this->serializeDefaultPayload($metadata, $context, $context->options);
         } finally {

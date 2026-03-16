@@ -165,6 +165,19 @@ final class SerializationContext
     }
 
     /**
+     * @param class-string $class
+     */
+    public function cachedMetadata(string $class): ?ClassMetadata
+    {
+        return $this->metadata[$class] ?? null;
+    }
+
+    public function rememberMetadata(ClassMetadata $metadata): ClassMetadata
+    {
+        return $this->metadata[$metadata->class] ??= $metadata;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function computedInputFor(

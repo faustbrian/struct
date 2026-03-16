@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of re-entering item-level serialization from `AbstractData`.
 - Reduced default transformation overhead by short-circuiting scalar
   values before the object-heavy serialization decision tree.
+- Reduced repeated serializer metadata overhead by reusing cached class
+  metadata directly instead of allocating resolver closures on each
+  pass.
 - Reduced collection hydration overhead for plain array, `DataList`,
   `DataCollection`, and Laravel collection properties by skipping
   runtime attribute scans when metadata proves that no collection
