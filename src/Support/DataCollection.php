@@ -181,6 +181,7 @@ final readonly class DataCollection implements Arrayable, ArrayAccess, Countable
     private function serializeFastPath(?SerializationContext $context = null): ?array
     {
         $plainItems = [];
+        $serializedDataObjects = [];
         $onlyPlainValues = true;
         $onlyDataObjects = $context instanceof SerializationContext;
 
@@ -194,8 +195,13 @@ final readonly class DataCollection implements Arrayable, ArrayAccess, Countable
                 }
             }
 
-            if ($onlyDataObjects && !$item instanceof AbstractData) {
-                $onlyDataObjects = false;
+            if ($onlyDataObjects) {
+                if ($item instanceof AbstractData) {
+                    $serializedDataObjects[$key] = $item->toArrayUsingContext($context);
+                } else {
+                    $onlyDataObjects = false;
+                    $serializedDataObjects = [];
+                }
             }
 
             if (!$onlyPlainValues && !$onlyDataObjects) {
@@ -211,14 +217,7 @@ final readonly class DataCollection implements Arrayable, ArrayAccess, Countable
             return null;
         }
 
-        $serialized = [];
-
-        foreach ($this->items as $key => $item) {
-            /** @var AbstractData $item */
-            $serialized[$key] = $item->toArrayUsingContext($context);
-        }
-
-        return $serialized;
+        return $serializedDataObjects;
     }
 
     private function normalizePlainValue(mixed $value, mixed &$normalized): bool
