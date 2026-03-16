@@ -45,6 +45,7 @@ use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\CollectionItemRuntime;
 use Cline\Struct\Metadata\MetadataFactory;
 use Cline\Struct\Metadata\PropertyMetadata;
+use Cline\Struct\Serialization\SerializationDefaults;
 use Cline\Struct\Serialization\DataSerializer;
 use Cline\Struct\Serialization\SerializationContext;
 use Cline\Struct\Serialization\SerializationOptions;
@@ -296,10 +297,13 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 && $exclude === []
                 && $groups === []
                 && $context === [];
+            $defaults = $isDefaultProjection
+                ? resolve(SerializationDefaults::class)
+                : null;
             $options = $isDefaultProjection
                 ? ($includeSensitive
-                    ? resolve(SerializationOptions::class)->withSensitive()
-                    : resolve(SerializationOptions::class))
+                    ? $defaults->options->withSensitive()
+                    : $defaults->options)
                 : new SerializationOptions(
                     includeSensitive: $includeSensitive,
                     include: $include,
@@ -316,6 +320,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
                 new SerializationContext(
                     new RecursionGuard(),
                     $options,
+                    metadataFactory: $defaults->metadataFactory ?? null,
                 ),
             )
             : $this->serializePayload(

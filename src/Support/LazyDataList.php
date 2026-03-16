@@ -14,6 +14,7 @@ use Cline\Struct\AbstractData;
 use Cline\Struct\Exceptions\ImmutableDataListException;
 use Cline\Struct\Exceptions\MissingDataListIndexException;
 use Cline\Struct\Serialization\SerializationContext;
+use Cline\Struct\Serialization\SerializationDefaults;
 use Cline\Struct\Serialization\SerializationOptions;
 use Closure;
 use Countable;
@@ -149,10 +150,13 @@ final readonly class LazyDataList implements Arrayable, ArrayAccess, Countable, 
      */
     public function toArray(): array
     {
+        $defaults = resolve(SerializationDefaults::class);
+
         return $this->toArrayUsingContext(
             new SerializationContext(
                 new RecursionGuard(),
-                resolve(SerializationOptions::class),
+                $defaults->options,
+                metadataFactory: $defaults->metadataFactory,
             ),
         );
     }

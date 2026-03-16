@@ -13,6 +13,7 @@ use ArrayAccess;
 use Cline\Struct\AbstractData;
 use Cline\Struct\Exceptions\ImmutableDataCollectionException;
 use Cline\Struct\Serialization\SerializationContext;
+use Cline\Struct\Serialization\SerializationDefaults;
 use Cline\Struct\Serialization\SerializationOptions;
 use Countable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -138,10 +139,13 @@ final readonly class DataCollection implements Arrayable, ArrayAccess, Countable
             return $fastPath;
         }
 
+        $defaults = resolve(SerializationDefaults::class);
+
         return $this->toArrayUsingContext(
             new SerializationContext(
                 new RecursionGuard(),
-                resolve(SerializationOptions::class),
+                $defaults->options,
+                metadataFactory: $defaults->metadataFactory,
             ),
         );
     }

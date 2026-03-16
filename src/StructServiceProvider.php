@@ -15,6 +15,7 @@ use Cline\Struct\Contracts\ModelPayloadResolverInterface;
 use Cline\Struct\Contracts\RequestPayloadResolverInterface;
 use Cline\Struct\Livewire\DataSynth;
 use Cline\Struct\Metadata\MetadataFactory;
+use Cline\Struct\Serialization\SerializationDefaults;
 use Cline\Struct\Resolvers\DefaultModelPayloadResolver;
 use Cline\Struct\Resolvers\DefaultRequestPayloadResolver;
 use Cline\Struct\Serialization\SerializationOptions;
@@ -95,6 +96,13 @@ final class StructServiceProvider extends PackageServiceProvider
         $this->app->singleton(
             SerializationOptions::class,
             fn (): SerializationOptions => new SerializationOptions(date: resolve(DateFormat::class)),
+        );
+        $this->app->singleton(
+            SerializationDefaults::class,
+            fn (): SerializationDefaults => new SerializationDefaults(
+                options: resolve(SerializationOptions::class),
+                metadataFactory: resolve(MetadataFactory::class),
+            ),
         );
         $this->app->singleton(
             RequestPayloadResolverInterface::class,
