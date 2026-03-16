@@ -450,7 +450,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             $context->setProperties($values);
         }
 
-        foreach ($metadata->hydratedProperties as $property) {
+        foreach ($metadata->postHydrationProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
             if ($tracksContextualHydration) {
@@ -460,6 +460,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         foreach ($metadata->collectionSourceProperties as $property) {
             $values[$property->name] = static::resolveGeneratedCollectionValue($context, $property, $values);
+        }
+
+        foreach ($metadata->postHydrationCollectionSourceProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
             if ($tracksContextualHydration) {

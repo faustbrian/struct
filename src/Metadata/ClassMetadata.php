@@ -13,6 +13,7 @@ use ReflectionClass;
 
 use function array_fill_keys;
 use function array_keys;
+use function in_array;
 use function is_array;
 use function is_string;
 
@@ -54,6 +55,12 @@ final readonly class ClassMetadata
     /** @var array<string, list<string>> */
     public array $computedInputNames;
 
+    /** @var list<PropertyMetadata> */
+    public array $postHydrationProperties;
+
+    /** @var list<PropertyMetadata> */
+    public array $postHydrationCollectionSourceProperties;
+
     public bool $usesContextualHydration;
 
     /**
@@ -84,11 +91,23 @@ final readonly class ClassMetadata
         $defaultProjectionPropertiesWithoutSensitive = [];
         $hydratedPropertyNames = [];
         $hydratedPropertyLookup = [];
+        $postHydrationProperties = [];
+        $postHydrationCollectionSourceProperties = [];
         $usesContextualHydration = false;
 
         foreach ($this->properties as $property) {
+            $needsPostHydrationPass = $property->laravelCollectionType !== null
+                || $property->laravelCollectionCastClass !== null
+                || $property->lazyLaravelCollectionType !== null
+                || $property->lazyLaravelCollectionCastClass !== null
+                || in_array('Illuminate\\Support\\LazyCollection', $property->types, true);
+
             if ($property->hasCollectionSourceAttribute) {
                 $collectionSourceProperties[] = $property;
+
+                if ($needsPostHydrationPass) {
+                    $postHydrationCollectionSourceProperties[] = $property;
+                }
             } elseif ($property->hasCollectionResultAttribute) {
                 $collectionResultProperties[] = $property;
             } elseif ($property->isComputed) {
@@ -98,6 +117,10 @@ final readonly class ClassMetadata
                 $hydratedProperties[] = $property;
                 $hydratedPropertyNames[] = $property->name;
                 $hydratedPropertyLookup[$property->name] = true;
+
+                if ($needsPostHydrationPass) {
+                    $postHydrationProperties[] = $property;
+                }
             }
 
             if ($property->isLazy) {
@@ -131,6 +154,8 @@ final readonly class ClassMetadata
         $this->defaultProjectionProperties = $defaultProjectionProperties;
         $this->defaultProjectionPropertiesWithoutSensitive = $defaultProjectionPropertiesWithoutSensitive;
         $this->computedInputNames = $this->buildComputedInputNames();
+        $this->postHydrationProperties = $postHydrationProperties;
+        $this->postHydrationCollectionSourceProperties = $postHydrationCollectionSourceProperties;
         $this->usesContextualHydration = $usesContextualHydration;
     }
 

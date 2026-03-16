@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sources and targets.
 
 ### Changed
+- Reduced collection hydration overhead by caching lazy derived-result
+  source materializations, reusing hydrated attribute/context state per
+  operation, and narrowing post-hydration collection passes to only the
+  properties that actually require them.
 - Moved the newer value-object and numeric attributes into dedicated
   subnamespaces under `Cline\Struct\Attributes\Money`,
   `Cline\Struct\Attributes\PhoneNumber`,

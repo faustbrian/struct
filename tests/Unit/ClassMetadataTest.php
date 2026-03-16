@@ -9,6 +9,7 @@
 
 use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\PropertyMetadata;
+use Illuminate\Support\LazyCollection;
 use Tests\Fixtures\Data\MappedUserData;
 
 describe('ClassMetadata', function (): void {
@@ -225,5 +226,153 @@ describe('ClassMetadata', function (): void {
             ->and($metadata->computedInputNames)->toBe([
                 'fullName' => ['firstName', 'lastName'],
             ]);
+    });
+
+    test('tracks only properties that need post-hydration collection passes', function (): void {
+        $reflection = new ReflectionClass(MappedUserData::class);
+        $parameter = $reflection->getConstructor()->getParameters()[0];
+
+        $plain = new PropertyMetadata(
+            name: 'plain',
+            inputName: 'plain',
+            outputName: 'plain',
+            types: ['string'],
+            typeKinds: ['string'],
+            nullable: false,
+            hasDefaultValue: false,
+            defaultValue: null,
+            replaceEmptyStringsWithNull: false,
+            inferValidationRules: false,
+            isOptional: false,
+            isSensitive: false,
+            isEncrypted: false,
+            isComputed: false,
+            hasCollectionResultAttribute: false,
+            hasCollectionSourceAttribute: false,
+            isLazy: false,
+            computer: null,
+            lazyResolver: null,
+            lazyGroups: [],
+            includeConditions: [],
+            excludeConditions: [],
+            castClass: null,
+            cast: null,
+            dataListType: null,
+            dataListCastClass: null,
+            dataListCast: null,
+            dataCollectionType: null,
+            dataListTypeKind: null,
+            dataCollectionCastClass: null,
+            dataCollectionCast: null,
+            dataCollectionTypeKind: null,
+            hasCollectionItemCast: false,
+            validationRules: [],
+            itemValidationRules: [],
+            parameter: $parameter,
+            property: null,
+        );
+
+        $lazyCollection = new PropertyMetadata(
+            name: 'lazyCollection',
+            inputName: 'lazyCollection',
+            outputName: 'lazyCollection',
+            types: [LazyCollection::class],
+            typeKinds: ['other'],
+            nullable: false,
+            hasDefaultValue: false,
+            defaultValue: null,
+            replaceEmptyStringsWithNull: false,
+            inferValidationRules: false,
+            isOptional: false,
+            isSensitive: false,
+            isEncrypted: false,
+            isComputed: false,
+            hasCollectionResultAttribute: false,
+            hasCollectionSourceAttribute: false,
+            isLazy: false,
+            computer: null,
+            lazyResolver: null,
+            lazyGroups: [],
+            includeConditions: [],
+            excludeConditions: [],
+            castClass: null,
+            cast: null,
+            dataListType: null,
+            dataListCastClass: null,
+            dataListCast: null,
+            dataCollectionType: null,
+            dataListTypeKind: null,
+            dataCollectionCastClass: null,
+            dataCollectionCast: null,
+            dataCollectionTypeKind: null,
+            hasCollectionItemCast: false,
+            validationRules: [],
+            itemValidationRules: [],
+            parameter: $parameter,
+            property: null,
+            lazyLaravelCollectionType: 'string',
+        );
+
+        $generatedLazyCollection = new PropertyMetadata(
+            name: 'generatedLazyCollection',
+            inputName: 'generatedLazyCollection',
+            outputName: 'generatedLazyCollection',
+            types: [LazyCollection::class],
+            typeKinds: ['other'],
+            nullable: false,
+            hasDefaultValue: false,
+            defaultValue: null,
+            replaceEmptyStringsWithNull: false,
+            inferValidationRules: false,
+            isOptional: false,
+            isSensitive: false,
+            isEncrypted: false,
+            isComputed: true,
+            hasCollectionResultAttribute: false,
+            hasCollectionSourceAttribute: true,
+            isLazy: false,
+            computer: null,
+            lazyResolver: null,
+            lazyGroups: [],
+            includeConditions: [],
+            excludeConditions: [],
+            castClass: null,
+            cast: null,
+            dataListType: null,
+            dataListCastClass: null,
+            dataListCast: null,
+            dataCollectionType: null,
+            dataListTypeKind: null,
+            dataCollectionCastClass: null,
+            dataCollectionCast: null,
+            dataCollectionTypeKind: null,
+            hasCollectionItemCast: false,
+            validationRules: [],
+            itemValidationRules: [],
+            parameter: $parameter,
+            property: null,
+            lazyLaravelCollectionType: 'string',
+        );
+
+        $metadata = new ClassMetadata(
+            class: MappedUserData::class,
+            reflection: $reflection,
+            properties: [
+                'plain' => $plain,
+                'lazyCollection' => $lazyCollection,
+                'generatedLazyCollection' => $generatedLazyCollection,
+            ],
+            forbidUndefinedValues: false,
+            forbidSuperfluousKeys: true,
+            inferValidationRules: false,
+            validatorMutator: null,
+            requestPayloadResolver: null,
+            modelPayloadResolver: null,
+            stringifier: null,
+            factory: null,
+        );
+
+        expect($metadata->postHydrationProperties)->toBe([$lazyCollection])
+            ->and($metadata->postHydrationCollectionSourceProperties)->toBe([$generatedLazyCollection]);
     });
 });
