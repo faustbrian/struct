@@ -431,7 +431,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $cascadeValidation = false,
     ): static {
         $metadata = $context->metadata;
-        $input = static::prepareInput($metadata, $input);
+        $input = static::prepareInput($metadata, $input, $context);
         static::assertNoRecursiveInput($input, $context);
         static::assertNoSuperfluousKeys($metadata, $input);
 
@@ -484,7 +484,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $input,
         bool $requestException = false,
     ): static {
-        $input = static::prepareInput($context->metadata, $input);
+        $input = static::prepareInput($context->metadata, $input, $context);
 
         /** @var array<string, mixed> $input */
         $prepared = $context->validationFactory()->make($context->metadata, $input);
@@ -507,10 +507,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
      * @param  array<array-key, mixed> $input
      * @return array<array-key, mixed>
      */
-    protected static function prepareInput(ClassMetadata $metadata, array $input): array
+    protected static function prepareInput(ClassMetadata $metadata, array $input, ?CreationContext $context = null): array
     {
         foreach ($metadata->hydratedProperties as $property) {
-            $attribute = static::generatedValueAttribute($metadata, $property);
+            $attribute = static::generatedValueAttribute($metadata, $property, $context);
 
             if (!$attribute instanceof GeneratesMissingValueInterface) {
                 continue;
@@ -806,17 +806,16 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function generatedValueAttribute(
         ClassMetadata $metadata,
         PropertyMetadata $property,
+        ?CreationContext $context = null,
     ): ?GeneratesMissingValueInterface {
         $instances = [];
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof GeneratesMissingValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof GeneratesMissingValueInterface) {
                 continue;
             }
 
-            $instances[] = $instance;
+            $instances[] = $attribute;
         }
 
         if ($instances === []) {
@@ -839,14 +838,27 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     }
 
     /**
-     * @return list<ReflectionAttribute<object>>
+     * @return list<object>
      */
-    protected static function propertyAttributes(PropertyMetadata $property): array
+    protected static function propertyAttributes(PropertyMetadata $property, ?CreationContext $context = null): array
     {
-        $propertyAttributes = $property->property?->getAttributes() ?? [];
-        $parameterAttributes = $propertyAttributes === [] ? $property->parameter->getAttributes() : [];
+        if ($context instanceof CreationContext) {
+            return $context->propertyAttributes($property);
+        }
 
-        return array_merge($propertyAttributes, $parameterAttributes);
+        $propertyAttributes = $property->property?->getAttributes() ?? [];
+
+        if ($propertyAttributes !== []) {
+            return array_map(
+                static fn (ReflectionAttribute $attribute): object => $attribute->newInstance(),
+                $propertyAttributes,
+            );
+        }
+
+        return array_map(
+            static fn (ReflectionAttribute $attribute): object => $attribute->newInstance(),
+            $property->parameter->getAttributes(),
+        );
     }
 
     protected static function supportsGeneratedStringValue(PropertyMetadata $property): bool
@@ -893,7 +905,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
      */
     protected static function resolveGeneratedCollectionValue(CreationContext $context, PropertyMetadata $property, array $values): mixed
     {
-        $attribute = static::collectionSourceAttribute($property);
+        $attribute = static::collectionSourceAttribute($property, $context);
 
         if ($attribute instanceof GeneratesCollectionValueInterface) {
             return $attribute->generateCollection($values, $context);
@@ -912,7 +924,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
      */
     protected static function resolveCollectionResultValue(CreationContext $context, PropertyMetadata $property, array $values): mixed
     {
-        $attribute = static::collectionResultAttribute($property);
+        $attribute = static::collectionResultAttribute($property, $context);
 
         if ($attribute instanceof ComputesCollectionResultValueInterface) {
             return $attribute->computeResult(
@@ -988,13 +1000,11 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      */
-    protected static function collectionSourceAttribute(PropertyMetadata $property): ?GeneratesCollectionValueInterface
+    protected static function collectionSourceAttribute(PropertyMetadata $property, ?CreationContext $context = null): ?GeneratesCollectionValueInterface
     {
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if ($instance instanceof GeneratesCollectionValueInterface) {
-                return $instance;
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if ($attribute instanceof GeneratesCollectionValueInterface) {
+                return $attribute;
             }
         }
 
@@ -1004,13 +1014,11 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      */
-    protected static function collectionResultAttribute(PropertyMetadata $property): ?ComputesCollectionResultValueInterface
+    protected static function collectionResultAttribute(PropertyMetadata $property, ?CreationContext $context = null): ?ComputesCollectionResultValueInterface
     {
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if ($instance instanceof ComputesCollectionResultValueInterface) {
-                return $instance;
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if ($attribute instanceof ComputesCollectionResultValueInterface) {
+                return $attribute;
             }
         }
 
@@ -1086,9 +1094,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         $metadata = $context instanceof CreationContext ? $context->metadata : static::metadata();
 
-        static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata);
-        static::assertLazyLaravelCollectionAttributesSupported($property, $metadata);
-        static::assertLazyCollectionAttributesUnsupported($property, $metadata);
+        static::assertLaravelCollectionCallbackAttributesSupported($property, $metadata, $context);
+        static::assertLazyLaravelCollectionAttributesSupported($property, $metadata, $context);
+        static::assertLazyCollectionAttributesUnsupported($property, $metadata, $context);
 
         if ($property->cast instanceof ContextualCastInterface) {
             return $property->cast->getWithContext(
@@ -1206,7 +1214,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ?CreationContext $context = null,
         array $rawInput = [],
     ): array {
-        $attributes = static::collectionAttributes($property, $metadata, $isList);
+        $attributes = static::collectionAttributes($property, $metadata, $isList, $context);
 
         foreach ($attributes as $attribute) {
             if ($attribute instanceof ContextualTransformsCollectionValueInterface) {
@@ -1232,29 +1240,28 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         PropertyMetadata $property,
         ClassMetadata $metadata,
         bool $isList,
+        ?CreationContext $context = null,
     ): array {
         $instances = [];
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof TransformsCollectionValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof TransformsCollectionValueInterface) {
                 continue;
             }
 
-            if (!$instance instanceof AbstractCollectionTransformer) {
+            if (!$attribute instanceof AbstractCollectionTransformer) {
                 continue;
             }
 
-            if ($isList && !$instance->supportsLists()) {
+            if ($isList && !$attribute->supportsLists()) {
                 throw InvalidCollectionAttributeException::forUnsupportedListAttribute(
                     $metadata->class,
                     $property->name,
-                    $instance::class,
+                    $attribute::class,
                 );
             }
 
-            $instances[] = $instance;
+            $instances[] = $attribute;
         }
 
         if ($instances === []) {
@@ -1302,7 +1309,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $properties = [],
         ?CreationContext $context = null,
     ): Collection {
-        $attributes = static::laravelCollectionAttributes($property, $metadata);
+        $attributes = static::laravelCollectionAttributes($property, $metadata, $context);
 
         foreach ($attributes as $attribute) {
             if ($context instanceof CreationContext) {
@@ -1328,7 +1335,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $properties = [],
         ?CreationContext $context = null,
     ): LazyCollection {
-        $attributes = static::lazyLaravelCollectionAttributes($property, $metadata);
+        $attributes = static::lazyLaravelCollectionAttributes($property, $metadata, $context);
 
         foreach ($attributes as $attribute) {
             if ($context instanceof CreationContext) {
@@ -1348,23 +1355,22 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function laravelCollectionAttributes(
         PropertyMetadata $property,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): array {
         $instances = [];
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof TransformsLaravelCollectionValueInterface) {
-                if (!$instance instanceof WrapsLaravelCollectionTransformInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof TransformsLaravelCollectionValueInterface) {
+                if (!$attribute instanceof WrapsLaravelCollectionTransformInterface) {
                     continue;
                 }
 
-                $instances[] = $instance;
+                $instances[] = $attribute;
 
                 continue;
             }
 
-            $instances[] = $instance;
+            $instances[] = $attribute;
         }
 
         if ($instances === []) {
@@ -1415,17 +1421,16 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function lazyLaravelCollectionAttributes(
         PropertyMetadata $property,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): array {
         $instances = [];
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof TransformsLazyCollectionValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof TransformsLazyCollectionValueInterface) {
                 continue;
             }
 
-            $instances[] = $instance;
+            $instances[] = $attribute;
         }
 
         if ($instances === []) {
@@ -1449,6 +1454,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function assertLaravelCollectionCallbackAttributesSupported(
         PropertyMetadata $property,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): void {
         if (
             $property->laravelCollectionType !== null
@@ -1461,21 +1467,19 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return;
         }
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof TransformsLaravelCollectionValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof TransformsLaravelCollectionValueInterface) {
                 continue;
             }
 
-            if ($instance instanceof AbstractCollectionTransformer) {
+            if ($attribute instanceof AbstractCollectionTransformer) {
                 continue;
             }
 
             throw InvalidCollectionAttributeException::forLaravelCollectionOnly(
                 $metadata->class,
                 $property->name,
-                $instance::class,
+                $attribute::class,
             );
         }
     }
@@ -1486,6 +1490,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function assertLazyLaravelCollectionAttributesSupported(
         PropertyMetadata $property,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): void {
         if (
             $property->lazyLaravelCollectionType === null
@@ -1495,26 +1500,24 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return;
         }
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if ($instance instanceof TransformsLazyCollectionValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if ($attribute instanceof TransformsLazyCollectionValueInterface) {
                 continue;
             }
 
-            if ($instance instanceof TransformsCollectionValueInterface) {
+            if ($attribute instanceof TransformsCollectionValueInterface) {
                 throw InvalidCollectionAttributeException::forLazyLaravelCollectionOnly(
                     $metadata->class,
                     $property->name,
-                    $instance::class,
+                    $attribute::class,
                 );
             }
 
-            if ($instance instanceof TransformsLaravelCollectionValueInterface) {
+            if ($attribute instanceof TransformsLaravelCollectionValueInterface) {
                 throw InvalidCollectionAttributeException::forLazyLaravelCollectionOnly(
                     $metadata->class,
                     $property->name,
-                    $instance::class,
+                    $attribute::class,
                 );
             }
         }
@@ -1526,6 +1529,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function assertLazyCollectionAttributesUnsupported(
         PropertyMetadata $property,
         ClassMetadata $metadata,
+        ?CreationContext $context = null,
     ): void {
         if (
             $property->lazyDataListType === null
@@ -1538,10 +1542,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return;
         }
 
-        foreach (static::propertyAttributes($property) as $attribute) {
-            $instance = $attribute->newInstance();
-
-            if (!$instance instanceof TransformsCollectionValueInterface) {
+        foreach (static::propertyAttributes($property, $context) as $attribute) {
+            if (!$attribute instanceof TransformsCollectionValueInterface) {
                 continue;
             }
 

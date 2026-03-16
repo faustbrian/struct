@@ -176,6 +176,30 @@ final class CreationContext
     }
 
     /**
+     * @return list<object>
+     */
+    public function propertyAttributes(PropertyMetadata $property): array
+    {
+        if (isset($this->cache->propertyAttributes[$property])) {
+            return $this->cache->propertyAttributes[$property];
+        }
+
+        $attributes = [];
+
+        foreach (($property->property?->getAttributes() ?? []) as $attribute) {
+            $attributes[] = $attribute->newInstance();
+        }
+
+        if ($attributes === []) {
+            foreach ($property->parameter->getAttributes() as $attribute) {
+                $attributes[] = $attribute->newInstance();
+            }
+        }
+
+        return $this->cache->propertyAttributes[$property] = $attributes;
+    }
+
+    /**
      * @param array<string, mixed> $properties
      */
     public function setProperties(array $properties): void
@@ -388,6 +412,9 @@ final class CreationContextCache
     /** @var WeakMap<PropertyMetadata, CollectionItemRuntime> */
     public WeakMap $collectionItemProperties;
 
+    /** @var WeakMap<PropertyMetadata, list<object>> */
+    public WeakMap $propertyAttributes;
+
     public ?HydrationGuard $hydrationGuard = null;
 
     public ?ValidationFactory $validationFactory = null;
@@ -425,5 +452,6 @@ final class CreationContextCache
     public function __construct()
     {
         $this->collectionItemProperties = new WeakMap();
+        $this->propertyAttributes = new WeakMap();
     }
 }
