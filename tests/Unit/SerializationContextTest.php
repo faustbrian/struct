@@ -115,6 +115,32 @@ describe('SerializationContext', function (): void {
             ->and($context->rememberMetadata($metadata))->toBe($metadata);
     });
 
+    test('shares remembered metadata with child contexts', function (): void {
+        $context = new SerializationContext(
+            new RecursionGuard(),
+            new SerializationOptions(),
+        );
+        $metadata = new ClassMetadata(
+            class: MultiComputedData::class,
+            reflection: new ReflectionClass(MultiComputedData::class),
+            properties: [],
+            forbidUndefinedValues: false,
+            forbidSuperfluousKeys: false,
+            inferValidationRules: false,
+            validatorMutator: null,
+            requestPayloadResolver: null,
+            modelPayloadResolver: null,
+            stringifier: null,
+            factory: null,
+        );
+        $child = $context->child('posts');
+
+        expect($child->cachedMetadata(MultiComputedData::class))->toBeNull()
+            ->and($context->rememberMetadata($metadata))->toBe($metadata)
+            ->and($child->cachedMetadata(MultiComputedData::class))->toBe($metadata)
+            ->and($child->rememberMetadata($metadata))->toBe($metadata);
+    });
+
     test('caches computed input payloads per object for one pass', function (): void {
         $context = new SerializationContext(
             new RecursionGuard(),

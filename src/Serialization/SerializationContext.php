@@ -11,11 +11,13 @@ namespace Cline\Struct\Serialization;
 
 use Cline\Struct\Metadata\ClassMetadata;
 use Cline\Struct\Metadata\CollectionItemRuntime;
+use Cline\Struct\Metadata\MetadataFactory;
 use Cline\Struct\Metadata\PropertyMetadata;
 use Cline\Struct\Support\RecursionGuard;
 use WeakMap;
 
 use function array_key_exists;
+use function resolve;
 
 /**
  * Shares traversal state across one serialization pass.
@@ -44,14 +46,18 @@ final class SerializationContext
     /** @var WeakMap<PropertyMetadata, CollectionItemRuntime> */
     private WeakMap $collectionItemProperties;
 
+    private ?MetadataFactory $metadataFactory;
+
     public function __construct(
         public readonly RecursionGuard $guard,
         public readonly SerializationOptions $options,
         private readonly SerializableResolverCache $resolverCache = new SerializableResolverCache(),
+        ?MetadataFactory $metadataFactory = null,
     ) {
         $this->hydratedInputs = new WeakMap();
         $this->computedInputsByExcludedProperty = new WeakMap();
         $this->collectionItemProperties = new WeakMap();
+        $this->metadataFactory = $metadataFactory;
     }
 
     public function child(string $path): self
@@ -70,6 +76,7 @@ final class SerializationContext
             $this->guard,
             $options,
             $this->resolverCache,
+            $this->metadataFactory,
         );
         $child->metadata = $this->metadata;
         $child->collectionItemProperties = $this->collectionItemProperties;
@@ -178,6 +185,14 @@ final class SerializationContext
     }
 
     /**
+     * @param class-string $class
+     */
+    public function metadataForClass(string $class): ClassMetadata
+    {
+        return $this->metadata[$class] ??= $this->metadataFactory()->for($class);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function computedInputFor(
@@ -235,5 +250,10 @@ final class SerializationContext
         }
 
         return $inputs;
+    }
+
+    private function metadataFactory(): MetadataFactory
+    {
+        return $this->metadataFactory ??= resolve(MetadataFactory::class);
     }
 }

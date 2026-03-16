@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced repeated serializer metadata overhead by reusing cached class
   metadata directly instead of allocating resolver closures on each
   pass.
+- Reduced transformation overhead further by letting
+  `SerializationContext` reuse one resolved `MetadataFactory` across an
+  entire serialization pass.
 - Reduced DTO-only collection serialization overhead by collapsing the
   “detect DTO items” and “serialize DTO items” passes into one shared
   traversal for Struct-owned wrappers.
