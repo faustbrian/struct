@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   source materializations, reusing hydrated attribute/context state per
   operation, and narrowing post-hydration collection passes to only the
   properties that actually require them.
+- Reduced collection hydration overhead for plain array, `DataList`,
+  `DataCollection`, and Laravel collection properties by skipping
+  runtime attribute scans when metadata proves that no collection
+  transforms are attached.
 - Moved the newer value-object and numeric attributes into dedicated
   subnamespaces under `Cline\Struct\Attributes\Money`,
   `Cline\Struct\Attributes\PhoneNumber`,

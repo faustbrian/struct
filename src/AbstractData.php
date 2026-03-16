@@ -1266,6 +1266,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $isList,
         ?CreationContext $context = null,
     ): array {
+        if (!$property->hasCollectionTransformAttribute) {
+            return [];
+        }
+
         $instances = [];
 
         foreach (static::propertyAttributes($property, $context) as $attribute) {
@@ -1381,6 +1385,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ClassMetadata $metadata,
         ?CreationContext $context = null,
     ): array {
+        if (!$property->hasLaravelCollectionTransformAttribute) {
+            return [];
+        }
+
         $instances = [];
 
         foreach (static::propertyAttributes($property, $context) as $attribute) {
@@ -1447,6 +1455,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ClassMetadata $metadata,
         ?CreationContext $context = null,
     ): array {
+        if (!$property->hasLazyLaravelCollectionTransformAttribute) {
+            return [];
+        }
+
         $instances = [];
 
         foreach (static::propertyAttributes($property, $context) as $attribute) {
@@ -1480,6 +1492,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ClassMetadata $metadata,
         ?CreationContext $context = null,
     ): void {
+        if (!$property->hasLaravelCollectionTransformAttribute) {
+            return;
+        }
+
         if (
             $property->laravelCollectionType !== null
             || $property->laravelCollectionCastClass !== null
@@ -1516,6 +1532,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ClassMetadata $metadata,
         ?CreationContext $context = null,
     ): void {
+        if (!$property->hasLazyLaravelCollectionTransformAttribute && !$property->hasCollectionTransformAttribute) {
+            return;
+        }
+
         if (
             $property->lazyLaravelCollectionType === null
             && $property->lazyLaravelCollectionCastClass === null
@@ -1555,6 +1575,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ClassMetadata $metadata,
         ?CreationContext $context = null,
     ): void {
+        if (!$property->hasCollectionTransformAttribute) {
+            return;
+        }
+
         if (
             $property->lazyDataListType === null
             && $property->lazyDataListCastClass === null

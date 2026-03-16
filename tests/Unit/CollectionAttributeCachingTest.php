@@ -8,9 +8,26 @@
  */
 
 use Tests\Fixtures\Data\ObservedCollectionTransformData;
+use Tests\Fixtures\Data\ObservedCollectionAttributeScanData;
+use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;
 
 describe('collection attribute caching', function (): void {
+    test('skips runtime collection attribute scans when no transforms exist', function (): void {
+        ObservedCollectionAttributeScanData::create([
+            'items' => ['warmup'],
+        ]);
+
+        ObservedCollectionAttributeScanData::reset();
+
+        $data = ObservedCollectionAttributeScanData::create([
+            'items' => ['a', 'b', 'c'],
+        ]);
+
+        expect($data->items->all())->toBe(['a', 'b', 'c'])
+            ->and(ObservedCollectionAttributeScans::$count)->toBe(0);
+    });
+
     test('instantiates collection transforms once per hydration operation', function (): void {
         ObservedCollectionTransformData::create([
             'items' => ['warmup'],

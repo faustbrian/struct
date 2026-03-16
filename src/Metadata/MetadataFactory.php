@@ -76,6 +76,10 @@ use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
 use Cline\Struct\Contracts\ProvidesValidationRulesInterface;
+use Cline\Struct\Contracts\TransformsCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLaravelCollectionValueInterface;
+use Cline\Struct\Contracts\TransformsLazyCollectionValueInterface;
+use Cline\Struct\Contracts\WrapsLaravelCollectionTransformInterface;
 use Cline\Struct\Enums\DataListType;
 use Cline\Struct\Enums\NameMapper;
 use Cline\Struct\Enums\SuperfluousKeys;
@@ -328,6 +332,9 @@ final class MetadataFactory
                 isComputed: $computed instanceof Computed || $attributeMap->hasCollectionResultAttribute || $attributeMap->hasCollectionSourceAttribute,
                 hasCollectionResultAttribute: $attributeMap->hasCollectionResultAttribute,
                 hasCollectionSourceAttribute: $attributeMap->hasCollectionSourceAttribute,
+                hasCollectionTransformAttribute: $attributeMap->hasCollectionTransformAttribute,
+                hasLaravelCollectionTransformAttribute: $attributeMap->hasLaravelCollectionTransformAttribute,
+                hasLazyLaravelCollectionTransformAttribute: $attributeMap->hasLazyLaravelCollectionTransformAttribute,
                 isLazy: $lazy instanceof Lazy || $lazyGroups !== [],
                 computer: $computed?->computer,
                 lazyResolver: $lazy?->resolver,
@@ -599,6 +606,9 @@ final class MetadataFactory
                 withoutPropertyInferredValidation: false,
                 hasCollectionResultAttribute: false,
                 hasCollectionSourceAttribute: false,
+                hasCollectionTransformAttribute: false,
+                hasLaravelCollectionTransformAttribute: false,
+                hasLazyLaravelCollectionTransformAttribute: false,
                 hasContextualStringTransform: false,
                 hasContextualCollectionTransform: false,
             );
@@ -629,6 +639,9 @@ final class MetadataFactory
         $withoutPropertyInferredValidation = false;
         $hasCollectionResultAttribute = false;
         $hasCollectionSourceAttribute = false;
+        $hasCollectionTransformAttribute = false;
+        $hasLaravelCollectionTransformAttribute = false;
+        $hasLazyLaravelCollectionTransformAttribute = false;
         $hasContextualStringTransform = false;
         $hasContextualCollectionTransform = false;
 
@@ -659,6 +672,21 @@ final class MetadataFactory
 
             if ($attribute instanceof ContextualTransformsCollectionValueInterface) {
                 $hasContextualCollectionTransform = true;
+            }
+
+            if ($attribute instanceof TransformsCollectionValueInterface) {
+                $hasCollectionTransformAttribute = true;
+            }
+
+            if (
+                $attribute instanceof TransformsLaravelCollectionValueInterface
+                || $attribute instanceof WrapsLaravelCollectionTransformInterface
+            ) {
+                $hasLaravelCollectionTransformAttribute = true;
+            }
+
+            if ($attribute instanceof TransformsLazyCollectionValueInterface) {
+                $hasLazyLaravelCollectionTransformAttribute = true;
             }
 
             if ($attribute instanceof LazyGroup) {
@@ -820,6 +848,9 @@ final class MetadataFactory
             withoutPropertyInferredValidation: $withoutPropertyInferredValidation,
             hasCollectionResultAttribute: $hasCollectionResultAttribute,
             hasCollectionSourceAttribute: $hasCollectionSourceAttribute,
+            hasCollectionTransformAttribute: $hasCollectionTransformAttribute,
+            hasLaravelCollectionTransformAttribute: $hasLaravelCollectionTransformAttribute,
+            hasLazyLaravelCollectionTransformAttribute: $hasLazyLaravelCollectionTransformAttribute,
             hasContextualStringTransform: $hasContextualStringTransform,
             hasContextualCollectionTransform: $hasContextualCollectionTransform,
         );
@@ -1208,6 +1239,9 @@ final readonly class PropertyAttributeMap
         public bool $withoutPropertyInferredValidation,
         public bool $hasCollectionResultAttribute,
         public bool $hasCollectionSourceAttribute,
+        public bool $hasCollectionTransformAttribute,
+        public bool $hasLaravelCollectionTransformAttribute,
+        public bool $hasLazyLaravelCollectionTransformAttribute,
         public bool $hasContextualStringTransform,
         public bool $hasContextualCollectionTransform,
     ) {}
