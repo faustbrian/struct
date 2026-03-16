@@ -12,6 +12,9 @@ namespace Tests\Fixtures\Attributes;
 use Attribute;
 use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 
+/**
+ * @psalm-immutable
+ */
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class ObserveCollectionAttributeScan
 {

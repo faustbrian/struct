@@ -7,8 +7,8 @@
  * file that was distributed with this source code.
  */
 
-use Tests\Fixtures\Data\ObservedCollectionTransformData;
 use Tests\Fixtures\Data\ObservedCollectionAttributeScanData;
+use Tests\Fixtures\Data\ObservedCollectionTransformData;
 use Tests\Fixtures\Data\ObservedGeneratedValueAttributeScanData;
 use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;

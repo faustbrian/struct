@@ -13,7 +13,9 @@ use Cline\Struct\AbstractData;
 use Cline\Struct\Attributes\AsDataList;
 use Cline\Struct\Enums\DataListType;
 use Cline\Struct\Metadata\ClassMetadata;
+use Cline\Struct\Support\CreationContext;
 use Cline\Struct\Support\DataList;
+use Override;
 use Tests\Fixtures\Attributes\ObserveCollectionAttributeScan;
 use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 
@@ -35,10 +37,11 @@ final readonly class ObservedCollectionAttributeScanData extends AbstractData
     }
 
     /**
-     * @param array<array-key, mixed> $input
+     * @param  array<array-key, mixed> $input
      * @return array<array-key, mixed>
      */
-    protected static function prepareInput(ClassMetadata $metadata, array $input, ?\Cline\Struct\Support\CreationContext $context = null): array
+    #[Override()]
+    protected static function prepareInput(ClassMetadata $metadata, array $input, ?CreationContext $context = null): array
     {
         return $input;
     }

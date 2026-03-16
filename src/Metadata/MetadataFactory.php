@@ -331,12 +331,8 @@ final class MetadataFactory
                 isSensitive: $sensitive,
                 isEncrypted: $attributeMap->isEncrypted,
                 isComputed: $computed instanceof Computed || $attributeMap->hasCollectionResultAttribute || $attributeMap->hasCollectionSourceAttribute,
-                hasGeneratedValueAttribute: $attributeMap->hasGeneratedValueAttribute,
                 hasCollectionResultAttribute: $attributeMap->hasCollectionResultAttribute,
                 hasCollectionSourceAttribute: $attributeMap->hasCollectionSourceAttribute,
-                hasCollectionTransformAttribute: $attributeMap->hasCollectionTransformAttribute,
-                hasLaravelCollectionTransformAttribute: $attributeMap->hasLaravelCollectionTransformAttribute,
-                hasLazyLaravelCollectionTransformAttribute: $attributeMap->hasLazyLaravelCollectionTransformAttribute,
                 isLazy: $lazy instanceof Lazy || $lazyGroups !== [],
                 computer: $computed?->computer,
                 lazyResolver: $lazy?->resolver,
@@ -380,6 +376,10 @@ final class MetadataFactory
                 lazyDataCollectionCastClass: $lazyDataCollection['castClass'],
                 lazyDataCollectionCast: $lazyDataCollectionCast,
                 lazyDataCollectionTypeKind: PropertyMetadata::nullableTypeKind($lazyDataCollection['type']),
+                hasGeneratedValueAttribute: $attributeMap->hasGeneratedValueAttribute,
+                hasCollectionTransformAttribute: $attributeMap->hasCollectionTransformAttribute,
+                hasLaravelCollectionTransformAttribute: $attributeMap->hasLaravelCollectionTransformAttribute,
+                hasLazyLaravelCollectionTransformAttribute: $attributeMap->hasLazyLaravelCollectionTransformAttribute,
                 requiresHydrationContext: $attributeMap->hasContextualStringTransform
                     || $attributeMap->hasContextualCollectionTransform
                     || $this->implementsContextualCast($cast)

@@ -27,6 +27,7 @@ use function array_keys;
 use function array_map;
 use function array_values;
 use function count;
+use function get_object_vars;
 use function is_array;
 use function is_bool;
 use function is_float;
