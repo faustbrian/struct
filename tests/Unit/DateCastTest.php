@@ -16,6 +16,28 @@ use Cline\Struct\Metadata\PropertyMetadata;
 use Tests\Fixtures\Data\MappedUserData;
 
 describe('Built-in date casts', function (): void {
+    test('formats dates directly when no timezone conversion is configured', function (string $castClass): void {
+        $cast = new $castClass();
+        $property = makeDateCastProperty();
+
+        config([
+            'struct.date_format' => \DATE_ATOM,
+            'struct.date_timezone' => null,
+        ]);
+
+        $serialized = $cast->set(
+            $property,
+            CarbonImmutable::create(2_024, 5, 16, 16, 0, 0, 'UTC'),
+        );
+
+        expect($serialized)->toBe('2024-05-16T16:00:00+00:00');
+    })->with([
+        CarbonImmutableCast::class,
+        CarbonCast::class,
+        CarbonInterfaceCast::class,
+        DateTimeInterfaceCast::class,
+    ]);
+
     test('captures date configuration once per cast instance', function (string $castClass): void {
         config([
             'struct.date_format' => 'Y-m-d H:i:s',

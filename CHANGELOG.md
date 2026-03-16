@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced transformation overhead further by letting
   `SerializationContext` reuse one resolved `MetadataFactory` across an
   entire serialization pass.
+- Reduced built-in date cast serialization overhead when no timezone
+  conversion is configured by formatting directly from the value.
 - Reduced DTO-only collection serialization overhead by collapsing the
   “detect DTO items” and “serialize DTO items” passes into one shared
   traversal for Struct-owned wrappers.

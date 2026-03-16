@@ -50,6 +50,10 @@ final readonly class CarbonCast implements CastInterface
             return null;
         }
 
+        if ($value instanceof DateTimeInterface && $this->date->timezone === null) {
+            return $value->format($this->date->format);
+        }
+
         return $value instanceof DateTimeInterface
             ? $this->date->formatValue($value)
             : $value;
