@@ -10,13 +10,13 @@
 use Cline\Struct\Attributes\Strings\Trim;
 use Cline\Struct\Attributes\Strings\Uuid;
 
-test('string attributes use the strings namespace with backward-compatible aliases', function (): void {
+test('string attributes use the strings namespace', function (): void {
     expect(class_exists(Trim::class))->toBeTrue()
         ->and(class_exists(Uuid::class))->toBeTrue()
         ->and(
-            new Cline\Struct\Attributes\Trim(),
+            new Trim()
         )->toBeInstanceOf(Trim::class)
         ->and(
-            new Cline\Struct\Attributes\Uuid(),
+            new Uuid()
         )->toBeInstanceOf(Uuid::class);
 });

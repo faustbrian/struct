@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced DTO-only collection serialization overhead by collapsing the
   “detect DTO items” and “serialize DTO items” passes into one shared
   traversal for Struct-owned wrappers.
+- Corrected the string-attribute namespace coverage to assert the
+  `Cline\Struct\Attributes\Strings\*` classes directly.
 - Reduced collection hydration overhead for plain array, `DataList`,
   `DataCollection`, and Laravel collection properties by skipping
   runtime attribute scans when metadata proves that no collection
