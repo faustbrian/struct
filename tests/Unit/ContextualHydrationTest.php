@@ -9,6 +9,7 @@
 
 use Tests\Fixtures\Casts\ContextualValueCast;
 use Tests\Fixtures\Data\ContextualCastData;
+use Tests\Fixtures\Data\ContextualCollectionItemCastData;
 use Tests\Fixtures\Data\ContextualCollectionTransformData;
 use Tests\Fixtures\Data\ContextualStringTransformData;
 
@@ -77,6 +78,21 @@ describe('Contextual hydration', function (): void {
             'tag:first',
             'tag:second',
         ]);
+    });
+
+    test('reuses one property hydration context for contextual collection item casts', function (): void {
+        $data = ContextualCollectionItemCastData::create([
+            'mode' => 'upper',
+            'prefix' => 'raw:',
+            'items' => ['first', 'second', 'third'],
+        ]);
+
+        $contexts = array_column(ContextualValueCast::$observations, 'context');
+        $contextIds = array_values(array_unique(array_map(spl_object_id(...), $contexts)));
+
+        expect($data->items->all())->toBe(['FIRST', 'SECOND', 'THIRD'])
+            ->and(ContextualValueCast::$observations)->toHaveCount(3)
+            ->and($contextIds)->toHaveCount(1);
     });
 
     test('passes resolved sibling values to contextual string transforms', function (): void {

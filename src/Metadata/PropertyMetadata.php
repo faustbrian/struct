@@ -104,6 +104,7 @@ final readonly class PropertyMetadata
         public ?string $lazyDataCollectionCastClass = null,
         public ?CastInterface $lazyDataCollectionCast = null,
         public ?string $lazyDataCollectionTypeKind = null,
+        public bool $requiresHydrationContext = false,
     ) {}
 
     /**
@@ -228,6 +229,7 @@ final readonly class PropertyMetadata
             lazyDataCollectionCastClass: $lazyDataCollectionCastClass,
             lazyDataCollectionCast: $lazyDataCollectionCast,
             lazyDataCollectionTypeKind: self::nullableTypeKind($lazyDataCollectionType),
+            requiresHydrationContext: (bool) ($payload['requiresHydrationContext'] ?? false),
         );
     }
 
@@ -449,6 +451,7 @@ final readonly class PropertyMetadata
             lazyDataCollectionCastClass: null,
             lazyDataCollectionCast: null,
             lazyDataCollectionTypeKind: null,
+            requiresHydrationContext: false,
         );
     }
 
@@ -494,6 +497,7 @@ final readonly class PropertyMetadata
             'lazyLaravelCollectionType' => $this->lazyLaravelCollectionType,
             'lazyLaravelCollectionCastClass' => $this->lazyLaravelCollectionCastClass,
             'hasCollectionItemCast' => $this->hasCollectionItemCast,
+            'requiresHydrationContext' => $this->requiresHydrationContext,
             'validationRules' => $this->validationRules,
             'itemValidationRules' => $this->itemValidationRules,
             'collectionItemDescriptor' => $this->collectionItemDescriptorPayload(),

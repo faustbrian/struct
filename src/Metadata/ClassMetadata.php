@@ -54,6 +54,8 @@ final readonly class ClassMetadata
     /** @var array<string, list<string>> */
     public array $computedInputNames;
 
+    public bool $usesContextualHydration;
+
     /**
      * @param class-string                    $class
      * @param ReflectionClass<object>         $reflection
@@ -82,6 +84,7 @@ final readonly class ClassMetadata
         $defaultProjectionPropertiesWithoutSensitive = [];
         $hydratedPropertyNames = [];
         $hydratedPropertyLookup = [];
+        $usesContextualHydration = false;
 
         foreach ($this->properties as $property) {
             if ($property->hasCollectionSourceAttribute) {
@@ -99,6 +102,10 @@ final readonly class ClassMetadata
 
             if ($property->isLazy) {
                 continue;
+            }
+
+            if ($property->requiresHydrationContext) {
+                $usesContextualHydration = true;
             }
 
             if ($property->excludeConditions !== []) {
@@ -124,6 +131,7 @@ final readonly class ClassMetadata
         $this->defaultProjectionProperties = $defaultProjectionProperties;
         $this->defaultProjectionPropertiesWithoutSensitive = $defaultProjectionPropertiesWithoutSensitive;
         $this->computedInputNames = $this->buildComputedInputNames();
+        $this->usesContextualHydration = $usesContextualHydration;
     }
 
     /**

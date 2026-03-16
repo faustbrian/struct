@@ -200,11 +200,40 @@ final class CreationContext
     }
 
     /**
+     * @param array<string, mixed> $rawInput
+     */
+    public function beginHydration(array $rawInput): void
+    {
+        $this->cache->rawInput = $rawInput;
+        $this->cache->propertyHydrationContexts = new WeakMap();
+        $this->cache->properties = [];
+    }
+
+    public function propertyHydrationContext(PropertyMetadata $property): PropertyHydrationContext
+    {
+        if (isset($this->cache->propertyHydrationContexts[$property])) {
+            return $this->cache->propertyHydrationContexts[$property];
+        }
+
+        return $this->cache->propertyHydrationContexts[$property] = new PropertyHydrationContext(
+            dataClass: $this->metadata->class,
+            property: $property,
+            rawInput: $this->cache->rawInput,
+            resolvedProperties: $this->cache->properties,
+        );
+    }
+
+    /**
      * @param array<string, mixed> $properties
      */
     public function setProperties(array $properties): void
     {
+        if (!$this->metadata->usesContextualHydration) {
+            return;
+        }
+
         $this->cache->properties = $properties;
+        $this->cache->propertyHydrationContexts = new WeakMap();
     }
 
     /**
@@ -415,6 +444,9 @@ final class CreationContextCache
     /** @var WeakMap<PropertyMetadata, list<object>> */
     public WeakMap $propertyAttributes;
 
+    /** @var WeakMap<PropertyMetadata, PropertyHydrationContext> */
+    public WeakMap $propertyHydrationContexts;
+
     public ?HydrationGuard $hydrationGuard = null;
 
     public ?ValidationFactory $validationFactory = null;
@@ -446,6 +478,9 @@ final class CreationContextCache
     /** @var array<string, mixed> */
     public array $properties = [];
 
+    /** @var array<string, mixed> */
+    public array $rawInput = [];
+
     /** @var array<string, Collection<array-key, mixed>> */
     public array $materializedCollectionSources = [];
 
@@ -453,5 +488,6 @@ final class CreationContextCache
     {
         $this->collectionItemProperties = new WeakMap();
         $this->propertyAttributes = new WeakMap();
+        $this->propertyHydrationContexts = new WeakMap();
     }
 }

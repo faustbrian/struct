@@ -15,13 +15,14 @@ use Cline\Struct\Support\PropertyHydrationContext;
 
 use function mb_strtolower;
 use function mb_strtoupper;
+use function spl_object_id;
 
 /**
  * @author Brian Faust <brian@cline.sh>
  */
 final class ContextualValueCast implements ContextualCastInterface
 {
-    /** @var list<array{dataClass: string, property: string, rawInput: array<string, mixed>, resolvedProperties: array<string, mixed>}> */
+    /** @var list<array{context: PropertyHydrationContext, contextId: int, dataClass: string, property: string, rawInput: array<string, mixed>, resolvedProperties: array<string, mixed>}> */
     public static array $observations = [];
 
     public static function reset(): void
@@ -40,6 +41,8 @@ final class ContextualValueCast implements ContextualCastInterface
         PropertyHydrationContext $context,
     ): mixed {
         self::$observations[] = [
+            'context' => $context,
+            'contextId' => spl_object_id($context),
             'dataClass' => $context->dataClass,
             'property' => $context->property->name,
             'rawInput' => $context->rawInput,

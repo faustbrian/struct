@@ -69,6 +69,9 @@ use Cline\Struct\Casts\PostalCodeCast;
 use Cline\Struct\Casts\SemVerCast;
 use Cline\Struct\Contracts\CastInterface;
 use Cline\Struct\Contracts\ComputesCollectionResultValueInterface;
+use Cline\Struct\Contracts\ContextualCastInterface;
+use Cline\Struct\Contracts\ContextualTransformsCollectionValueInterface;
+use Cline\Struct\Contracts\ContextualTransformsStringValueInterface;
 use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
@@ -368,6 +371,15 @@ final class MetadataFactory
                 lazyDataCollectionCastClass: $lazyDataCollection['castClass'],
                 lazyDataCollectionCast: $lazyDataCollectionCast,
                 lazyDataCollectionTypeKind: PropertyMetadata::nullableTypeKind($lazyDataCollection['type']),
+                requiresHydrationContext: $attributeMap->hasContextualStringTransform
+                    || $attributeMap->hasContextualCollectionTransform
+                    || $this->implementsContextualCast($cast)
+                    || $this->implementsContextualCast($dataList['castClass'])
+                    || $this->implementsContextualCast($dataCollection['castClass'])
+                    || $this->implementsContextualCast($lazyDataList['castClass'])
+                    || $this->implementsContextualCast($lazyDataCollection['castClass'])
+                    || $this->implementsContextualCast($laravelCollection['castClass'])
+                    || $this->implementsContextualCast($lazyLaravelCollection['castClass']),
             );
         }
 
@@ -587,6 +599,8 @@ final class MetadataFactory
                 withoutPropertyInferredValidation: false,
                 hasCollectionResultAttribute: false,
                 hasCollectionSourceAttribute: false,
+                hasContextualStringTransform: false,
+                hasContextualCollectionTransform: false,
             );
         }
 
@@ -615,6 +629,8 @@ final class MetadataFactory
         $withoutPropertyInferredValidation = false;
         $hasCollectionResultAttribute = false;
         $hasCollectionSourceAttribute = false;
+        $hasContextualStringTransform = false;
+        $hasContextualCollectionTransform = false;
 
         foreach ($attributes as $attribute) {
             if ($attribute instanceof ComputesCollectionResultValueInterface) {
@@ -635,6 +651,14 @@ final class MetadataFactory
                 foreach ($attribute->rules() as $rule) {
                     $itemValidationRules[] = $rule;
                 }
+            }
+
+            if ($attribute instanceof ContextualTransformsStringValueInterface) {
+                $hasContextualStringTransform = true;
+            }
+
+            if ($attribute instanceof ContextualTransformsCollectionValueInterface) {
+                $hasContextualCollectionTransform = true;
             }
 
             if ($attribute instanceof LazyGroup) {
@@ -796,7 +820,17 @@ final class MetadataFactory
             withoutPropertyInferredValidation: $withoutPropertyInferredValidation,
             hasCollectionResultAttribute: $hasCollectionResultAttribute,
             hasCollectionSourceAttribute: $hasCollectionSourceAttribute,
+            hasContextualStringTransform: $hasContextualStringTransform,
+            hasContextualCollectionTransform: $hasContextualCollectionTransform,
         );
+    }
+
+    /**
+     * @param null|class-string<CastInterface> $class
+     */
+    private function implementsContextualCast(?string $class): bool
+    {
+        return $class !== null && is_subclass_of($class, ContextualCastInterface::class);
     }
 
     /**
@@ -1174,5 +1208,7 @@ final readonly class PropertyAttributeMap
         public bool $withoutPropertyInferredValidation,
         public bool $hasCollectionResultAttribute,
         public bool $hasCollectionSourceAttribute,
+        public bool $hasContextualStringTransform,
+        public bool $hasContextualCollectionTransform,
     ) {}
 }

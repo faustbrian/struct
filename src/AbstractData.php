@@ -431,30 +431,40 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         bool $cascadeValidation = false,
     ): static {
         $metadata = $context->metadata;
+        $context->beginHydration($input);
         $input = static::prepareInput($metadata, $input, $context);
         static::assertNoRecursiveInput($input, $context);
         static::assertNoSuperfluousKeys($metadata, $input);
 
         $values = [];
+        $tracksContextualHydration = $metadata->usesContextualHydration;
 
         foreach ($metadata->hydratedProperties as $property) {
-            $context->setProperties($values);
+            if ($tracksContextualHydration) {
+                $context->setProperties($values);
+            }
             $values[$property->name] = static::resolveValue($metadata, $property, $input, $cascadeValidation, $context);
         }
 
-        $context->setProperties($values);
+        if ($tracksContextualHydration) {
+            $context->setProperties($values);
+        }
 
         foreach ($metadata->hydratedProperties as $property) {
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
-            $context->setProperties($values);
+            if ($tracksContextualHydration) {
+                $context->setProperties($values);
+            }
         }
 
         foreach ($metadata->collectionSourceProperties as $property) {
             $values[$property->name] = static::resolveGeneratedCollectionValue($context, $property, $values);
             $values[$property->name] = static::resolveHydratedLaravelCollectionValue($property, $values, $metadata, $context);
             $values[$property->name] = static::resolveHydratedLazyLaravelCollectionValue($property, $values, $metadata, $context);
-            $context->setProperties($values);
+            if ($tracksContextualHydration) {
+                $context->setProperties($values);
+            }
         }
 
         foreach ($metadata->collectionResultProperties as $property) {
@@ -484,6 +494,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $input,
         bool $requestException = false,
     ): static {
+        $context->beginHydration($input);
         $input = static::prepareInput($context->metadata, $input, $context);
 
         /** @var array<string, mixed> $input */
@@ -1934,11 +1945,15 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         array $rawInput = [],
         ?CreationContext $context = null,
     ): PropertyHydrationContext {
+        if ($context instanceof CreationContext) {
+            return $context->propertyHydrationContext($property);
+        }
+
         return new PropertyHydrationContext(
-            dataClass: $context?->metadata->class ?? static::class,
+            dataClass: static::class,
             property: $property,
             rawInput: $rawInput,
-            resolvedProperties: $context?->properties() ?? [],
+            resolvedProperties: [],
         );
     }
 
