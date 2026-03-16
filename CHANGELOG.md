@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `DataCollection`, and Laravel collection properties by skipping
   runtime attribute scans when metadata proves that no collection
   transforms are attached.
+- Reduced creation overhead for properties without generated-value
+  attributes by skipping runtime attribute scans during input
+  preparation when metadata proves that no missing-value generators are
+  attached.
 - Moved the newer value-object and numeric attributes into dedicated
   subnamespaces under `Cline\Struct\Attributes\Money`,
   `Cline\Struct\Attributes\PhoneNumber`,

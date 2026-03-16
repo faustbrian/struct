@@ -832,6 +832,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         PropertyMetadata $property,
         ?CreationContext $context = null,
     ): ?GeneratesMissingValueInterface {
+        if (!$property->hasGeneratedValueAttribute) {
+            return null;
+        }
+
         $instances = [];
 
         foreach (static::propertyAttributes($property, $context) as $attribute) {

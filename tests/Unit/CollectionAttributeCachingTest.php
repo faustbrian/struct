@@ -9,10 +9,26 @@
 
 use Tests\Fixtures\Data\ObservedCollectionTransformData;
 use Tests\Fixtures\Data\ObservedCollectionAttributeScanData;
+use Tests\Fixtures\Data\ObservedGeneratedValueAttributeScanData;
 use Tests\Fixtures\Support\ObservedCollectionAttributeScans;
 use Tests\Fixtures\Support\ObservedCollectionTransformInstantiations;
 
 describe('collection attribute caching', function (): void {
+    test('skips runtime generated value scans when no generators exist', function (): void {
+        ObservedGeneratedValueAttributeScanData::create([
+            'name' => 'warmup',
+        ]);
+
+        ObservedGeneratedValueAttributeScanData::reset();
+
+        $data = ObservedGeneratedValueAttributeScanData::create([
+            'name' => 'Taylor',
+        ]);
+
+        expect($data->name)->toBe('Taylor')
+            ->and(ObservedCollectionAttributeScans::$count)->toBe(0);
+    });
+
     test('skips runtime collection attribute scans when no transforms exist', function (): void {
         ObservedCollectionAttributeScanData::create([
             'items' => ['warmup'],

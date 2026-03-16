@@ -73,6 +73,7 @@ use Cline\Struct\Contracts\ContextualCastInterface;
 use Cline\Struct\Contracts\ContextualTransformsCollectionValueInterface;
 use Cline\Struct\Contracts\ContextualTransformsStringValueInterface;
 use Cline\Struct\Contracts\GeneratesCollectionValueInterface;
+use Cline\Struct\Contracts\GeneratesMissingValueInterface;
 use Cline\Struct\Contracts\ProvidesCastClassInterface;
 use Cline\Struct\Contracts\ProvidesItemValidationRulesInterface;
 use Cline\Struct\Contracts\ProvidesValidationRulesInterface;
@@ -330,6 +331,7 @@ final class MetadataFactory
                 isSensitive: $sensitive,
                 isEncrypted: $attributeMap->isEncrypted,
                 isComputed: $computed instanceof Computed || $attributeMap->hasCollectionResultAttribute || $attributeMap->hasCollectionSourceAttribute,
+                hasGeneratedValueAttribute: $attributeMap->hasGeneratedValueAttribute,
                 hasCollectionResultAttribute: $attributeMap->hasCollectionResultAttribute,
                 hasCollectionSourceAttribute: $attributeMap->hasCollectionSourceAttribute,
                 hasCollectionTransformAttribute: $attributeMap->hasCollectionTransformAttribute,
@@ -602,6 +604,7 @@ final class MetadataFactory
                 mapName: null,
                 withoutReplacingEmptyStrings: false,
                 isEncrypted: false,
+                hasGeneratedValueAttribute: false,
                 withPropertyInferredValidation: false,
                 withoutPropertyInferredValidation: false,
                 hasCollectionResultAttribute: false,
@@ -635,6 +638,7 @@ final class MetadataFactory
         $mapName = null;
         $withoutReplacingEmptyStrings = false;
         $isEncrypted = false;
+        $hasGeneratedValueAttribute = false;
         $withPropertyInferredValidation = false;
         $withoutPropertyInferredValidation = false;
         $hasCollectionResultAttribute = false;
@@ -648,6 +652,10 @@ final class MetadataFactory
         foreach ($attributes as $attribute) {
             if ($attribute instanceof ComputesCollectionResultValueInterface) {
                 $hasCollectionResultAttribute = true;
+            }
+
+            if ($attribute instanceof GeneratesMissingValueInterface) {
+                $hasGeneratedValueAttribute = true;
             }
 
             if ($attribute instanceof GeneratesCollectionValueInterface) {
@@ -844,6 +852,7 @@ final class MetadataFactory
             mapName: $mapName,
             withoutReplacingEmptyStrings: $withoutReplacingEmptyStrings,
             isEncrypted: $isEncrypted,
+            hasGeneratedValueAttribute: $hasGeneratedValueAttribute,
             withPropertyInferredValidation: $withPropertyInferredValidation,
             withoutPropertyInferredValidation: $withoutPropertyInferredValidation,
             hasCollectionResultAttribute: $hasCollectionResultAttribute,
@@ -1235,6 +1244,7 @@ final readonly class PropertyAttributeMap
         public ?MapName $mapName,
         public bool $withoutReplacingEmptyStrings,
         public bool $isEncrypted,
+        public bool $hasGeneratedValueAttribute,
         public bool $withPropertyInferredValidation,
         public bool $withoutPropertyInferredValidation,
         public bool $hasCollectionResultAttribute,
