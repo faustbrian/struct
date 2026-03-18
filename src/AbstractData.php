@@ -291,19 +291,21 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         ?SerializationOptions $serialization = null,
     ): array {
         $options = $serialization;
+        $defaults = null;
 
         if (!$options instanceof SerializationOptions) {
             $isDefaultProjection = $include === []
                 && $exclude === []
                 && $groups === []
                 && $context === [];
-            $defaults = $isDefaultProjection
-                ? resolve(SerializationDefaults::class)
-                : null;
             $options = $isDefaultProjection
-                ? ($includeSensitive
-                    ? $defaults->options->withSensitive()
-                    : $defaults->options)
+                ? (function () use ($includeSensitive, &$defaults): SerializationOptions {
+                    $defaults = resolve(SerializationDefaults::class);
+
+                    return $includeSensitive
+                        ? $defaults->options->withSensitive()
+                        : $defaults->options;
+                })()
                 : new SerializationOptions(
                     includeSensitive: $includeSensitive,
                     include: $include,

@@ -199,7 +199,7 @@ final readonly class DataCollection implements Arrayable, ArrayAccess, Countable
             }
 
             if ($onlyDataObjects) {
-                if ($item instanceof AbstractData) {
+                if ($context instanceof SerializationContext && $item instanceof AbstractData) {
                     $serializedDataObjects[$key] = $item->toArrayUsingContext($context);
                 } else {
                     $onlyDataObjects = false;

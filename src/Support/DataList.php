@@ -202,7 +202,7 @@ final readonly class DataList implements Arrayable, ArrayAccess, Countable, Iter
             }
 
             if ($onlyDataObjects) {
-                if ($item instanceof AbstractData) {
+                if ($context instanceof SerializationContext && $item instanceof AbstractData) {
                     $serializedDataObjects[] = $item->toArrayUsingContext($context);
                 } else {
                     $onlyDataObjects = false;
