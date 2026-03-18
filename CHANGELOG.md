@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Documented the scalar value expectation inside
+  `Attributes\\Collections\\SortValues` so static analysis accepts the
+  built-in value sort transform without changing runtime behavior.
+
 ## [2.0.0] - 2026-03-18
 
 ### Added

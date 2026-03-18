@@ -30,14 +30,17 @@ final readonly class SortValues extends AbstractCollectionTransformer
 
     public function transform(array $items): array
     {
-        if ($this->descending) {
-            arsort($items, $this->flags);
+        /** @var array<array-key, bool|float|int|string> $sortableItems */
+        $sortableItems = $items;
 
-            return $items;
+        if ($this->descending) {
+            arsort($sortableItems, $this->flags);
+
+            return $sortableItems;
         }
 
-        asort($items, $this->flags);
+        asort($sortableItems, $this->flags);
 
-        return $items;
+        return $sortableItems;
     }
 }
