@@ -18,7 +18,7 @@
         "laravel/framework": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "spatie/laravel-package-tools": "^1.93.0",
         "spatie/php-structure-discoverer": "^2.4",
-        "symfony/yaml": "^7.4.6"
+        "symfony/yaml": "^7.4.6 || ^8.0"
     },
     "require-dev": {
         "beacon-hq/bag": "^2.6.2",
@@ -31,7 +31,7 @@
         "orchestra/testbench": "^8.0 || ^9.0 || ^10.9",
         "ramsey/uuid": "^4.7",
         "spatie/laravel-data": "^4.20",
-        "symfony/var-dumper": "^6.0 || ^7.4.6",
+        "symfony/var-dumper": "^6.0 || ^7.4.6 || ^8.0",
         "cline/phone-number": "^1.0",
         "cline/postal-code": "^1.0",
         "cline/semver": "^1.0"
