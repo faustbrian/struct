@@ -1145,6 +1145,27 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             return $property->cast->get($property, $value);
         }
 
+        if (
+            $value === null
+            && $property->nullable
+            && (
+                $property->dataListType !== null
+                || $property->dataListCastClass !== null
+                || $property->dataCollectionType !== null
+                || $property->dataCollectionCastClass !== null
+                || $property->lazyDataListType !== null
+                || $property->lazyDataListCastClass !== null
+                || $property->lazyDataCollectionType !== null
+                || $property->lazyDataCollectionCastClass !== null
+                || $property->laravelCollectionType !== null
+                || $property->laravelCollectionCastClass !== null
+                || $property->lazyLaravelCollectionType !== null
+                || $property->lazyLaravelCollectionCastClass !== null
+            )
+        ) {
+            return null;
+        }
+
         if ($property->dataListType !== null) {
             return new DataList(static::transformCollectionValue(
                 $property,

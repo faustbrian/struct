@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Preserved explicit `null` values for nullable `DataList`,
+  `DataCollection`, lazy Struct collection wrappers, and Laravel
+  collection wrappers instead of coercing them into empty collections
+  during hydration.
 - Documented the scalar value expectation inside
   `Attributes\\Collections\\SortValues` so static analysis accepts the
   built-in value sort transform without changing runtime behavior.
