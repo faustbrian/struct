@@ -1239,6 +1239,10 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
             );
 
             if (($property->typeKinds[$index] ?? 'other') === 'array') {
+                if ($hydrated === null) {
+                    return null;
+                }
+
                 /** @var array<array-key, mixed> $hydrated */
                 return static::transformCollectionValue(
                     $property,

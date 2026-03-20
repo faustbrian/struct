@@ -24,6 +24,7 @@ describe('nullable collection hydration', function (): void {
             ],
             'collectionNumbers' => ['1', 2, '3'],
             'lazyCollectionNumbers' => ['1', 2, '3'],
+            'reindexed' => ['first' => 'A', 'second' => 'B'],
         ]);
 
         expect($dto->numbers?->toArray())->toBe([1, 2, 3])
@@ -37,7 +38,8 @@ describe('nullable collection hydration', function (): void {
                 'second' => ['title' => 'B', 'artist' => 'Artist B'],
             ])
             ->and($dto->collectionNumbers?->all())->toBe([1, 2, 3])
-            ->and($dto->lazyCollectionNumbers?->all())->toBe([1, 2, 3]);
+            ->and($dto->lazyCollectionNumbers?->all())->toBe([1, 2, 3])
+            ->and($dto->reindexed)->toBe(['A', 'B']);
     });
 
     test('preserves explicit null for nullable collection wrappers', function (): void {
@@ -48,6 +50,7 @@ describe('nullable collection hydration', function (): void {
             'lazySongs' => null,
             'collectionNumbers' => null,
             'lazyCollectionNumbers' => null,
+            'reindexed' => null,
         ]);
 
         expect($dto->numbers)->toBeNull()
@@ -55,7 +58,8 @@ describe('nullable collection hydration', function (): void {
             ->and($dto->lazyNumbers)->toBeNull()
             ->and($dto->lazySongs)->toBeNull()
             ->and($dto->collectionNumbers)->toBeNull()
-            ->and($dto->lazyCollectionNumbers)->toBeNull();
+            ->and($dto->lazyCollectionNumbers)->toBeNull()
+            ->and($dto->reindexed)->toBeNull();
     });
 
     test('preserves missing nullable collection wrappers as null', function (): void {
@@ -66,6 +70,7 @@ describe('nullable collection hydration', function (): void {
             ->and($dto->lazyNumbers)->toBeNull()
             ->and($dto->lazySongs)->toBeNull()
             ->and($dto->collectionNumbers)->toBeNull()
-            ->and($dto->lazyCollectionNumbers)->toBeNull();
-    });
+            ->and($dto->lazyCollectionNumbers)->toBeNull()
+            ->and($dto->reindexed)->toBeNull();
+});
 });

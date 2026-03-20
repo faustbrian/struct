@@ -16,6 +16,7 @@ use Cline\Struct\Attributes\AsDataList;
 use Cline\Struct\Attributes\AsLazyCollection;
 use Cline\Struct\Attributes\AsLazyDataCollection;
 use Cline\Struct\Attributes\AsLazyDataList;
+use Cline\Struct\Attributes\Collections\Values;
 use Cline\Struct\Support\DataCollection;
 use Cline\Struct\Support\DataList;
 use Cline\Struct\Support\LazyDataCollection;
@@ -43,5 +44,7 @@ final readonly class NullableCollectionData extends AbstractData
         public ?Collection $collectionNumbers = null,
         #[AsLazyCollection(IntegerStringCast::class)]
         public ?LazyCollection $lazyCollectionNumbers = null,
+        #[Values()]
+        public ?array $reindexed = null,
     ) {}
 }
