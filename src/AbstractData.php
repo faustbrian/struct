@@ -196,23 +196,23 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
      */
     public static function collect(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
-    ): array|Collection|LengthAwarePaginator|CursorPaginator {
+    ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection {
         return static::collectMapped($items);
     }
 
     /**
      * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
      * @param  'array'|class-string                                                                                                              $into
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
      */
     public static function collectInto(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
         string $into,
-    ): array|Collection|LengthAwarePaginator|CursorPaginator {
+    ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection {
         return static::collectMapped($items, $into);
     }
 
@@ -396,7 +396,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     protected static function collectMapped(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
         ?string $into = null,
-    ): array|Collection|LengthAwarePaginator|CursorPaginator {
+    ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection {
         if ($items instanceof LengthAwarePaginator) {
             return static::collectLengthAwarePaginator($items, $into);
         }
@@ -580,9 +580,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      * @param  array<array-key, mixed>                                $items
-     * @return array<array-key, static>|Collection<array-key, static>
+     * @return array<array-key, static>|Collection<array-key, static>|DataCollection<array-key, static>
      */
-    protected static function collectArray(array $items, ?string $into = null): array|Collection
+    protected static function collectArray(array $items, ?string $into = null): array|Collection|DataCollection
     {
         $context = static::creationContext();
         $mapped = [];
@@ -594,6 +594,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         return match ($into) {
             null, 'array' => $mapped,
             Collection::class => new Collection($mapped),
+            DataCollection::class => new DataCollection($mapped),
             EloquentCollection::class => static::eloquentCollectionFromMappedItems($mapped),
             default => throw InvalidArrayCollectTargetException::fromTarget($into),
         };
@@ -602,9 +603,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      * @param  Collection<array-key, mixed>  $items
-     * @return Collection<array-key, static>
+     * @return Collection<array-key, static>|DataCollection<array-key, static>
      */
-    protected static function collectCollection(Collection $items, ?string $into = null): Collection
+    protected static function collectCollection(Collection $items, ?string $into = null): Collection|DataCollection
     {
         $context = static::creationContext();
         $mapped = [];
@@ -615,6 +616,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
         return match ($into) {
             null, Collection::class => new Collection($mapped),
+            DataCollection::class => new DataCollection($mapped),
             EloquentCollection::class => static::eloquentCollectionFromMappedItems($mapped),
             default => throw InvalidCollectionCollectTargetException::fromTarget($into),
         };
@@ -623,9 +625,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     /**
      * @internal
      * @param  EloquentCollection<array-key, Model> $items
-     * @return Collection<array-key, static>
+     * @return Collection<array-key, static>|DataCollection<array-key, static>
      */
-    protected static function collectEloquentCollection(EloquentCollection $items, ?string $into = null): Collection
+    protected static function collectEloquentCollection(EloquentCollection $items, ?string $into = null): Collection|DataCollection
     {
         $context = static::creationContext();
         $mapped = [];
@@ -637,6 +639,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
         return match ($into) {
             null, EloquentCollection::class => static::eloquentCollectionFromMappedItems($mapped),
             Collection::class => new Collection($mapped),
+            DataCollection::class => new DataCollection($mapped),
             default => throw InvalidEloquentCollectionCollectTargetException::fromTarget($into),
         };
     }

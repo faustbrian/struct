@@ -12,6 +12,7 @@ namespace Cline\Struct\Contracts;
 use Cline\Struct\Factories\AbstractFactory;
 use Cline\Struct\Serialization\DataSerializer;
 use Cline\Struct\Serialization\SerializationOptions;
+use Cline\Struct\Support\DataCollection;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
@@ -55,21 +56,21 @@ interface DataObjectInterface extends Arrayable, Castable, Jsonable, JsonSeriali
 
     /**
      * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
      */
     public static function collect(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
-    ): array|Collection|LengthAwarePaginator|CursorPaginator;
+    ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection;
 
     /**
      * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
      * @param  'array'|class-string                                                                                                              $into
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
      */
     public static function collectInto(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
         string $into,
-    ): array|Collection|LengthAwarePaginator|CursorPaginator;
+    ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection;
 
     public static function factory(): AbstractFactory;
 

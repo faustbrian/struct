@@ -131,6 +131,7 @@ describe('AbstractData', function (): void {
             // Act
             $array = SongData::collectInto($items, 'array');
             $collection = SongData::collectInto(collect($items), Collection::class);
+            $dataCollection = SongData::collectInto($items, DataCollection::class);
             $eloquent = SongData::collectInto(
                 new EloquentCollection($items),
                 EloquentCollection::class,
@@ -149,6 +150,8 @@ describe('AbstractData', function (): void {
                 ->and($array[0])->toBeInstanceOf(SongData::class)
                 ->and($collection)->toBeInstanceOf(Collection::class)
                 ->and($collection->first())->toBeInstanceOf(SongData::class)
+                ->and($dataCollection)->toBeInstanceOf(DataCollection::class)
+                ->and($dataCollection->first())->toBeInstanceOf(SongData::class)
                 ->and($eloquent)->toBeInstanceOf(EloquentCollection::class)
                 ->and($eloquent->first())->toBeInstanceOf(SongData::class)
                 ->and($lengthAware->items()[0])->toBeInstanceOf(SongData::class)
@@ -184,16 +187,25 @@ describe('AbstractData', function (): void {
 
             // Act
             $arrayIntoEloquent = SongData::collectInto($items, EloquentCollection::class);
+            $arrayIntoDataCollection = SongData::collectInto($items, DataCollection::class);
             $collectionIntoEloquent = SongData::collectInto(collect($items), EloquentCollection::class);
+            $collectionIntoDataCollection = SongData::collectInto(collect($items), DataCollection::class);
             $eloquentIntoCollection = SongData::collectInto(
                 new EloquentCollection($items),
                 Collection::class,
             );
+            $eloquentIntoDataCollection = SongData::collectInto(
+                new EloquentCollection($items),
+                DataCollection::class,
+            );
 
             // Assert
             expect($arrayIntoEloquent)->toBeInstanceOf(EloquentCollection::class)
+                ->and($arrayIntoDataCollection)->toBeInstanceOf(DataCollection::class)
                 ->and($collectionIntoEloquent)->toBeInstanceOf(EloquentCollection::class)
-                ->and($eloquentIntoCollection)->toBeInstanceOf(Collection::class);
+                ->and($collectionIntoDataCollection)->toBeInstanceOf(DataCollection::class)
+                ->and($eloquentIntoCollection)->toBeInstanceOf(Collection::class)
+                ->and($eloquentIntoDataCollection)->toBeInstanceOf(DataCollection::class);
         });
 
         test('ignores numeric overrides when cloning with with()', function (): void {

@@ -13,6 +13,7 @@ use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Cline\Struct\Support\DataCollection;
 use Tests\Fixtures\Data\ResolvedSongData;
 use Tests\Fixtures\Data\SongData;
 use Tests\Fixtures\Models\Song;
@@ -126,6 +127,19 @@ describe('SongData::collect', function (): void {
 
             // Assert
             expect($songs)->toBeInstanceOf(Collection::class)
+                ->and($songs)->toHaveCount(2)
+                ->and($songs->first())->toBeInstanceOf(SongData::class);
+        });
+
+        test('allows explicit data collection overrides', function (): void {
+            $payload = [
+                ['title' => 'Never Gonna Give You Up', 'artist' => 'Rick Astley'],
+                ['title' => 'Giving Up on Love', 'artist' => 'Rick Astley'],
+            ];
+
+            $songs = SongData::collectInto($payload, DataCollection::class);
+
+            expect($songs)->toBeInstanceOf(DataCollection::class)
                 ->and($songs)->toHaveCount(2)
                 ->and($songs->first())->toBeInstanceOf(SongData::class);
         });
