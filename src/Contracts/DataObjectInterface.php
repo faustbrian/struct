@@ -55,17 +55,17 @@ interface DataObjectInterface extends Arrayable, Castable, Jsonable, JsonSeriali
     public static function createFromRequestWithValidation(Request $request): static;
 
     /**
-     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
+     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>                                       $items
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|DataCollection<array-key, static>|LengthAwarePaginator<array-key, static>
      */
     public static function collect(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
     ): array|Collection|LengthAwarePaginator|CursorPaginator|DataCollection;
 
     /**
-     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @param  'array'|class-string                                                                                                              $into
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
+     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>                                       $items
+     * @param  'array'|class-string                                                                                                                                                $into
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|DataCollection<array-key, static>|LengthAwarePaginator<array-key, static>
      */
     public static function collectInto(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,

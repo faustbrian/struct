@@ -35,11 +35,11 @@ final readonly class LazySerializationData extends AbstractData
         public string $location = '',
         #[Lazy(LazyAnalyticsResolver::class)]
         public array $analytics = [],
-        #[Lazy()]
         #[Computed(LazyDisplayNameComputer::class)]
-        public string $displayName = '',
         #[Lazy()]
+        public string $displayName = '',
         #[IncludeWhen(AdminVisibilityCondition::class)]
+        #[Lazy()]
         public string $adminNotes = '',
         #[AsDataCollection(LazyPostData::class)]
         public DataCollection $posts = new DataCollection(),

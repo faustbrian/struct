@@ -23,29 +23,29 @@ use Cline\Struct\Attributes\Validate;
 final readonly class GeneratedValueData extends AbstractData
 {
     public function __construct(
+        #[Validate('uuid')]
         #[Uuid(version: 1)]
-        #[Validate('uuid')]
         public string $uuidV1,
+        #[Validate('uuid')]
         #[Uuid(version: 2, localDomain: 0, localIdentifier: 42, node: '0x123456789abc', clockSeq: 21, lowerCase: true)]
-        #[Validate('uuid')]
         public string $uuidV2,
+        #[Validate('uuid')]
         #[Uuid(version: 3, namespace: 'dns', name: 'example.com')]
-        #[Validate('uuid')]
         public string $uuidV3,
+        #[Validate('uuid')]
         #[Uuid(version: 4)]
-        #[Validate('uuid')]
         public string $uuidV4,
+        #[Validate('uuid')]
         #[Uuid(version: 5, namespace: 'url', name: 'https://cline.sh')]
-        #[Validate('uuid')]
         public string $uuidV5,
+        #[Validate('uuid')]
         #[Uuid(version: 6)]
-        #[Validate('uuid')]
         public string $uuidV6,
-        #[Uuid(version: 7)]
         #[Validate('uuid')]
+        #[Uuid(version: 7)]
         public string $uuidV7,
-        #[Ulid(lowerCase: true)]
         #[Validate('ulid')]
+        #[Ulid(lowerCase: true)]
         public string $ulid,
         #[Random(length: 12, lowerCase: true)]
         public string $random,

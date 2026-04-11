@@ -23,8 +23,8 @@ use Tests\Fixtures\Rules\UppercaseValueRule;
 final readonly class ItemValidatedData extends AbstractData
 {
     public function __construct(
-        #[AsDataList(DataListType::Int)]
         #[ValidateItems('min:10')]
+        #[AsDataList(DataListType::Int)]
         public DataList $scores,
         #[ValidateItems([UppercaseValueRule::class])]
         public array $codes,

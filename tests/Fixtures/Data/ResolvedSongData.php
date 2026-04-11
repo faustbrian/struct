@@ -19,8 +19,8 @@ use Tests\Fixtures\Support\LocalRequestPayloadResolver;
  * @author Brian Faust <brian@cline.sh>
  * @psalm-immutable
  */
-#[UseRequestPayloadResolver(LocalRequestPayloadResolver::class)]
 #[UseModelPayloadResolver(LocalModelPayloadResolver::class)]
+#[UseRequestPayloadResolver(LocalRequestPayloadResolver::class)]
 final readonly class ResolvedSongData extends AbstractData
 {
     public function __construct(

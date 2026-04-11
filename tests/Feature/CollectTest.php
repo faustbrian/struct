@@ -8,12 +8,12 @@
  */
 
 use Cline\Struct\Contracts\ModelPayloadResolverInterface;
+use Cline\Struct\Support\DataCollection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
-use Cline\Struct\Support\DataCollection;
 use Tests\Fixtures\Data\ResolvedSongData;
 use Tests\Fixtures\Data\SongData;
 use Tests\Fixtures\Models\Song;

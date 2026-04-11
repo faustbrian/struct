@@ -72,5 +72,5 @@ describe('nullable collection hydration', function (): void {
             ->and($dto->collectionNumbers)->toBeNull()
             ->and($dto->lazyCollectionNumbers)->toBeNull()
             ->and($dto->reindexed)->toBeNull();
-});
+    });
 });

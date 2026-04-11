@@ -195,8 +195,8 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     }
 
     /**
-     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
+     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>                                       $items
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|DataCollection<array-key, static>|LengthAwarePaginator<array-key, static>
      */
     public static function collect(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
@@ -205,9 +205,9 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
     }
 
     /**
-     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>     $items
-     * @param  'array'|class-string                                                                                                              $into
-     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|LengthAwarePaginator<array-key, static>|DataCollection<array-key, static>
+     * @param  array<array-key, mixed>|Collection<array-key, mixed>|CursorPaginator<array-key, mixed>|LengthAwarePaginator<array-key, mixed>                                       $items
+     * @param  'array'|class-string                                                                                                                                                $into
+     * @return array<array-key, static>|Collection<array-key, static>|CursorPaginator<array-key, static>|DataCollection<array-key, static>|LengthAwarePaginator<array-key, static>
      */
     public static function collectInto(
         array|Collection|LengthAwarePaginator|CursorPaginator $items,
@@ -579,7 +579,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
-     * @param  array<array-key, mixed>                                $items
+     * @param  array<array-key, mixed>                                                                  $items
      * @return array<array-key, static>|Collection<array-key, static>|DataCollection<array-key, static>
      */
     protected static function collectArray(array $items, ?string $into = null): array|Collection|DataCollection
@@ -602,7 +602,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
-     * @param  Collection<array-key, mixed>  $items
+     * @param  Collection<array-key, mixed>                                    $items
      * @return Collection<array-key, static>|DataCollection<array-key, static>
      */
     protected static function collectCollection(Collection $items, ?string $into = null): Collection|DataCollection
@@ -624,7 +624,7 @@ abstract readonly class AbstractData implements DataObjectInterface, Stringable
 
     /**
      * @internal
-     * @param  EloquentCollection<array-key, Model> $items
+     * @param  EloquentCollection<array-key, Model>                            $items
      * @return Collection<array-key, static>|DataCollection<array-key, static>
      */
     protected static function collectEloquentCollection(EloquentCollection $items, ?string $into = null): Collection|DataCollection
